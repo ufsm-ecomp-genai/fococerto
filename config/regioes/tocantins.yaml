@@ -1,0 +1,7 @@
+# Região principal (seção 4.1 da especificação). bbox = [lat_min, lat_max, lon_min, lon_max]
+bbox: [-13.0, -8.0, -49.5, -45.5]
+idioma: pt-BR
+velocidade_kmh: 40        # suposição declarada: estradas de terra, areia no Jalapão
+fator_tortuosidade: 1.4   # linha reta -> estrada (estimativa)
+raio_exposicao_km: 15
+eta_max_h: 6

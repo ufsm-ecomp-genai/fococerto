@@ -151,3 +151,9 @@ Implementações: `ClienteHMEM(base_url)` (HTTP, porta 7070) e `MemoriaLocal(cam
 - Nomes de `Violacao.regra`:
   - rígidas: `capacidade_excedida`, `recurso_duplicado`, `eta_acima_limite`, `recurso_indisponivel`, `recurso_inexistente`, `ocorrencia_inexistente`, `exposta_sem_recurso`, `reserva_nao_mantida`, `citacao_incorreta`, `exposicao_sem_recurso_viavel` (esta não tem solução no plano e obriga escalação);
   - não rígidas (zona cinzenta, decididas pelo Crítico): `exposta_nao_atendida`, `restricao_memoria`.
+
+## 13. Semântica adotada na leva 1 (dados-zetaris)
+- `periodo` = data UTC `AAAA-MM-DD`. `RepositorioCache.periodos_disponiveis()` lista os dias que existem no cache.
+- As views do Zetaris são `ocorrencias`, `ocorrencias_localidades`, `ocorrencias_contexto` e `ocorrencias_prioridade`, todas com as colunas `regiao` e `dia`; os componentes ficam em `c_exposicao` … `c_crescimento`. Elas foram validadas em Spark SQL 4.0 local contra o Python (698/698 ocorrências iguais). **Ainda não foram testadas no Zetaris.**
+- Extras fora do Protocol: `RepositorioCache.decisoes_salvas/notas_salvas` (gravam em `data/estado/<regiao>/`) e `RepositorioZetaris.aquecer_cache/consultas/modo_usado`.
+- Constantes declaradas da fórmula (`app/data/ocorrencias.py` e o SQL): `POP_REF=100000` (log), `HDW_REF=400`, intensidade em log, `PERSIST_REF=4` dias.

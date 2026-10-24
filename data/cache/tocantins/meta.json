@@ -1,0 +1,35 @@
+{
+  "regiao": "tocantins",
+  "bbox": [
+    -13.0,
+    -8.0,
+    -49.5,
+    -45.5
+  ],
+  "passo_clima": 0.5,
+  "congelado_em_utc": "2026-10-24T18:25:28+00:00",
+  "dias_focos": [
+    "2026-10-17",
+    "2026-10-18",
+    "2026-10-19",
+    "2026-10-20",
+    "2026-10-21",
+    "2026-10-22",
+    "2026-10-23",
+    "2026-10-24"
+  ],
+  "contagens": {
+    "focos": 1875,
+    "localidades": 107,
+    "bases": 5,
+    "clima": 792
+  },
+  "fontes": {
+    "focos": "https://firms.modaps.eosdis.nasa.gov/data/active_fire/suomi-npp-viirs-c2/csv/SUOMI_VIIRS_C2_Global_7d.csv (arquivo local: firms_7d.csv)",
+    "localidades": "https://download.geonames.org/export/dump/cities1000.zip (bbox + 0.2°)",
+    "bases": "https://overpass-api.de/api/interpreter amenity=fire_station (bbox + 1.0°)",
+    "clima": "https://api.open-meteo.com/v1/forecast diário, grade 0.5°, past_days=7"
+  },
+  "simulado": false,
+  "observacao": "Dados reais congelados. TI/UC ainda não incluídos (dist_ti_uc_km = null)."
+}

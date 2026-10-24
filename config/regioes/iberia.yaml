@@ -1,0 +1,7 @@
+# Segunda região: prova "mesmo código, outra região". bbox = [lat_min, lat_max, lon_min, lon_max]
+bbox: [36.0, 44.0, -10.0, 4.0]
+idioma: es-ES
+velocidade_kmh: 60        # suposição declarada: malha viária pavimentada mais densa
+fator_tortuosidade: 1.3   # linha reta -> estrada (estimativa)
+raio_exposicao_km: 15
+eta_max_h: 3
