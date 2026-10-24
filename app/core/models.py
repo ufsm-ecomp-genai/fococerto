@@ -114,3 +114,17 @@ class Cenario(BaseModel):
     reserva: int = 0
     notas: list[str] = Field(default_factory=list)
     simulado: bool = True
+
+
+class ResultadoPeriodo(BaseModel):
+    """Saída de app.agents.grafo.executar_periodo (docs/CONTRATOS.md, seção 10)."""
+    plano: Plano
+    ocorrencias: list[Ocorrencia]
+    bases: list[Base]
+    recursos: list[Recurso]
+    escalacoes: list[dict] = Field(default_factory=list)  # {ocorrencia_id, motivo}
+    pareceres: list[ParecerAnalista] = Field(default_factory=list)
+    memorias_usadas: list[Memoria] = Field(default_factory=list)
+    historico: list[dict] = Field(default_factory=list)  # por rodada: {rodada, plano, violacoes, veredicto}
+    rodadas: int = 0
+    log_path: str = ""

@@ -114,3 +114,24 @@ python -m app.cli aprovar --regiao R --periodo P
 python -m app.cli avaliar --regiao R
 ```
 Saídas em `out/<regiao>/<periodo>/`: `plano.json`, `plano.md`, `mapa.html`.
+
+## 10. Execução de um período (a interface entre os agentes e a CLI)
+`app/agents/grafo.py` (dono: `agentes-llm`):
+```python
+def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio,
+                     memoria: ClienteMemoria, log: LogExecucao,
+                     modo: Literal["llm", "offline"] = "llm",
+                     usar_critico_llm: bool = True, usar_memoria: bool = True) -> ResultadoPeriodo
+```
+- `usar_critico_llm` e `usar_memoria` existem para a ablação: a variante B usa `usar_critico_llm=False`, e a D usa `usar_memoria=False`.
+- `ResultadoPeriodo` está em `app/core/models.py`.
+
+## 11. Cliente de memória em Python (app/memory_client.py, dono: `hmem-engine`)
+```python
+class ClienteMemoria(Protocol):
+    def gravar(self, regiao: str, texto: str, tipo: str, fonte: str,
+               confianca: float = 1.0, supersedes: str | None = None) -> Memoria
+    def recall(self, regiao: str, consulta: str, k: int = 5) -> tuple[list[Memoria], list[Memoria]]  # (ativas, substituidas)
+    def listar(self, regiao: str) -> list[Memoria]
+```
+Implementações: `ClienteHMEM(base_url)` (HTTP, porta 7070) e `MemoriaLocal()` (em memória).
