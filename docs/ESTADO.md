@@ -2,27 +2,37 @@
 
 > Para retomar numa sessão nova: leia este arquivo, `CLAUDE.md` e `docs/CONTRATOS.md`. Depois rode `git status`, `git log --oneline` e `.venv/bin/python -m pytest -q` para ver o estado real. O que estiver aqui como "em andamento" pode ter ficado pela metade.
 
-Última atualização: 24/10/2026, ~19h UTC.
+Última atualização: 24/10/2026, ~19h40 UTC.
 
 ## Pronto (commitado)
-- Estrutura do repositório, `CLAUDE.md`, `docs/CONTRATOS.md` (seções 1 a 11), as definições dos agentes em `.claude/agents/`
-- `app/core/`: models.py, config.py, logging.py; `pyproject.toml`; `.venv` com as dependências
-- **interface-ux (leva 1):** CLI, plano MD/JSON, mapa, 3 cenários (ids de base provisórios `osm_pendente_*`, trocar na integração). 12 testes.
-- **hmem-engine (leva 1):** `services/hmem/` (conformidade 13/13, `npm test`), `app/memory_client.py` (`MemoriaLocal(caminho=...)` persistente + `ClienteHMEM`). 12 testes.
+- Estrutura, `CLAUDE.md`, contratos (seções 1 a 13), agentes em `.claude/agents/`, `app/core/`
+- **interface-ux:** CLI, plano MD/JSON, mapa, 3 cenários do Tocantins (período 2026-10-23)
+- **hmem-engine:** `services/hmem/` (conformidade 13/13, `npm test`), `app/memory_client.py`
+- **agentes-llm:** cliente LLM (Nightshift **não testado**), ferramentas, Planejador/Crítico/Analista, grafo
+- **dados-zetaris:** ingestão, ocorrências e prioridade, `data/cache/tocantins` (dados reais de 17 a 24/10), views do Zetaris validadas em Spark (**não testadas no Zetaris**)
+- **Integração:** `python -m app.cli run --regiao tocantins --recursos cenarios/tocantins-escasso.yaml --sample` roda de ponta a ponta (6 designações, 9 escaladas). 99 testes passam e 1 é pulado (precisa do Postgres de teste).
 
-## Leva 1 (em andamento, sem commit)
-| Agente | Tarefa | Estado | Próximo passo se interrompido |
-|---|---|---|---|
-| dados-zetaris | configs das regiões, ingestão FIRMS/GeoNames/OSM, lógica de ocorrências em Python, `data/cache/` do Tocantins, `REGIAO_7DIAS.md`, setup do Zetaris (não testado) | em andamento | conferir o que existe em `app/data/`, `scripts/`, `data/cache/` e continuar pela lista de prioridades do prompt (`.claude/agents/dados-zetaris.md`) |
-| agentes-llm | `app/llm/client.py`, `app/tools/`, Planejador/Crítico/Analista, `app/agents/grafo.py`, testes com fakes em `tests/` | em andamento | rodar `pytest tests/test_tools_* tests/test_grafo.py` |
+## Decisões da integração
+- O OSM tem só 2 bases dentro do TO, as duas em Palmas. Os cenários declaram as bases do coordenador (`Cenario.bases`) em cidades reais, marcadas `simulada: true`.
+- Período da demo: 2026-10-23 (179 ocorrências, 52 com localidade a < 15 km).
 
-## Leva 2 (depois da integração da leva 1)
-- Integração: rodar `python -m app.cli run --regiao tocantins --recursos cenarios/tocantins-escasso.yaml --sample` de ponta a ponta
-- avaliacao: cenários e gabaritos **antes** de rodar; depois a ablação
-- qa-integracao: teste a partir de um clone limpo, Dockerfile, checklist da submissão
-- docs-submissao: README, patrocinadores, roteiro do vídeo, slides
+## Limitações conhecidas (vão para o README)
+- `pop_raio` soma a população do GeoNames, que muitas vezes é a do município inteiro e não só a da sede. Isso superestima a exposição perto de cidades médias (ex.: Porto Nacional 53 mil).
+- O Planejador offline é igual ao baseline (alocador simples). As diferenças entre as variantes da ablação aparecem no modo LLM.
+- TI/UC não foram ingeridos (`dist_ti_uc_km` fica nulo).
+
+## Leva 2 (em andamento, sem commit)
+| Agente | Tarefa | Próximo passo se interrompido |
+|---|---|---|
+| avaliacao | cenários e gabaritos **antes** de rodar; `eval/run_ablacao.py` validado em modo offline | conferir `eval/`; o commit dos gabaritos deve vir antes de qualquer execução |
+| qa-integracao | testes de integração, `scripts/check_clean_clone.sh`, Dockerfile, `.env.example`, `scripts/check_submissao.py` | rodar `scripts/check_clean_clone.sh` |
+
+## Depois
+- docs-submissao: README (em inglês), patrocinadores, roteiro do vídeo, slides (depois da ablação)
+- Ligar o Nightshift real e rodar a ablação no modo LLM
+- Ligar o Zetaris real: `scripts/setup_zetaris.py` e depois `run` sem `--sample`
 
 ## Bloqueios externos (time)
 - [ ] Zetaris rodando na máquina do time + `.env`
-- [ ] Nightshift: roda sem GPU dedicada? Porta 8088 acessível?
+- [ ] Nightshift: roda sem GPU dedicada? Porta 8088 acessível? Onde vêm o `routed_model` e o `receipt`?
 - [ ] Respostas do Help Meterless (seção 19 da especificação)
