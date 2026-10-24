@@ -9,3 +9,9 @@ out/
 data/raw/
 .pytest_cache/
 data/estado/
+
+# ablação: só resumo.json e tabela.md vão para o git (os brutos são regeneráveis com eval/run_ablacao.py)
+eval/resultados/*/*
+!eval/resultados/*/resumo.json
+!eval/resultados/*/tabela.md
+eval/__pycache__/
