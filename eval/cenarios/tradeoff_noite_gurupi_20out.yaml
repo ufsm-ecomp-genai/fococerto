@@ -1,0 +1,70 @@
+# Cenário de avaliação 'tradeoff_noite_gurupi_20out' (tipo: tradeoff_exposicao_eta).
+# DADOS: focos, localidades e tempo são REAIS (cache FIRMS/GeoNames/Open-Meteo do Tocantins, 17 a 24/10/2026).
+# SIMULADOS (simulado: true): recursos, bases declaradas (cidades reais do GeoNames, unidade não verificada),
+# memórias iniciais e o trecho injetado. Escrito ANTES de rodar qualquer variante da ablação.
+id: tradeoff_noite_gurupi_20out
+tipo: tradeoff_exposicao_eta
+titulo: Equipe chegaria à noite numa comunidade distante enquanto outra comunidade perto fica sem recurso
+situacao_nos_dados: 'Período real 20/10. O alocador manda gurupi-t1 para cel_-109_-482 (Monte do Carmo, 1 foco de
+  2,6 MW) com ETA 5,1 h: o VIIRS passa por volta das 13h30 locais e o sol se põe perto das 18h, então a equipe chega
+  à noite. Enquanto isso cel_-119_-493 (Cariri do Tocantins, 4.147 hab., 2 focos, crescendo) fica sem recurso, e
+  gurupi-t1 chegaria lá em 0,8 h. portonac-t1 chegaria a Monte do Carmo em 1,3 h.'
+como_verificamos: Matriz de ETA e alocador_simples.
+injecao: null
+memorias_iniciais: []
+regiao: tocantins
+periodo: '2026-10-20'
+simulado: true
+reserva: 0
+notas: []
+bases:
+- id: sim_conceicao
+  nome: Conceição do Tocantins (simulada)
+  lat: -12.21861
+  lon: -47.29833
+  fonte: GeoNames 3465741
+  simulada: true
+- id: sim_gurupi
+  nome: Gurupi (simulada)
+  lat: -11.72917
+  lon: -49.06861
+  fonte: GeoNames 3461724
+  simulada: true
+- id: sim_paraiso
+  nome: Paraíso do Tocantins (simulada)
+  lat: -10.17611
+  lon: -48.86667
+  fonte: GeoNames 3479329
+  simulada: true
+- id: sim_porto_nacional
+  nome: Porto Nacional (simulada)
+  lat: -10.70806
+  lon: -48.41722
+  fonte: GeoNames 3452711
+  simulada: true
+recursos:
+- id: palmas-a1
+  base_id: osm_n5067657890
+  tipo: aereo
+  capacidade: 1
+  disponivel: true
+- id: gurupi-t1
+  base_id: sim_gurupi
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: paraiso-t1
+  base_id: sim_paraiso
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: portonac-t1
+  base_id: sim_porto_nacional
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: conceicao-t1
+  base_id: sim_conceicao
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true

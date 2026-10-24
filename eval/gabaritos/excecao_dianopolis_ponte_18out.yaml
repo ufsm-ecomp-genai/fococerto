@@ -1,0 +1,26 @@
+# Gabarito de 'excecao_dianopolis_ponte_18out'. Escrito pelo time ANTES de rodar qualquer variante da ablação (prova: data do commit).
+# As checagens são verificadas automaticamente por eval/run_ablacao.py (tipos documentados em eval/README.md).
+id: excecao_dianopolis_ponte_18out
+cenario: eval/cenarios/excecao_dianopolis_ponte_18out.yaml
+escrito_em: '2026-10-24'
+autor: time FocoCerto (agente de avaliação), antes de rodar qualquer variante
+decisao_certa: dianopolis-t1 não sai. cel_-117_-469 (Dianópolis, maior prioridade do período) é atendida por outro
+  recurso (palmas-a1 em 1,3 h ou taguatinga-t1 em 3,2 h).
+por_que: A ponte na saída da base caiu (nota do coordenador). Existem alternativas viáveis para a ocorrência mais
+  prioritária, então ela não deve ficar sem recurso nem ser só escalada.
+ressalvas: 'A nota fala da saída da base, não do acesso à cidade: um terrestre de outra base (Taguatinga) é aceitável.
+  O leitor de memórias offline também bloqueia rotas terrestres para ocorrências cuja localidade é citada (Dianópolis);
+  isso não muda o gabarito, porque o aéreo continua disponível.'
+checagens:
+- id: c1
+  tipo: recurso_nao_designado
+  categoria: deteccao
+  descricao: dianopolis-t1 não recebe designação
+  params:
+    recurso: dianopolis-t1
+- id: c2
+  tipo: ocorrencia_atendida
+  categoria: decisao
+  descricao: cel_-117_-469 recebe algum recurso
+  params:
+    ocorrencia: cel_-117_-469

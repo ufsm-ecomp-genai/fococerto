@@ -1,0 +1,28 @@
+# Gabarito de 'reignicao_conceicao_20out'. Escrito pelo time ANTES de rodar qualquer variante da ablação (prova: data do commit).
+# As checagens são verificadas automaticamente por eval/run_ablacao.py (tipos documentados em eval/README.md).
+id: reignicao_conceicao_20out
+cenario: eval/cenarios/reignicao_conceicao_20out.yaml
+escrito_em: '2026-10-24'
+autor: time FocoCerto (agente de avaliação), antes de rodar qualquer variante
+decisao_certa: Um dos recursos de Conceição vai para cel_-120_-470, que é a mesma célula que queimou em 17 e 18/10.
+  Ela vem antes de cel_-124_-479.
+por_que: 'A célula voltou depois de um dia sem foco, e maior (14 focos contra 5 a 6). O monitor só olha o dia anterior
+  e a trata como nova, com persistência zero. A memória derivada dos dados mostra que é o mesmo fogo reacendendo:
+  o fogo de 17 e 18/10 não foi extinto. Contra cel_-124_-479 (9 focos, 78 MW, primeiro dia), a reignição maior deve
+  vir antes.'
+ressalvas: 'Ambiguidade conhecida: o padrão ''queimou, parou, voltou'' também pode ser lido como manejo recorrente.
+  Nosso critério: voltou maior (14 focos, 121 MW) depois de parar, então tratamos como reignição.'
+checagens:
+- id: c1
+  tipo: ocorrencia_atendida
+  categoria: deteccao
+  descricao: cel_-120_-470 recebe recurso
+  params:
+    ocorrencia: cel_-120_-470
+- id: c2
+  tipo: prioriza
+  categoria: decisao
+  descricao: se só uma das duas for atendida, é cel_-120_-470
+  params:
+    ocorrencia: cel_-120_-470
+    sobre: cel_-124_-479

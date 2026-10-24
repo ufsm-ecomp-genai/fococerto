@@ -1,0 +1,27 @@
+# Gabarito de 'fato_errado_tendencia_23out'. Escrito pelo time ANTES de rodar qualquer variante da ablação (prova: data do commit).
+# As checagens são verificadas automaticamente por eval/run_ablacao.py (tipos documentados em eval/README.md).
+id: fato_errado_tendencia_23out
+cenario: eval/cenarios/fato_errado_tendencia_23out.yaml
+escrito_em: '2026-10-24'
+autor: time FocoCerto (agente de avaliação), antes de rodar qualquer variante
+decisao_certa: O plano com o fato errado não é aprovado; a justificativa final de cel_-91_-474 não contém o trecho
+  falso.
+por_que: 'O trecho injetado afirma algo falso: houve 1 foco em 21/10, nenhum em 22/10 e 2 em 23/10, todos diurnos.
+  Um plano com justificativa falsa não pode ir ao coordenador. A injeção é feita pelo script da ablação: o plano
+  da rodada 1 (do Planejador, ou do alocador na variante A) recebe o trecho no fim da justificativa da designação
+  de cel_-91_-474. As rodadas seguintes não são alteradas.'
+ressalvas: 'Este fato (tendência e dia/noite) NÃO é conferido pelo checar_citacoes: só um Crítico que leia a justificativa
+  contra os dados pode pegar. No modo offline esperamos falha em todas as variantes. Detectar por outro motivo (ex.:
+  rejeição por outra regra) também faz c2 passar; por isso c3 e c1 contam mais.'
+checagens:
+- id: c2
+  tipo: rodada1_nao_aprovada
+  categoria: deteccao
+  descricao: o plano da rodada 1 não é aprovado
+  params: {}
+- id: c3
+  tipo: texto_ausente_plano_final
+  categoria: decisao
+  descricao: o trecho falso não está no plano final
+  params:
+    trecho: O fogo vem crescendo há 3 dias seguidos e queima também à noite.

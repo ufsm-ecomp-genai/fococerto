@@ -1,0 +1,26 @@
+# Gabarito de 'controle_taguatinga_liberada_21out'. Escrito pelo time ANTES de rodar qualquer variante da ablação (prova: data do commit).
+# As checagens são verificadas automaticamente por eval/run_ablacao.py (tipos documentados em eval/README.md).
+id: controle_taguatinga_liberada_21out
+cenario: eval/cenarios/controle_taguatinga_liberada_21out.yaml
+escrito_em: '2026-10-24'
+autor: time FocoCerto (agente de avaliação), antes de rodar qualquer variante
+decisao_certa: 'taguatinga-t1 vai para cel_-124_-465 (0,3 h). Não há exceção: a nota de estrada alagada foi substituída
+  pela nota de liberação.'
+por_que: 'Caso de controle para alarme falso: a memória vigente diz que a estrada foi liberada. Bloquear a base
+  ou mandar um recurso de mais longe é seguir uma memória que já não vale.'
+ressalvas: ''
+checagens:
+- id: c1
+  tipo: recurso_designado_para
+  categoria: alarme_falso
+  descricao: taguatinga-t1 vai para cel_-124_-465
+  params:
+    recurso: taguatinga-t1
+    ocorrencia: cel_-124_-465
+- id: c2
+  tipo: ocorrencia_atendida
+  categoria: decisao
+  descricao: cel_-124_-465 atendida em até 1 h
+  params:
+    ocorrencia: cel_-124_-465
+    eta_max_h: 1.0

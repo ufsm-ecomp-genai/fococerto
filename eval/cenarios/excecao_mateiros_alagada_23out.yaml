@@ -1,0 +1,82 @@
+# Cenário de avaliação 'excecao_mateiros_alagada_23out' (tipo: excecao_memoria).
+# DADOS: focos, localidades e tempo são REAIS (cache FIRMS/GeoNames/Open-Meteo do Tocantins, 17 a 24/10/2026).
+# SIMULADOS (simulado: true): recursos, bases declaradas (cidades reais do GeoNames, unidade não verificada),
+# memórias iniciais e o trecho injetado. Escrito ANTES de rodar qualquer variante da ablação.
+id: excecao_mateiros_alagada_23out
+tipo: excecao_memoria
+titulo: Base mais próxima com a estrada alagada (nota do coordenador no H-MEM)
+situacao_nos_dados: Período real 23/10 (179 ocorrências, top 15 todas com população no raio). Com os recursos do
+  cenário escasso, a base de Mateiros é a única base terrestre viável para cel_-96_-468 (Lizarda, 6 focos, crescendo,
+  ETA 4,0 h); a outra opção é o aéreo de Palmas (1,1 h), que também é o único recurso viável para cel_-91_-474 (Centenário,
+  398 MW).
+como_verificamos: ETA de cada recurso para cada ocorrência do top 15 (app.tools.geo.eta_recurso) e o alocador_simples
+  (baseline, sem LLM), que manda mateiros-t1 para cel_-96_-468.
+injecao: null
+memorias_iniciais:
+- ref: m1
+  tipo: nota
+  fonte: coordenador
+  confianca: 1.0
+  texto: 'Coordenador, 22/10: a estrada de saída da base de Mateiros está alagada desde a chuva de 21/10; a viatura
+    terrestre de Mateiros não consegue sair. Usar outra base ou meio aéreo.'
+regiao: tocantins
+periodo: '2026-10-23'
+simulado: true
+reserva: 0
+notas: []
+bases:
+- id: sim_dianopolis
+  nome: Dianópolis (simulada)
+  lat: -11.62778
+  lon: -46.82056
+  fonte: GeoNames 3464720
+  simulada: true
+- id: sim_mateiros
+  nome: Mateiros/Jalapão (simulada)
+  lat: -10.5475
+  lon: -46.42111
+  fonte: GeoNames 6317561
+  simulada: true
+- id: sim_paraiso
+  nome: Paraíso do Tocantins (simulada)
+  lat: -10.17611
+  lon: -48.86667
+  fonte: GeoNames 3479329
+  simulada: true
+- id: sim_porto_nacional
+  nome: Porto Nacional (simulada)
+  lat: -10.70806
+  lon: -48.41722
+  fonte: GeoNames 3452711
+  simulada: true
+recursos:
+- id: palmas-t1
+  base_id: osm_n5067657890
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: palmas-a1
+  base_id: osm_n5067657890
+  tipo: aereo
+  capacidade: 1
+  disponivel: true
+- id: portonac-t1
+  base_id: sim_porto_nacional
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: paraiso-t1
+  base_id: sim_paraiso
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: dianopolis-t1
+  base_id: sim_dianopolis
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: mateiros-t1
+  base_id: sim_mateiros
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true

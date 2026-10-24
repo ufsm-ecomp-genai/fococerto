@@ -1,0 +1,93 @@
+# Cenário de avaliação 'reignicao_conceicao_20out' (tipo: reignicao_memoria).
+# DADOS: focos, localidades e tempo são REAIS (cache FIRMS/GeoNames/Open-Meteo do Tocantins, 17 a 24/10/2026).
+# SIMULADOS (simulado: true): recursos, bases declaradas (cidades reais do GeoNames, unidade não verificada),
+# memórias iniciais e o trecho injetado. Escrito ANTES de rodar qualquer variante da ablação.
+id: reignicao_conceicao_20out
+tipo: reignicao_memoria
+titulo: Reignição que o monitor vê como foco novo
+situacao_nos_dados: Período real 20/10. cel_-120_-470 voltou com 14 focos (121 MW) depois de um dia sem foco; o
+  monitor compara só com o dia anterior e marca 'nova' (componente persistencia = 0, prioridade 0,418). Os dois
+  recursos de Conceição sobram depois das ocorrências com população e o alocador os manda para cel_-125_-482 e cel_-124_-479
+  (9 focos, 78 MW).
+como_verificamos: 'Contagem de focos por célula e dia no cache (17/10: 6, 18/10: 5, 19/10: 0, 20/10: 14); matriz
+  de ETA; alocador_simples.'
+injecao: null
+memorias_iniciais:
+- ref: m1
+  tipo: derivada
+  fonte: dados:firms:2026-10-19
+  confianca: 0.9
+  texto: 'Derivada dos dados FIRMS (19/10): a célula cel_-120_-470 teve 6 focos em 17/10 e 5 em 18/10 e nenhum em
+    19/10. Se voltar a ter focos, é reignição do mesmo fogo, não foco novo.'
+regiao: tocantins
+periodo: '2026-10-20'
+simulado: true
+reserva: 0
+notas: []
+bases:
+- id: sim_conceicao
+  nome: Conceição do Tocantins (simulada)
+  lat: -12.21861
+  lon: -47.29833
+  fonte: GeoNames 3465741
+  simulada: true
+- id: sim_gurupi
+  nome: Gurupi (simulada)
+  lat: -11.72917
+  lon: -49.06861
+  fonte: GeoNames 3461724
+  simulada: true
+- id: sim_paraiso
+  nome: Paraíso do Tocantins (simulada)
+  lat: -10.17611
+  lon: -48.86667
+  fonte: GeoNames 3479329
+  simulada: true
+- id: sim_porto_nacional
+  nome: Porto Nacional (simulada)
+  lat: -10.70806
+  lon: -48.41722
+  fonte: GeoNames 3452711
+  simulada: true
+- id: sim_taguatinga
+  nome: Taguatinga (simulada)
+  lat: -12.40389
+  lon: -46.43611
+  fonte: GeoNames 3447075
+  simulada: true
+recursos:
+- id: taguatinga-t1
+  base_id: sim_taguatinga
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: portonac-t1
+  base_id: sim_porto_nacional
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: paraiso-t1
+  base_id: sim_paraiso
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: gurupi-t1
+  base_id: sim_gurupi
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: palmas-t1
+  base_id: osm_n5067657890
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: conceicao-t1
+  base_id: sim_conceicao
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: conceicao-t2
+  base_id: sim_conceicao
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true

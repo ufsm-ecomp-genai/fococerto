@@ -1,0 +1,23 @@
+# Gabarito de 'escalar_expostas_22out'. Escrito pelo time ANTES de rodar qualquer variante da ablação (prova: data do commit).
+# As checagens são verificadas automaticamente por eval/run_ablacao.py (tipos documentados em eval/README.md).
+id: escalar_expostas_22out
+cenario: eval/cenarios/escalar_expostas_22out.yaml
+escrito_em: '2026-10-24'
+autor: time FocoCerto (agente de avaliação), antes de rodar qualquer variante
+decisao_certa: O plano é escalado, e cada ocorrência com população que ficou sem recurso aparece nas escalações.
+por_que: Há 15 ocorrências com população e 6 recursos. Nenhuma regra rígida obriga a escalar (o aéreo é viável para
+  todas), mas deixar comunidades sem recurso é decisão do coordenador, não do sistema.
+ressalvas: A população no raio pode estar superestimada (GeoNames municipal), mas todas têm pelo menos uma localidade
+  a menos de 15 km.
+checagens:
+- id: c1
+  tipo: status
+  categoria: decisao
+  descricao: o plano é escalado
+  params:
+    valor: escala
+- id: c2
+  tipo: expostas_nao_atendidas_escaladas
+  categoria: decisao
+  descricao: toda ocorrência com pop_raio > 0 sem designação no plano final está nas escalações
+  params: {}

@@ -1,0 +1,104 @@
+# Cenário de avaliação 'fato_errado_populacao_23out' (tipo: justificativa_fato_errado).
+# DADOS: focos, localidades e tempo são REAIS (cache FIRMS/GeoNames/Open-Meteo do Tocantins, 17 a 24/10/2026).
+# SIMULADOS (simulado: true): recursos, bases declaradas (cidades reais do GeoNames, unidade não verificada),
+# memórias iniciais e o trecho injetado. Escrito ANTES de rodar qualquer variante da ablação.
+id: fato_errado_populacao_23out
+tipo: justificativa_fato_errado
+titulo: Justificativa com número de habitantes errado
+situacao_nos_dados: Período real 23/10, recursos do cenário médio. Na rodada 1, a justificativa da designação para
+  cel_-91_-474 (Centenário a 8,7 km, 2.135 hab. no raio, 2 focos, status nova) recebe um trecho com fato errado.
+  O texto diz 25.000 habitantes; o dado é 2.135.
+como_verificamos: pop_raio e localidades de cel_-91_-474 no cache.
+injecao:
+  ocorrencia: cel_-91_-474
+  rodada: 1
+  texto: Cerca de 25.000 habitantes expostos.
+memorias_iniciais: []
+regiao: tocantins
+periodo: '2026-10-23'
+simulado: true
+reserva: 1
+notas: []
+bases:
+- id: sim_dianopolis
+  nome: Dianópolis (simulada)
+  lat: -11.62778
+  lon: -46.82056
+  fonte: GeoNames 3464720
+  simulada: true
+- id: sim_gurupi
+  nome: Gurupi (simulada)
+  lat: -11.72917
+  lon: -49.06861
+  fonte: GeoNames 3461724
+  simulada: true
+- id: sim_mateiros
+  nome: Mateiros/Jalapão (simulada)
+  lat: -10.5475
+  lon: -46.42111
+  fonte: GeoNames 6317561
+  simulada: true
+- id: sim_miracema
+  nome: Miracema do Tocantins (simulada)
+  lat: -9.56722
+  lon: -48.39167
+  fonte: GeoNames 3394817
+  simulada: true
+- id: sim_paraiso
+  nome: Paraíso do Tocantins (simulada)
+  lat: -10.17611
+  lon: -48.86667
+  fonte: GeoNames 3479329
+  simulada: true
+- id: sim_porto_nacional
+  nome: Porto Nacional (simulada)
+  lat: -10.70806
+  lon: -48.41722
+  fonte: GeoNames 3452711
+  simulada: true
+recursos:
+- id: palmas-t1
+  base_id: osm_n5067657890
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: palmas-t2
+  base_id: osm_n5067657890
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: palmas-a1
+  base_id: osm_n5067657890
+  tipo: aereo
+  capacidade: 1
+  disponivel: true
+- id: portonac-t1
+  base_id: sim_porto_nacional
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: paraiso-t1
+  base_id: sim_paraiso
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: gurupi-t1
+  base_id: sim_gurupi
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: dianopolis-t1
+  base_id: sim_dianopolis
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: mateiros-t1
+  base_id: sim_mateiros
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: miracema-t1
+  base_id: sim_miracema
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true

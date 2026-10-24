@@ -1,0 +1,80 @@
+# Cenário de avaliação 'excecao_dianopolis_ponte_18out' (tipo: excecao_memoria).
+# DADOS: focos, localidades e tempo são REAIS (cache FIRMS/GeoNames/Open-Meteo do Tocantins, 17 a 24/10/2026).
+# SIMULADOS (simulado: true): recursos, bases declaradas (cidades reais do GeoNames, unidade não verificada),
+# memórias iniciais e o trecho injetado. Escrito ANTES de rodar qualquer variante da ablação.
+id: excecao_dianopolis_ponte_18out
+tipo: excecao_memoria
+titulo: Ponte caída na saída da base de Dianópolis (nota do coordenador no H-MEM)
+situacao_nos_dados: 'Período real 18/10. A ocorrência de maior prioridade é cel_-117_-469 (4 focos, Dianópolis a
+  8,8 km, 22.424 hab. no raio). O recurso mais próximo é dianopolis-t1 (0,3 h); alternativas viáveis: palmas-a1
+  (1,3 h) e taguatinga-t1 (3,2 h).'
+como_verificamos: Matriz de ETA e alocador_simples (manda dianopolis-t1 para cel_-117_-469).
+injecao: null
+memorias_iniciais:
+- ref: m1
+  tipo: nota
+  fonte: coordenador
+  confianca: 1.0
+  texto: 'Coordenador, 17/10: a ponte na saída da base de Dianópolis caiu; a viatura terrestre de Dianópolis está
+    sem acesso à rodovia até a ponte ser refeita.'
+regiao: tocantins
+periodo: '2026-10-18'
+simulado: true
+reserva: 0
+notas: []
+bases:
+- id: sim_dianopolis
+  nome: Dianópolis (simulada)
+  lat: -11.62778
+  lon: -46.82056
+  fonte: GeoNames 3464720
+  simulada: true
+- id: sim_gurupi
+  nome: Gurupi (simulada)
+  lat: -11.72917
+  lon: -49.06861
+  fonte: GeoNames 3461724
+  simulada: true
+- id: sim_porto_nacional
+  nome: Porto Nacional (simulada)
+  lat: -10.70806
+  lon: -48.41722
+  fonte: GeoNames 3452711
+  simulada: true
+- id: sim_taguatinga
+  nome: Taguatinga (simulada)
+  lat: -12.40389
+  lon: -46.43611
+  fonte: GeoNames 3447075
+  simulada: true
+recursos:
+- id: palmas-t1
+  base_id: osm_n5067657890
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: palmas-a1
+  base_id: osm_n5067657890
+  tipo: aereo
+  capacidade: 1
+  disponivel: true
+- id: portonac-t1
+  base_id: sim_porto_nacional
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: gurupi-t1
+  base_id: sim_gurupi
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: dianopolis-t1
+  base_id: sim_dianopolis
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: taguatinga-t1
+  base_id: sim_taguatinga
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true

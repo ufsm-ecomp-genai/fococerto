@@ -1,0 +1,36 @@
+# Gabarito de 'tradeoff_noite_gurupi_20out'. Escrito pelo time ANTES de rodar qualquer variante da ablação (prova: data do commit).
+# As checagens são verificadas automaticamente por eval/run_ablacao.py (tipos documentados em eval/README.md).
+id: tradeoff_noite_gurupi_20out
+cenario: eval/cenarios/tradeoff_noite_gurupi_20out.yaml
+escrito_em: '2026-10-24'
+autor: time FocoCerto (agente de avaliação), antes de rodar qualquer variante
+decisao_certa: gurupi-t1 vai para cel_-119_-493 (Cariri, 0,8 h). cel_-109_-482 (Monte do Carmo) recebe portonac-t1
+  (1,3 h) ou outro recurso que chegue de dia, ou é escalada. Nenhuma equipe viaja 5 h para chegar à noite enquanto
+  deixa uma comunidade a 0,8 h sem recurso.
+por_que: Os dois lugares têm população no raio (4.147 e 5.722 hab.). Cariri está crescendo e fica a 0,8 h; Monte
+  do Carmo tem 1 foco de 2,6 MW e a equipe de Gurupi só chegaria depois do pôr do sol (ETA 5,1 h a partir da passagem
+  das 13h30). Há um recurso (portonac-t1) que chega a Monte do Carmo em 1,3 h.
+ressalvas: O horário de chegada é uma suposição declarada (passagem diurna do VIIRS ~13h30 locais, pôr do sol ~18h).
+  A população de Monte do Carmo e Cariri vem do GeoNames (pode ser a do município).
+checagens:
+- id: c1
+  tipo: ocorrencia_atendida
+  categoria: decisao
+  descricao: cel_-119_-493 atendida em até 4,5 h
+  params:
+    ocorrencia: cel_-119_-493
+    eta_max_h: 4.5
+- id: c2
+  tipo: recurso_nao_designado_para
+  categoria: decisao
+  descricao: gurupi-t1 não vai para cel_-109_-482
+  params:
+    recurso: gurupi-t1
+    ocorrencia: cel_-109_-482
+- id: c3
+  tipo: ocorrencia_atendida_ou_escalada
+  categoria: decisao
+  descricao: cel_-109_-482 atendida em até 4,5 h ou escalada
+  params:
+    ocorrencia: cel_-109_-482
+    eta_max_h: 4.5

@@ -1,0 +1,28 @@
+# Gabarito de 'agricola_recorrente_parana_24out'. Escrito pelo time ANTES de rodar qualquer variante da ablação (prova: data do commit).
+# As checagens são verificadas automaticamente por eval/run_ablacao.py (tipos documentados em eval/README.md).
+id: agricola_recorrente_parana_24out
+cenario: eval/cenarios/agricola_recorrente_parana_24out.yaml
+escrito_em: '2026-10-24'
+autor: time FocoCerto (agente de avaliação), antes de rodar qualquer variante
+decisao_certa: 'parana-t1 fica de reserva: não vai para cel_-124_-479. Se o Analista for consultado, a conclusão
+  é queima_agricola_provavel (não incendio_vegetacao_provavel).'
+por_que: 'cel_-124_-479 não tem população no raio e repete o mesmo padrão há 5 dias: depois de 9 focos em 20/10,
+  1 a 2 focos por dia com 2 a 7 MW por dia. Isso é a assinatura de queima de manejo recorrente. Mandar a única equipe
+  do sul do estado para lá deixa a região sem resposta, sem ganho para ninguém exposto.'
+ressalvas: 'É um julgamento: sem verdade de campo, ninguém sabe se é manejo. Os focos de 24/10 são noturnos e o
+  dia é parcial. TI/UC não foram ingeridos. Se o parecer não for pedido, c2 conta como não detectado.'
+checagens:
+- id: c1
+  tipo: ocorrencia_nao_atendida
+  categoria: decisao
+  descricao: cel_-124_-479 não recebe recurso
+  params:
+    ocorrencia: cel_-124_-479
+- id: c2
+  tipo: parecer_conclusao
+  categoria: deteccao
+  descricao: parecer do Analista = queima_agricola_provavel
+  params:
+    ocorrencia: cel_-124_-479
+    esperada: queima_agricola_provavel
+    proibida: incendio_vegetacao_provavel

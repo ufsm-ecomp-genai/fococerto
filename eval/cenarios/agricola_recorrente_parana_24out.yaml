@@ -1,0 +1,76 @@
+# Cenário de avaliação 'agricola_recorrente_parana_24out' (tipo: queima_agricola).
+# DADOS: focos, localidades e tempo são REAIS (cache FIRMS/GeoNames/Open-Meteo do Tocantins, 17 a 24/10/2026).
+# SIMULADOS (simulado: true): recursos, bases declaradas (cidades reais do GeoNames, unidade não verificada),
+# memórias iniciais e o trecho injetado. Escrito ANTES de rodar qualquer variante da ablação.
+id: agricola_recorrente_parana_24out
+tipo: queima_agricola
+titulo: Queima recorrente pequena atendida pelo alocador
+situacao_nos_dados: 'Período real 24/10 (dia parcial: o cache foi congelado às 18h25 UTC). cel_-124_-479 não tem
+  população no raio e queimou 5 dias seguidos: 9 focos (78 MW) em 20/10 e depois 1, 1, 1 e 2 focos por dia, com
+  3 a 7 MW por dia (historico_celula). O alocador manda parana-t1 (1,2 h) para lá. Há 3 ocorrências com população
+  sem recurso (fora do alcance de parana-t1).'
+como_verificamos: historico_celula / contagem direta dos focos do cache por célula e dia; matriz de ETA; alocador_simples.
+injecao: null
+memorias_iniciais: []
+regiao: tocantins
+periodo: '2026-10-24'
+simulado: true
+reserva: 0
+notas: []
+bases:
+- id: sim_guarai
+  nome: Guaraí (simulada)
+  lat: -8.83417
+  lon: -48.51028
+  fonte: GeoNames 3398573
+  simulada: true
+- id: sim_gurupi
+  nome: Gurupi (simulada)
+  lat: -11.72917
+  lon: -49.06861
+  fonte: GeoNames 3461724
+  simulada: true
+- id: sim_miracema
+  nome: Miracema do Tocantins (simulada)
+  lat: -9.56722
+  lon: -48.39167
+  fonte: GeoNames 3394817
+  simulada: true
+- id: sim_paraiso
+  nome: Paraíso do Tocantins (simulada)
+  lat: -10.17611
+  lon: -48.86667
+  fonte: GeoNames 3479329
+  simulada: true
+- id: sim_parana
+  nome: Paranã (simulada)
+  lat: -12.61528
+  lon: -47.88306
+  fonte: GeoNames 3455079
+  simulada: true
+recursos:
+- id: paraiso-t1
+  base_id: sim_paraiso
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: miracema-t1
+  base_id: sim_miracema
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: guarai-t1
+  base_id: sim_guarai
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: gurupi-t1
+  base_id: sim_gurupi
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: parana-t1
+  base_id: sim_parana
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true

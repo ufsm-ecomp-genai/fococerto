@@ -1,0 +1,85 @@
+# Cenário de avaliação 'controle_vegetacao_parana_19out' (tipo: queima_agricola_controle).
+# DADOS: focos, localidades e tempo são REAIS (cache FIRMS/GeoNames/Open-Meteo do Tocantins, 17 a 24/10/2026).
+# SIMULADOS (simulado: true): recursos, bases declaradas (cidades reais do GeoNames, unidade não verificada),
+# memórias iniciais e o trecho injetado. Escrito ANTES de rodar qualquer variante da ablação.
+id: controle_vegetacao_parana_19out
+tipo: queima_agricola_controle
+titulo: 'Controle: fogo novo e intenso sem população não é queima agrícola'
+situacao_nos_dados: Período real 19/10. cel_-127_-477 (sem população) aparece pela primeira vez na semana com 6
+  focos e 185 MW (31 MW por foco, foco máximo 60 MW), o maior FRP do top 15. parana-t3 chega em 0,9 h. Uma ocorrência
+  com população (cel_-104_-480) fica sem recurso, então o Crítico tende a perguntar ao Analista.
+como_verificamos: historico_celula (nenhum foco na célula em 17 e 18/10; o cache começa em 17/10), matriz de ETA,
+  alocador_simples.
+injecao: null
+memorias_iniciais: []
+regiao: tocantins
+periodo: '2026-10-19'
+simulado: true
+reserva: 0
+notas: []
+bases:
+- id: sim_dianopolis
+  nome: Dianópolis (simulada)
+  lat: -11.62778
+  lon: -46.82056
+  fonte: GeoNames 3464720
+  simulada: true
+- id: sim_gurupi
+  nome: Gurupi (simulada)
+  lat: -11.72917
+  lon: -49.06861
+  fonte: GeoNames 3461724
+  simulada: true
+- id: sim_mateiros
+  nome: Mateiros/Jalapão (simulada)
+  lat: -10.5475
+  lon: -46.42111
+  fonte: GeoNames 6317561
+  simulada: true
+- id: sim_parana
+  nome: Paranã (simulada)
+  lat: -12.61528
+  lon: -47.88306
+  fonte: GeoNames 3455079
+  simulada: true
+recursos:
+- id: parana-t1
+  base_id: sim_parana
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: parana-t2
+  base_id: sim_parana
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: parana-t3
+  base_id: sim_parana
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: dianopolis-t1
+  base_id: sim_dianopolis
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: gurupi-t1
+  base_id: sim_gurupi
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: gurupi-t2
+  base_id: sim_gurupi
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: palmas-t1
+  base_id: osm_n5067657890
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: mateiros-t1
+  base_id: sim_mateiros
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true

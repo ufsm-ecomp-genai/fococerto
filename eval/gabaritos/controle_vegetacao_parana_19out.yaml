@@ -1,0 +1,25 @@
+# Gabarito de 'controle_vegetacao_parana_19out'. Escrito pelo time ANTES de rodar qualquer variante da ablação (prova: data do commit).
+# As checagens são verificadas automaticamente por eval/run_ablacao.py (tipos documentados em eval/README.md).
+id: controle_vegetacao_parana_19out
+cenario: eval/cenarios/controle_vegetacao_parana_19out.yaml
+escrito_em: '2026-10-24'
+autor: time FocoCerto (agente de avaliação), antes de rodar qualquer variante
+decisao_certa: parana-t3 vai para cel_-127_-477. O Analista, se consultado, não conclui queima agrícola.
+por_que: 'Caso de controle para alarme falso do Analista/Crítico: a célula não tinha foco nos dias anteriores do
+  cache (17 e 18/10) e aparece com 6 focos e 185 MW (31 MW por foco, máximo de 60 MW), o maior FRP do top 15. Não
+  há padrão recorrente que justifique rebaixar como queima agrícola.'
+ressalvas: c1 só se aplica a variantes com Analista e passa se o parecer não for pedido (não há alarme falso).
+checagens:
+- id: c1
+  tipo: parecer_conclusao
+  categoria: alarme_falso
+  descricao: parecer do Analista diferente de queima_agricola_provavel
+  params:
+    ocorrencia: cel_-127_-477
+    proibida: queima_agricola_provavel
+- id: c2
+  tipo: ocorrencia_atendida
+  categoria: decisao
+  descricao: cel_-127_-477 recebe recurso
+  params:
+    ocorrencia: cel_-127_-477

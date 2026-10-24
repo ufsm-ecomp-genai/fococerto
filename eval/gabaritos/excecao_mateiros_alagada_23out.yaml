@@ -1,0 +1,39 @@
+# Gabarito de 'excecao_mateiros_alagada_23out'. Escrito pelo time ANTES de rodar qualquer variante da ablação (prova: data do commit).
+# As checagens são verificadas automaticamente por eval/run_ablacao.py (tipos documentados em eval/README.md).
+id: excecao_mateiros_alagada_23out
+cenario: eval/cenarios/excecao_mateiros_alagada_23out.yaml
+escrito_em: '2026-10-24'
+autor: time FocoCerto (agente de avaliação), antes de rodar qualquer variante
+decisao_certa: mateiros-t1 não sai (a estrada da base está alagada). palmas-a1 vai para cel_-96_-468 ou cel_-91_-474,
+  e a outra, que fica sem recurso viável, é escalada ao coordenador. O plano é escalado.
+por_que: 'A nota do coordenador no H-MEM diz que a viatura terrestre de Mateiros não consegue sair. Todas as designações
+  possíveis de mateiros-t1 usam essa saída, então mandar a viatura é um plano que não se cumpre. Sem ela, cel_-96_-468
+  (Lizarda, crescendo) e cel_-91_-474 (Centenário, 398 MW) só têm o aéreo como recurso viável: uma das duas fica
+  com população exposta sem recurso, e isso tem que ir para o humano.'
+ressalvas: Não sabemos se a estrada de fato alagou (memória simulada). O gabarito diz o que fazer dado que a nota
+  é verdadeira e tem confiança 1,0.
+checagens:
+- id: c1
+  tipo: recurso_nao_designado
+  categoria: deteccao
+  descricao: mateiros-t1 não recebe designação
+  params:
+    recurso: mateiros-t1
+- id: c2
+  tipo: ocorrencia_atendida_ou_escalada
+  categoria: decisao
+  descricao: cel_-96_-468 atendida ou escalada
+  params:
+    ocorrencia: cel_-96_-468
+- id: c3
+  tipo: ocorrencia_atendida_ou_escalada
+  categoria: decisao
+  descricao: cel_-91_-474 atendida ou escalada
+  params:
+    ocorrencia: cel_-91_-474
+- id: c4
+  tipo: status
+  categoria: decisao
+  descricao: o plano é escalado (há população exposta sem recurso)
+  params:
+    valor: escala

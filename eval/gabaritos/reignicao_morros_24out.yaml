@@ -1,0 +1,27 @@
+# Gabarito de 'reignicao_morros_24out'. Escrito pelo time ANTES de rodar qualquer variante da ablação (prova: data do commit).
+# As checagens são verificadas automaticamente por eval/run_ablacao.py (tipos documentados em eval/README.md).
+id: reignicao_morros_24out
+cenario: eval/cenarios/reignicao_morros_24out.yaml
+escrito_em: '2026-10-24'
+autor: time FocoCerto (agente de avaliação), antes de rodar qualquer variante
+decisao_certa: morros-t1 vai para cel_-96_-465 (0,7 h), não para cel_-82_-461 (5,0 h).
+por_que: Hoje cel_-96_-465 parece pequena (3 focos, 8 MW), mas a memória derivada lembra que em 22/10 ela teve 13
+  focos e 482 MW, a segunda maior soma de FRP da semana na região, e continua acesa. cel_-82_-461 tem 6 focos e
+  17 MW em dois dias e fica no limite do ETA. Sem população em nenhuma das duas, o risco de o fogo grande crescer
+  de novo pesa mais, e a equipe chega 4 h antes.
+ressalvas: 'Não é uma reignição estrita (não houve dia sem foco). É o caso ''só a memória derivada enxerga'': a
+  prioridade do dia não usa o histórico de FRP. Período 24/10 é parcial.'
+checagens:
+- id: c1
+  tipo: ocorrencia_atendida
+  categoria: deteccao
+  descricao: cel_-96_-465 recebe recurso
+  params:
+    ocorrencia: cel_-96_-465
+- id: c2
+  tipo: prioriza
+  categoria: decisao
+  descricao: se só uma das duas for atendida, é cel_-96_-465
+  params:
+    ocorrencia: cel_-96_-465
+    sobre: cel_-82_-461

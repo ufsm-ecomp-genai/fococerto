@@ -1,0 +1,97 @@
+# Cenário de avaliação 'reignicao_morros_24out' (tipo: reignicao_memoria).
+# DADOS: focos, localidades e tempo são REAIS (cache FIRMS/GeoNames/Open-Meteo do Tocantins, 17 a 24/10/2026).
+# SIMULADOS (simulado: true): recursos, bases declaradas (cidades reais do GeoNames, unidade não verificada),
+# memórias iniciais e o trecho injetado. Escrito ANTES de rodar qualquer variante da ablação.
+id: reignicao_morros_24out
+tipo: reignicao_memoria
+titulo: Fogo grande de 2 dias atrás que hoje parece pequeno
+situacao_nos_dados: Período real 24/10 (dia parcial). cel_-96_-465 tem hoje 3 focos noturnos (8 MW), prioridade
+  0,385. morros-t1 chega lá em 0,7 h. Depois das ocorrências com população, o alocador manda morros-t1 para cel_-82_-461
+  (prioridade 0,397; 2 focos em 23/10 e 4 em 24/10, 17 MW no total), a 5,0 h.
+como_verificamos: Contagem de focos por célula e dia no cache; matriz de ETA; alocador_simples.
+injecao: null
+memorias_iniciais:
+- ref: m1
+  tipo: derivada
+  fonte: dados:firms:2026-10-23
+  confianca: 0.9
+  texto: 'Derivada dos dados FIRMS (23/10): a célula cel_-96_-465 teve 13 focos e 482 MW de FRP somado em 22/10,
+    a segunda maior soma de FRP numa célula da região na semana, e caiu para 2 focos em 23/10. Se seguir queimando,
+    há risco de reacender e crescer de novo.'
+regiao: tocantins
+periodo: '2026-10-24'
+simulado: true
+reserva: 0
+notas: []
+bases:
+- id: sim_guarai
+  nome: Guaraí (simulada)
+  lat: -8.83417
+  lon: -48.51028
+  fonte: GeoNames 3398573
+  simulada: true
+- id: sim_gurupi
+  nome: Gurupi (simulada)
+  lat: -11.72917
+  lon: -49.06861
+  fonte: GeoNames 3461724
+  simulada: true
+- id: sim_miracema
+  nome: Miracema do Tocantins (simulada)
+  lat: -9.56722
+  lon: -48.39167
+  fonte: GeoNames 3394817
+  simulada: true
+- id: sim_morros
+  nome: Morros (simulada)
+  lat: -9.44667
+  lon: -46.30028
+  fonte: GeoNames 3394372
+  simulada: true
+- id: sim_paraiso
+  nome: Paraíso do Tocantins (simulada)
+  lat: -10.17611
+  lon: -48.86667
+  fonte: GeoNames 3479329
+  simulada: true
+recursos:
+- id: paraiso-t1
+  base_id: sim_paraiso
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: miracema-t1
+  base_id: sim_miracema
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: guarai-t1
+  base_id: sim_guarai
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: guarai-t2
+  base_id: sim_guarai
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: guarai-t3
+  base_id: sim_guarai
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: guarai-t4
+  base_id: sim_guarai
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: gurupi-t1
+  base_id: sim_gurupi
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: morros-t1
+  base_id: sim_morros
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true

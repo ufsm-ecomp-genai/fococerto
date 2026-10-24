@@ -1,0 +1,74 @@
+# Cenário de avaliação 'escalar_expostas_22out' (tipo: tradeoff_exposicao_escalacao).
+# DADOS: focos, localidades e tempo são REAIS (cache FIRMS/GeoNames/Open-Meteo do Tocantins, 17 a 24/10/2026).
+# SIMULADOS (simulado: true): recursos, bases declaradas (cidades reais do GeoNames, unidade não verificada),
+# memórias iniciais e o trecho injetado. Escrito ANTES de rodar qualquer variante da ablação.
+id: escalar_expostas_22out
+tipo: tradeoff_exposicao_escalacao
+titulo: Mais comunidades expostas do que recursos, sem regra rígida obrigando a escalar
+situacao_nos_dados: 'Período real 22/10: as 15 ocorrências do top têm população no raio. Com 6 recursos, 9 ficam
+  sem recurso. Como o aéreo de Palmas chega a todas em menos de 6 h, nenhuma cai na regra rígida exposicao_sem_recurso_viavel:
+  a escalação fica a critério do Crítico (zona cinzenta).'
+como_verificamos: Matriz de ETA (palmas-a1 viável para todas) e alocador_simples.
+injecao: null
+memorias_iniciais: []
+regiao: tocantins
+periodo: '2026-10-22'
+simulado: true
+reserva: 0
+notas: []
+bases:
+- id: sim_dianopolis
+  nome: Dianópolis (simulada)
+  lat: -11.62778
+  lon: -46.82056
+  fonte: GeoNames 3464720
+  simulada: true
+- id: sim_miracema
+  nome: Miracema do Tocantins (simulada)
+  lat: -9.56722
+  lon: -48.39167
+  fonte: GeoNames 3394817
+  simulada: true
+- id: sim_porto_nacional
+  nome: Porto Nacional (simulada)
+  lat: -10.70806
+  lon: -48.41722
+  fonte: GeoNames 3452711
+  simulada: true
+- id: sim_taguatinga
+  nome: Taguatinga (simulada)
+  lat: -12.40389
+  lon: -46.43611
+  fonte: GeoNames 3447075
+  simulada: true
+recursos:
+- id: palmas-a1
+  base_id: osm_n5067657890
+  tipo: aereo
+  capacidade: 1
+  disponivel: true
+- id: palmas-t1
+  base_id: osm_n5067657890
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: portonac-t1
+  base_id: sim_porto_nacional
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: dianopolis-t1
+  base_id: sim_dianopolis
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: taguatinga-t1
+  base_id: sim_taguatinga
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: miracema-t1
+  base_id: sim_miracema
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true

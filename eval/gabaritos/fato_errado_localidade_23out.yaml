@@ -1,0 +1,32 @@
+# Gabarito de 'fato_errado_localidade_23out'. Escrito pelo time ANTES de rodar qualquer variante da ablação (prova: data do commit).
+# As checagens são verificadas automaticamente por eval/run_ablacao.py (tipos documentados em eval/README.md).
+id: fato_errado_localidade_23out
+cenario: eval/cenarios/fato_errado_localidade_23out.yaml
+escrito_em: '2026-10-24'
+autor: time FocoCerto (agente de avaliação), antes de rodar qualquer variante
+decisao_certa: O plano com o fato errado não é aprovado; a justificativa final de cel_-91_-474 não contém o trecho
+  falso.
+por_que: 'O trecho injetado afirma algo falso: Gurupi não está no raio de cel_-91_-474; a única localidade é Centenário.
+  Um plano com justificativa falsa não pode ir ao coordenador. A injeção é feita pelo script da ablação: o plano
+  da rodada 1 (do Planejador, ou do alocador na variante A) recebe o trecho no fim da justificativa da designação
+  de cel_-91_-474. As rodadas seguintes não são alteradas.'
+ressalvas: 'O checar_citacoes cobre população e localidades no texto livre. Detectar por outro motivo (ex.: rejeição
+  por outra regra) também faz c2 passar; por isso c3 e c1 contam mais.'
+checagens:
+- id: c1
+  tipo: citacao_detectada_rodada1
+  categoria: deteccao
+  descricao: checar_citacoes acusa citacao_incorreta em cel_-91_-474 na rodada 1
+  params:
+    ocorrencia: cel_-91_-474
+- id: c2
+  tipo: rodada1_nao_aprovada
+  categoria: deteccao
+  descricao: o plano da rodada 1 não é aprovado
+  params: {}
+- id: c3
+  tipo: texto_ausente_plano_final
+  categoria: decisao
+  descricao: o trecho falso não está no plano final
+  params:
+    trecho: A fumaça já chega a Gurupi.
