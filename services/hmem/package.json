@@ -1,0 +1,15 @@
+{
+  "name": "fococerto-hmem",
+  "version": "0.1.0",
+  "description": "Servico HTTP do Meterless H-MEM para o FocoCerto (escopo por regiao, persistencia em arquivo). Engine vendorizado da referencia oficial da Meterless (Apache-2.0).",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/server.ts",
+    "test": "node scripts/conformance.mjs"
+  },
+  "devDependencies": {
+    "tsx": "4.23.0"
+  }
+}

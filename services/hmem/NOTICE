@@ -1,0 +1,19 @@
+FocoCerto H-MEM service
+Copyright 2026 time UFSM (FocoCerto)
+
+This directory contains code from the Meterless open core:
+  https://github.com/meterless/meterless  (engines/hmem)
+  commit 1742dec56a66e58eef9dda2d2b865823758ca8cd (2026-10-19)
+  Licensed under the Apache License, Version 2.0 (see LICENSE-meterless-hmem).
+
+Copied files:
+  src/engine/*.ts               <- engines/hmem/reference/src/*.ts
+  conformance/runner.ts         <- engines/hmem/conformance/runner.ts        (unmodified)
+  conformance/vectors/vectors.json <- engines/hmem/conformance/vectors/vectors.json (unmodified)
+
+Modified files (each change is marked "FocoCerto adaptation" in the source):
+  src/engine/embeddings.ts         accent folding before tokenizing (identity on ASCII)
+  src/engine/memoryStore.ts        Portuguese correction language; entities on accent-folded text
+  src/engine/conflictDetection.ts  Portuguese opposing pairs; scanFor(); resolveBySupervisor()
+
+All other files in this directory were written for FocoCerto.

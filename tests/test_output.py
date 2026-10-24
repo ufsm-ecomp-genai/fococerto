@@ -147,6 +147,9 @@ def _stubs(monkeypatch, chamadas):
     mem_mod = types.ModuleType("app.memory_client")
 
     class MemoriaLocal:
+        def __init__(self, caminho=None):
+            chamadas["memoria_caminho"] = caminho
+
         def gravar(self, regiao, texto, tipo, fonte, confianca=1.0, supersedes=None):
             chamadas["nota_mem"] = (regiao, texto, tipo, fonte)
             return types.SimpleNamespace(id="m-teste", supersedes=None)

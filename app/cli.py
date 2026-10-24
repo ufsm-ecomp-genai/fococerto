@@ -134,8 +134,9 @@ def criar_memoria(args):
     if modo_sample(args) or not url:
         motivo = "--sample" if modo_sample(args) else "HMEM_URL ausente"
         classe = importar("app.memory_client", "MemoriaLocal")
-        progresso(f"Memória: MemoriaLocal em processo [{motivo}]")
-        return classe()
+        caminho = config.RAIZ / "data" / "estado" / f"memoria_{getattr(args, 'regiao', None) or 'geral'}.json"
+        progresso(f"Memória: MemoriaLocal persistida em {caminho.relative_to(config.RAIZ)} [{motivo}]")
+        return classe(caminho=caminho)
     classe = importar("app.memory_client", "ClienteHMEM")
     progresso(f"Memória: H-MEM em {url}")
     return classe(url)
@@ -262,8 +263,6 @@ def cmd_nota(args) -> int:
     print(f"Nota registrada ({args.regiao}, {periodo}) com memória {getattr(m, 'id', '?')}.")
     if getattr(m, "supersedes", None):
         print(f"  Substitui a memória {m.supersedes}.")
-    if modo_sample(args) or not config.env("HMEM_URL"):
-        print("  Aviso: MemoriaLocal vive só neste processo; a nota não persiste para o próximo run sem o H-MEM.")
     return 0
 
 

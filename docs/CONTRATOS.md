@@ -81,7 +81,11 @@ POST /memorias   {regiao, texto, tipo, fonte, confianca, supersedes?}  -> Memori
 POST /recall     {regiao, consulta, k}         -> {memorias: [Memoria], substituidas: [Memoria]}
 GET  /memorias?regiao=..                       -> [Memoria]   (para auditoria)
 ```
-- A resolução de conflito e o *supersedes* seguem a semântica do engine de referência.
+- A resolução de conflito e o *supersedes* seguem a semântica do engine de referência (Meterless, Apache-2.0; adaptações marcadas "FocoCerto adaptation" em `services/hmem/`).
+- Ids no formato `<regiao>:mem-<n>`. `supersedes` precisa apontar para uma memória da mesma região. Ao substituir, o serviço também marca `substituida_por` na memória antiga, e é isso que a tira do ranking.
+- Política de conflito entre notas (`HMEM_POLITICA_NOTAS`, padrão `coordenador_mais_recente`): a nota mais nova do coordenador vence. Com `fila`, o conflito fica na fila do engine, que não é persistida.
+- Extras para auditoria: `GET /ledger?regiao=..`, `GET /conflitos?regiao=..`. O `gravar` devolve também `conflitos` e o `recall` devolve `trace`; em Python ficam em `ultimos_conflitos` e `ultimo_trace` (úteis no log).
+- O recall compara palavras, não significado (embedder da referência, limiar 0,35). Consulte com termos da própria memória (id da célula, nome do lugar) ou use `listar()`.
 - `app/memory_client.py` expõe as mesmas operações, com uma versão `MemoriaLocal` em memória para o sample mode e os testes.
 
 ## 6. Ferramentas (app/tools/)
@@ -135,4 +139,4 @@ class ClienteMemoria(Protocol):
     def recall(self, regiao: str, consulta: str, k: int = 5) -> tuple[list[Memoria], list[Memoria]]  # (ativas, substituidas)
     def listar(self, regiao: str) -> list[Memoria]
 ```
-Implementações: `ClienteHMEM(base_url)` (HTTP, porta 7070) e `MemoriaLocal()` (em memória).
+Implementações: `ClienteHMEM(base_url)` (HTTP, porta 7070) e `MemoriaLocal(caminho: str | Path | None = None)` (em memória; com `caminho`, persiste em JSON). A CLI usa `data/estado/memoria_<regiao>.json`.
