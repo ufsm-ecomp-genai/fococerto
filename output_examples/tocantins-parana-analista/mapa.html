@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FocoCerto: mapa tocantins 2026-10-24</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>:root { --topo: 70px; }
+html, body { height: 100%; margin: 0; font-family: system-ui, sans-serif; background: #fff; color: #111; }
+#topo { padding: 8px 16px; background: #222; color: #fff; font-size: 15px; }
+#aviso { padding: 6px 16px; background: #fff3cd; color: #5c4400; font-weight: 600; font-size: 14px; }
+#mapa { position: absolute; top: var(--topo, 40px); bottom: 0; left: 0; right: 0; }
+.legenda { background: #fff; padding: 8px 10px; border-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,.3); font-size: 12px; line-height: 1.7; }
+.pt { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; vertical-align: middle; border: 1px solid #333; }
+.pt.anel { background: transparent; border: 2px dashed #000; }
+.base-q { width: 12px; height: 12px; background: #1565c0; border: 2px solid #fff; box-shadow: 0 0 0 1px #1565c0; }
+.base-q.inl { display: inline-block; margin-right: 6px; vertical-align: middle; width: 8px; height: 8px; }
+.ln { display: inline-block; width: 18px; height: 3px; background: #1565c0; margin-right: 6px; vertical-align: middle; }
+.esc { margin-top: 4px; padding: 4px 6px; background: #000; color: #fff; font-weight: 600; }
+</style>
+</head>
+<body>
+<div id="topo">FocoCerto: mapa tocantins 2026-10-24</div>
+<div id="aviso">RECURSOS SIMULADOS: as equipes e aeronaves deste plano vêm de um cenário de demonstração (input_examples/tocantins-parana-analista.yaml), não de um inventário real.</div>
+<div id="mapa"></div>
+<script id="dados" type="application/json">{"ocorrencias": [{"id": "cel_-104_-489", "lat": -10.3753, "lon": -48.87184, "prioridade": 0.612, "faixa": "alta", "faixa_nome": "alta", "cor": "#c62828", "status": "nova", "n_focos": 4, "frp_max": 2.44, "pop_raio": 2231, "localidade": "Pugmil (6.2 km)", "escalada": false, "motivo_escalacao": null, "designacoes": [{"ordem": 1, "recurso": "paraiso-t1", "eta_h": 0.78, "justificativa": "Prioridade 0.61; 2231 habitantes no raio; Pugmil a 6.2 km; 4 focos, FRP somado 10 MW; paraiso-t1 (terrestre) chega em ETA 0.8 h saindo de Paraíso do Tocantins (simulada).", "evidencias": ["focos:4", "eta:0.78", "pop:2231", "dist:Pugmil:6.2", "base:sim_paraiso"]}]}, {"id": "cel_-86_-487", "lat": -8.58976, "lon": -48.68809, "prioridade": 0.593, "faixa": "alta", "faixa_nome": "alta", "cor": "#c62828", "status": "nova", "n_focos": 3, "frp_max": 2.94, "pop_raio": 2464, "localidade": "Itaporã do Tocantins (2.0 km)", "escalada": false, "motivo_escalacao": null, "designacoes": [{"ordem": 2, "recurso": "guarai-t1", "eta_h": 1.17, "justificativa": "Prioridade 0.59; 2464 habitantes no raio; Itaporã do Tocantins a 2.0 km; 3 focos, FRP somado 7 MW; guarai-t1 (terrestre) chega em ETA 1.2 h saindo de Guaraí (simulada).", "evidencias": ["focos:3", "eta:1.17", "pop:2464", "dist:Itaporã do Tocantins:2.0", "base:sim_guarai"]}]}, {"id": "cel_-93_-486", "lat": -9.2324, "lon": -48.55969, "prioridade": 0.558, "faixa": "alta", "faixa_nome": "alta", "cor": "#c62828", "status": "diminuindo", "n_focos": 4, "frp_max": 2.61, "pop_raio": 2833, "localidade": "Rio dos Bois (12.8 km)", "escalada": false, "motivo_escalacao": null, "designacoes": [{"ordem": 3, "recurso": "miracema-t1", "eta_h": 1.45, "justificativa": "Prioridade 0.56; 2833 habitantes no raio; Rio dos Bois a 12.8 km; 4 focos, FRP somado 7 MW; miracema-t1 (terrestre) chega em ETA 1.5 h saindo de Miracema do Tocantins (simulada).", "evidencias": ["focos:4", "eta:1.45", "pop:2833", "dist:Rio dos Bois:12.8", "base:sim_miracema"]}]}, {"id": "cel_-117_-491", "lat": -11.67763, "lon": -49.00356, "prioridade": 0.54, "faixa": "alta", "faixa_nome": "alta", "cor": "#c62828", "status": "diminuindo", "n_focos": 2, "frp_max": 1.36, "pop_raio": 87545, "localidade": "Gurupi (9.1 km)", "escalada": false, "motivo_escalacao": null, "designacoes": [{"ordem": 4, "recurso": "gurupi-t1", "eta_h": 0.32, "justificativa": "Prioridade 0.54; 87545 habitantes no raio; Gurupi a 9.1 km; 2 focos, FRP somado 3 MW; gurupi-t1 (terrestre) chega em ETA 0.3 h saindo de Gurupi (simulada).", "evidencias": ["focos:2", "eta:0.32", "pop:87545", "dist:Gurupi:9.1", "base:sim_gurupi"]}]}, {"id": "cel_-88_-479", "lat": -8.74756, "lon": -47.8746, "prioridade": 0.485, "faixa": "alta", "faixa_nome": "alta", "cor": "#c62828", "status": "nova", "n_focos": 1, "frp_max": 1.78, "pop_raio": 2726, "localidade": "Santa Maria do Tocantins (10.4 km)", "escalada": true, "motivo_escalacao": "Escalação: cel_-88_-479 tem 2726 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.", "designacoes": []}, {"id": "cel_-90_-475", "lat": -8.98311, "lon": -47.43752, "prioridade": 0.45, "faixa": "media", "faixa_nome": "média", "cor": "#ef6c00", "status": "estavel", "n_focos": 2, "frp_max": 0.68, "pop_raio": 2135, "localidade": "Centenário (11.7 km)", "escalada": true, "motivo_escalacao": "Escalação: cel_-90_-475 tem 2135 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.", "designacoes": []}, {"id": "cel_-83_-490", "lat": -8.20959, "lon": -48.96944, "prioridade": 0.433, "faixa": "media", "faixa_nome": "média", "cor": "#ef6c00", "status": "nova", "n_focos": 1, "frp_max": 1.09, "pop_raio": 2305, "localidade": "Juarina (14.5 km)", "escalada": true, "motivo_escalacao": "Escalação: cel_-83_-490 tem 2305 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.", "designacoes": []}, {"id": "cel_-82_-461", "lat": -8.18819, "lon": -46.00471, "prioridade": 0.397, "faixa": "media", "faixa_nome": "média", "cor": "#ef6c00", "status": "crescendo", "n_focos": 4, "frp_max": 3.51, "pop_raio": 0, "localidade": null, "escalada": false, "motivo_escalacao": null, "designacoes": []}, {"id": "cel_-96_-465", "lat": -9.53929, "lon": -46.44722, "prioridade": 0.385, "faixa": "media", "faixa_nome": "média", "cor": "#ef6c00", "status": "crescendo", "n_focos": 3, "frp_max": 3.69, "pop_raio": 0, "localidade": null, "escalada": false, "motivo_escalacao": null, "designacoes": []}, {"id": "cel_-91_-479", "lat": -9.05249, "lon": -47.89436, "prioridade": 0.376, "faixa": "media", "faixa_nome": "média", "cor": "#ef6c00", "status": "crescendo", "n_focos": 4, "frp_max": 3.02, "pop_raio": 0, "localidade": null, "escalada": false, "motivo_escalacao": null, "designacoes": []}, {"id": "cel_-105_-482", "lat": -10.42209, "lon": -48.19489, "prioridade": 0.327, "faixa": "baixa", "faixa_nome": "baixa", "cor": "#f9a825", "status": "nova", "n_focos": 5, "frp_max": 1.51, "pop_raio": 0, "localidade": null, "escalada": false, "motivo_escalacao": null, "designacoes": []}, {"id": "cel_-106_-481", "lat": -10.52685, "lon": -48.03892, "prioridade": 0.322, "faixa": "baixa", "faixa_nome": "baixa", "cor": "#f9a825", "status": "crescendo", "n_focos": 3, "frp_max": 1.77, "pop_raio": 0, "localidade": null, "escalada": false, "motivo_escalacao": null, "designacoes": []}, {"id": "cel_-124_-479", "lat": -12.31535, "lon": -47.84985, "prioridade": 0.31, "faixa": "baixa", "faixa_nome": "baixa", "cor": "#f9a825", "status": "crescendo", "n_focos": 2, "frp_max": 0.87, "pop_raio": 0, "localidade": null, "escalada": false, "motivo_escalacao": null, "designacoes": [{"ordem": 5, "recurso": "parana-t1", "eta_h": 1.17, "justificativa": "Prioridade 0.31; sem população no raio; 2 focos, FRP somado 2 MW; parana-t1 (terrestre) chega em ETA 1.2 h saindo de Paranã (simulada).", "evidencias": ["focos:2", "eta:1.17", "base:sim_parana"]}]}, {"id": "cel_-104_-466", "lat": -10.36923, "lon": -46.59107, "prioridade": 0.305, "faixa": "baixa", "faixa_nome": "baixa", "cor": "#f9a825", "status": "nova", "n_focos": 2, "frp_max": 2.85, "pop_raio": 0, "localidade": null, "escalada": false, "motivo_escalacao": null, "designacoes": []}, {"id": "cel_-87_-495", "lat": -8.65067, "lon": -49.42783, "prioridade": 0.281, "faixa": "baixa", "faixa_nome": "baixa", "cor": "#f9a825", "status": "nova", "n_focos": 2, "frp_max": 1.88, "pop_raio": 0, "localidade": null, "escalada": false, "motivo_escalacao": null, "designacoes": []}], "bases": [{"id": "osm_n3165869368", "nome": "Bombeiros (perto de Porangatu, 1 km)", "lat": -13.445225, "lon": -49.136863, "recursos": []}, {"id": "osm_n5067657890", "nome": "1º Batalhão de Bombeiros Militar", "lat": -10.206127, "lon": -48.343395, "recursos": []}, {"id": "osm_w1022455273", "nome": "SCI (Palmas)", "lat": -10.293075, "lon": -48.360013, "recursos": []}, {"id": "osm_w365506007", "nome": "Corpo de Bombeiros Militar", "lat": -13.274527, "lon": -50.167664, "recursos": []}, {"id": "osm_w412958353", "nome": "Bombeiros (perto de Barreiras, 1 km)", "lat": -12.15074, "lon": -44.998205, "recursos": []}, {"id": "sim_guarai", "nome": "Guaraí (simulada)", "lat": -8.83417, "lon": -48.51028, "recursos": ["guarai-t1 (terrestre)"]}, {"id": "sim_gurupi", "nome": "Gurupi (simulada)", "lat": -11.72917, "lon": -49.06861, "recursos": ["gurupi-t1 (terrestre)"]}, {"id": "sim_miracema", "nome": "Miracema do Tocantins (simulada)", "lat": -9.56722, "lon": -48.39167, "recursos": ["miracema-t1 (terrestre)"]}, {"id": "sim_paraiso", "nome": "Paraíso do Tocantins (simulada)", "lat": -10.17611, "lon": -48.86667, "recursos": ["paraiso-t1 (terrestre)"]}, {"id": "sim_parana", "nome": "Paranã (simulada)", "lat": -12.61528, "lon": -47.88306, "recursos": ["parana-t1 (terrestre)"]}], "linhas": [{"de": [-10.17611, -48.86667], "para": [-10.3753, -48.87184], "ordem": 1, "recurso": "paraiso-t1", "ocorrencia": "cel_-104_-489", "eta_h": 0.78, "aereo": false, "justificativa": "Prioridade 0.61; 2231 habitantes no raio; Pugmil a 6.2 km; 4 focos, FRP somado 10 MW; paraiso-t1 (terrestre) chega em ETA 0.8 h saindo de Paraíso do Tocantins (simulada)."}, {"de": [-8.83417, -48.51028], "para": [-8.58976, -48.68809], "ordem": 2, "recurso": "guarai-t1", "ocorrencia": "cel_-86_-487", "eta_h": 1.17, "aereo": false, "justificativa": "Prioridade 0.59; 2464 habitantes no raio; Itaporã do Tocantins a 2.0 km; 3 focos, FRP somado 7 MW; guarai-t1 (terrestre) chega em ETA 1.2 h saindo de Guaraí (simulada)."}, {"de": [-9.56722, -48.39167], "para": [-9.2324, -48.55969], "ordem": 3, "recurso": "miracema-t1", "ocorrencia": "cel_-93_-486", "eta_h": 1.45, "aereo": false, "justificativa": "Prioridade 0.56; 2833 habitantes no raio; Rio dos Bois a 12.8 km; 4 focos, FRP somado 7 MW; miracema-t1 (terrestre) chega em ETA 1.5 h saindo de Miracema do Tocantins (simulada)."}, {"de": [-11.72917, -49.06861], "para": [-11.67763, -49.00356], "ordem": 4, "recurso": "gurupi-t1", "ocorrencia": "cel_-117_-491", "eta_h": 0.32, "aereo": false, "justificativa": "Prioridade 0.54; 87545 habitantes no raio; Gurupi a 9.1 km; 2 focos, FRP somado 3 MW; gurupi-t1 (terrestre) chega em ETA 0.3 h saindo de Gurupi (simulada)."}, {"de": [-12.61528, -47.88306], "para": [-12.31535, -47.84985], "ordem": 5, "recurso": "parana-t1", "ocorrencia": "cel_-124_-479", "eta_h": 1.17, "aereo": false, "justificativa": "Prioridade 0.31; sem população no raio; 2 focos, FRP somado 2 MW; parana-t1 (terrestre) chega em ETA 1.2 h saindo de Paranã (simulada)."}], "bbox": [[-13.0, -49.5], [-8.0, -45.5]], "simulado": true, "cores": {"alta": "#c62828", "media": "#ef6c00", "baixa": "#f9a825"}, "t": {"mapa_legenda": "Legenda", "mapa_ocorrencia": "Ocorrência", "mapa_base": "Base", "mapa_designacao": "Designação (recurso → ocorrência)", "mapa_escalada": "Escalada (decisão humana)", "mapa_motivo": "Motivo da escalação", "mapa_recursos_na_base": "Recursos nesta base", "col_prioridade": "Prioridade", "col_status": "Status", "col_focos": "Focos", "col_frp": "FRP máx (MW)", "col_pop": "Pop. no raio", "col_localidade": "Localidade mais próxima", "col_eta": "ETA", "justificativa": "Justificativa", "evidencias": "Evidências", "faixa_alta": "alta", "faixa_media": "média", "faixa_baixa": "baixa", "nao_atendida": "não atendida", "col_ordem": "Ordem", "h": "h"}, "aviso": "RECURSOS SIMULADOS: as equipes e aeronaves deste plano vêm de um cenário de demonstração (input_examples/tocantins-parana-analista.yaml), não de um inventário real."}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function () {
+  var D = JSON.parse(document.getElementById('dados').textContent);
+  var T = D.t;
+  function esc(s) {
+    return String(s == null ? '-' : s).replace(/[&<>"']/g, function (c) {
+      return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c];
+    });
+  }
+  var mapa = L.map('mapa');
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18, attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(mapa);
+  var limites = L.latLngBounds(D.bbox);
+
+  D.linhas.forEach(function (l) {
+    L.polyline([l.de, l.para], {color: '#1565c0', weight: 3, opacity: 0.8, dashArray: l.aereo ? '2 6' : null})
+      .bindTooltip('#' + l.ordem + ' ' + esc(l.recurso) + ' → ' + esc(l.ocorrencia) + ' (' + esc(l.eta_h) + ' ' + T.h + ')')
+      .bindPopup('<b>#' + l.ordem + ' ' + esc(l.recurso) + ' → ' + esc(l.ocorrencia) + '</b><br>' +
+                 T.col_eta + ': ' + esc(l.eta_h) + ' ' + T.h + '<br>' + T.justificativa + ': ' + esc(l.justificativa))
+      .addTo(mapa);
+  });
+
+  D.bases.forEach(function (b) {
+    var icone = L.divIcon({className: 'base', html: '<div class="base-q"></div>', iconSize: [14, 14]});
+    L.marker([b.lat, b.lon], {icon: icone})
+      .bindPopup('<b>' + T.mapa_base + ': ' + esc(b.nome) + '</b><br><code>' + esc(b.id) + '</code><br>' +
+                 T.mapa_recursos_na_base + ': ' + (b.recursos.length ? b.recursos.map(esc).join(', ') : '-'))
+      .addTo(mapa);
+    limites.extend([b.lat, b.lon]);
+  });
+
+  D.ocorrencias.forEach(function (o) {
+    var r = 6 + Math.min(10, Math.sqrt(o.n_focos) * 2);
+    if (o.escalada) {
+      L.circleMarker([o.lat, o.lon], {radius: r + 7, color: '#000', weight: 3, dashArray: '4 4', fill: false})
+        .addTo(mapa);
+    }
+    var html = '<b>' + T.mapa_ocorrencia + ' <code>' + esc(o.id) + '</code></b>';
+    if (o.escalada) html += '<div class="esc">' + T.mapa_escalada + '<br>' + T.mapa_motivo + ': ' + esc(o.motivo_escalacao) + '</div>';
+    html += '<br>' + T.col_prioridade + ': ' + esc(o.prioridade) + ' (' + esc(o.faixa_nome) + ')' +
+            '<br>' + T.col_status + ': ' + esc(o.status) +
+            '<br>' + T.col_focos + ': ' + esc(o.n_focos) + ' · ' + T.col_frp + ': ' + esc(o.frp_max) +
+            '<br>' + T.col_pop + ': ' + esc(o.pop_raio) +
+            '<br>' + T.col_localidade + ': ' + esc(o.localidade);
+    if (o.designacoes.length) {
+      o.designacoes.forEach(function (d) {
+        html += '<hr><b>#' + d.ordem + ' ' + esc(d.recurso) + '</b> · ' + T.col_eta + ' ' + esc(d.eta_h) + ' ' + T.h +
+                '<br>' + T.justificativa + ': ' + esc(d.justificativa) +
+                '<br>' + T.evidencias + ': ' + (d.evidencias.length ? d.evidencias.map(esc).join(', ') : '-');
+      });
+    } else {
+      html += '<hr><i>' + T.nao_atendida + '</i>';
+    }
+    L.circleMarker([o.lat, o.lon], {radius: r, color: '#333', weight: 1, fillColor: o.cor, fillOpacity: 0.85})
+      .bindPopup(html, {maxWidth: 360})
+      .addTo(mapa);
+    limites.extend([o.lat, o.lon]);
+  });
+
+  mapa.fitBounds(limites, {padding: [20, 20]});
+
+  var legenda = L.control({position: 'bottomright'});
+  legenda.onAdd = function () {
+    var div = L.DomUtil.create('div', 'legenda');
+    div.innerHTML = '<b>' + T.mapa_legenda + '</b><br>' +
+      ['alta', 'media', 'baixa'].map(function (f) {
+        return '<span class="pt" style="background:' + D.cores[f] + '"></span>' + T.mapa_ocorrencia + ' · ' +
+               T.col_prioridade.toLowerCase() + ' ' + T['faixa_' + f];
+      }).join('<br>') +
+      '<br><span class="pt anel"></span>' + T.mapa_escalada +
+      '<br><span class="base-q inl"></span>' + T.mapa_base +
+      '<br><span class="ln"></span>' + T.mapa_designacao;
+    return div;
+  };
+  legenda.addTo(mapa);
+})();
+</script>
+</body>
+</html>

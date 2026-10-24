@@ -100,7 +100,7 @@ Estrutura do `pitch-deck-template.md` (12 slides + apêndice), adaptada ao que o
 - **IA responsável:** aprovação humana em todo plano; escalação obrigatória; incerteza declarada; só dados públicos, sem dados pessoais; dados simulados identificados.
 
 ## Slide 12: Próximos passos
-- **Já:** rodar no Zetaris e no Nightshift/Nemotron reais; rodar a ablação no modo LLM; gerar automaticamente as memórias derivadas dos dados ao fim de cada período.
+- **Já:** rodar no Zetaris e no Nightshift/Nemotron reais; rodar a ablação no modo LLM.
 - **Em 2 a 3 meses:** validação com operadores; TI/UC (FUNAI/ICMBio) na exposição; filtro de queima agrícola por cobertura do solo; rotas reais; tipos de recurso (terrestre, aéreo, fluvial).
 - **Depois:** modelo de propagação; outras doutrinas como configuração; outros desastres.
 - **Fechamento:** *"Os painéis mostram onde está o fogo. O FocoCerto propõe qual atender primeiro e com quem, mostrando por quê, e um crítico revisa o plano antes de o coordenador aprovar."*

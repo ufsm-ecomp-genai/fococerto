@@ -73,7 +73,7 @@ python -m app.cli run  --regiao tocantins --recursos cenarios/tocantins-escasso.
 
 **Atenção:** usar exatamente as frases "estrada para Mateiros alagada" e "estrada para Mateiros liberada". Com "alagada, sem acesso" o plano também volta, mas o *supersedes* automático não dispara (a similaridade fica abaixo do limiar do engine).
 
-**Não mostrar** "memória derivada que aprende sozinha ao longo de 3 períodos": a geração automática ainda não existe (as memórias derivadas da ablação são semeadas pelo cenário).
+**Aprendizado ao longo de 3 períodos:** mostrar com `scripts/demo_3_periodos.sh` (21 → 22 → 23/10). No dia 22, células que ficaram sem recurso no dia 21 e cresceram viram memória derivada e mudam o plano (ex.: `palmas-a1` vai para `cel_-97_-491`, Abreulândia, "[muda por causa da memória]"). No dia 23, a nota "liberada" substitui a "alagada" e o recurso de Mateiros volta.
 
 ## 5. (2:50–3:30) A prova: ablação A/B/C/D
 **Tela:** a tabela de `eval/RELATORIO.md`.
@@ -98,6 +98,5 @@ python -m app.cli aprovar --regiao tocantins --periodo 2026-10-23
 | Item da especificação | Situação |
 |---|---|
 | "Mesmo código, outra região" (Península Ibérica) | Só existe `config/regioes/iberia.yaml`; não há dados em cache nem execução. Não mostrar, a não ser que alguém rode de verdade antes de gravar. |
-| Memória derivada aprendida ao longo de 3 períodos | A geração automática não está implementada; mostrar só a nota e o *supersedes*. |
 | SQL federada ao vivo no Zetaris | **[ZETARIS]**: só se o Zetaris real estiver no ar. |
 | Nemotron respondendo, com `routed_model` | **[NIGHTSHIFT]**: obrigatório pelas regras ("one real request passing through Nightshift"); sem isso, o vídeo fica incompleto nesse requisito. |

@@ -304,7 +304,21 @@ The Track 3 question: **do the agents and the memory make better decisions?** We
 
 **Honesty notes:** the answer keys were written by the team, there is no field ground truth, and the reservations for each case are in the key itself. In offline mode every run is deterministic and A and B tend to coincide, so offline results only validate the pipeline; **the comparison that matters is in LLM mode**. Details: `eval/README.md` and `eval/RELATORIO.md`.
 
-<!-- EVAL_RESULTS -->
+**Ablation results: offline deterministic agents — LLM-mode results pending.** These numbers validate the
+evaluation pipeline (12 scenarios × 4 variants × 3 repetitions, `python -m eval.run_ablacao --modo offline --repeticoes 3`);
+they are not the final comparison. Offline runs are deterministic, so the variance between repetitions is zero.
+
+| Variant | Checks passed | Decision | Detection | False alarms | False citations in final plan |
+|---|---|---|---|---|---|
+| **A** simple allocator | 18/81 (22.2%) | 15/51 | 0/27 | 0/3 | 0 |
+| **B** Planner + rule checker | 48/81 (59.3%) | 27/51 | 18/27 | 0/3 | 0 |
+| **C** full (Planner ⇄ Critic ⇄ Analyst + H-MEM) | 69/87 (79.3%) | 36/51 | 27/30 | 0/6 | 0 |
+| **D** C without H-MEM | 51/87 (58.6%) | 30/51 | 15/30 | 0/6 | 0 |
+
+H-MEM contribution (C − D): +18 checks (coordinator notes and data-derived reignition memories). Full table,
+per-scenario results and the before/after of the bug fixes: `eval/RELATORIO.md`.
+
+<!-- EVAL_RESULTS_LLM -->
 
 ---
 
@@ -325,7 +339,7 @@ Full write-up: [`docs/PATROCINADORES.md`](docs/PATROCINADORES.md).
 
 - **Not tested against the real sponsor services yet:** Zetaris (views validated only in local Spark SQL) and Nightshift/Nemotron (client tested only with a fake HTTP layer).
 - **Offline agents are simple:** in sample mode the Planner is essentially the greedy baseline; differences between ablation variants depend on LLM mode.
-- **Data-derived memories are not yet generated automatically** after each period. The memory type, its effect on priority and the H-MEM path exist and are tested; in the ablation these memories are seeded by the scenario.
+- **Data-derived memories are learned between periods**: before each `run`, the system compares the previous period's plan with the new FIRMS data and stores, for example, "cell X was left without a resource and grew from 2 to 8 detections" (`app/agents/aprendizado.py`). Each ablation scenario has a single period, so the ablation seeds these memories; the multi-period effect is shown by `scripts/demo_3_periodos.sh`.
 - **Exposure is overestimated near mid-size towns:** `pop_raio` sums GeoNames population, which is often the whole municipality (e.g. Porto Nacional ~53k), not just the town.
 - **A detection is not a fire:** the same fire is detected several times, clouds hide fires, and part of the detections are agricultural or industrial burning. Agricultural-vs-native-vegetation is an inference with stated uncertainty.
 - **Distances are straight lines × a tortuosity factor**, and speeds are declared assumptions; ETA is an estimate.

@@ -7,7 +7,7 @@
     "modo": "offline",
     "simulado": true,
     "arquivo_cenario": "input_examples/tocantins-folgado.yaml",
-    "gerado_em": "2026-10-24T22:15:07.031239+00:00",
+    "gerado_em": "2026-10-24T22:27:09.727130+00:00",
     "aprovacao_humana": "pendente"
   },
   "plano": {
@@ -1162,5 +1162,5 @@
     }
   ],
   "rodadas": 1,
-  "log_path": "/tmp/tmp.cvX2riRIju/logs-tocantins-folgado/20261024T221506-151bc5.jsonl"
+  "log_path": "/tmp/tmp.LsycRlDpnm/logs-tocantins-folgado/20261024T222709-24add1.jsonl"
 }

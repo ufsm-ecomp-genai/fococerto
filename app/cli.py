@@ -31,6 +31,7 @@ DONOS = {
     "app.data.repositorio": "dados-zetaris",
     "app.memory_client": "hmem-engine",
     "app.llm.client": "agentes-llm",
+    "app.agents.aprendizado": "agentes-llm",
 }
 
 
@@ -174,6 +175,28 @@ class LogComProgresso(LogExecucao):
 
 # ----------------------------------------------------------------------------- subcomandos
 
+def aprender_periodo_anterior(args, regiao: str, periodo: str, repo, memoria, log) -> list:
+    """Memória derivada (H-MEM, especificação seção 7): antes do período P, compara o plano de P-1 (decisões
+    aprovadas ou ``<saida>/<regiao>/<P-1>/plano.json``) com os dados de P e grava o que aprendeu.
+    Sem plano de P-1, não faz nada. Falha aqui não impede o período (só fica no log)."""
+    try:
+        plano_anterior, aprender = importar("app.agents.aprendizado", "plano_anterior", "aprender_entre_periodos")
+        plano, origem = plano_anterior(regiao, periodo, repo, Path(args.saida))
+        if plano is None:
+            progresso("Aprendizado: sem plano do período anterior; nenhuma memória derivada nova")
+            return []
+        gravadas = aprender(regiao, periodo, plano, repo, memoria, log)
+        progresso(f"Aprendizado {plano.periodo} -> {periodo} (plano de {origem}): "
+                  f"{len(gravadas)} memória(s) derivada(s) gravada(s)")
+        for m in gravadas:
+            progresso(f"  + {m.id}: {m.texto}")
+        return gravadas
+    except Exception as e:  # noqa: BLE001
+        log.evento("sistema", "memoria_gravada", {"erro": f"{type(e).__name__}: {e}", "aprendizado": True})
+        progresso(f"Aprendizado falhou ({type(e).__name__}: {e}); o período segue sem ele")
+        return []
+
+
 def cmd_run(args) -> int:
     from app.output import escrever_saidas
 
@@ -203,6 +226,7 @@ def cmd_run(args) -> int:
 
     log.evento("sistema", "inicio", {"cenario": str(arq), "modo": modo, "sample": modo_sample(args),
                                       "simulado": cenario.simulado})
+    aprender_periodo_anterior(args, regiao.nome, periodo, repo, memoria, log)
     progresso("Rodando o ciclo Planejador/Crítico/Analista (pode demorar no modo LLM)...")
     t0 = time.monotonic()
     resultado = executar_periodo(regiao, cenario, repo, memoria, log, modo=modo)

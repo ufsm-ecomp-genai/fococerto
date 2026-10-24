@@ -124,6 +124,6 @@ O Analista não foi chamado neste período.
 - O índice de tempo é uma simplificação de superfície.
 - A doutrina é simplificada, e não houve validação com operadores.
 
-[Log completo da execução](../../../logs-tocantins-escasso-com-nota/20261024T221509-5d2a21.jsonl)
+[Log completo da execução](../../../logs-tocantins-escasso-com-nota/20261024T222712-8e86b7.jsonl)
 
-_Gerado em 2026-10-24 22:15 UTC_
+_Gerado em 2026-10-24 22:27 UTC_

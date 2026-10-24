@@ -20,7 +20,7 @@ from app.core.models import (Base, Cenario, Memoria, Ocorrencia, ParecerAnalista
 from app.tools.alocador import alocador_simples
 from app.tools.citacoes import checar_citacoes
 from app.tools.consultar import Consultor
-from app.tools.memorias import interpretar_memorias, tokens_distintivos
+from app.tools.memorias import REFORCO, interpretar_memorias, tokens_distintivos
 from app.tools.texto import contem_termo, norm, sem_sufixo_simulada, tokens_nome
 from app.tools.monitor import monitor
 from app.tools.regras import INSOLUVEIS, checar_regras
@@ -28,6 +28,7 @@ from app.tools.regras import INSOLUVEIS, checar_regras
 MAX_RODADAS = 3
 TOP = 15
 TOP_ANTERIOR = 5000  # sem corte relevante: o monitor precisa do par de cada célula de ontem (dia típico: ~200)
+MAX_PUXADAS = 5      # ocorrências fora do top 15 que uma memória derivada de reforço traz para a lista
 
 
 class Repositorio(Protocol):  # docs/CONTRATOS.md, seção 3 (só o que o grafo usa)
@@ -107,7 +108,7 @@ def _ler_memorias(memoria: ClienteMemoria, regiao: str, bases: list[Base], ocorr
 
     1. ``recall`` do H-MEM, uma consulta por termo (o recall compara palavras: consulta longa dilui a similaridade);
     2. ``listar(regiao)`` (o escopo por região é pequeno, CONTRATOS §5): entram as ativas que citam célula do
-       período, base, localidade ou palavra-chave. Sem isso, uma memória longa (ex.: derivada de reignição) não
+       período, base, localidade ou palavra-chave (as derivadas, só por célula ou localidade). Sem isso, uma memória longa (ex.: derivada de reignição) não
        passa do limiar 0,35 do recall contra um termo curto, nem pelo id da célula.
     Substituídas (``supersedes``/``substituida_por``) nunca entram como ativas."""
     nomes_base = [p.strip() for b in bases for p in re.sub(r"\(.*?\)", "", b.nome).split("/")]
@@ -129,11 +130,38 @@ def _ler_memorias(memoria: ClienteMemoria, regiao: str, bases: list[Base], ocorr
         if m.id in ativas or m.id in ids_subst:
             continue
         motivo = _motivo_listar(m.texto, ocorrencias, bases, distintivos)
+        if motivo and m.tipo == "derivada" and not motivo.startswith(("celula:", "localidade:")):
+            # derivada fala de uma célula: só interessa se a célula (ou a localidade) está no período. Pela base
+            # ou por palavra-chave, toda derivada antiga voltaria em todo período (ex.: localidade = nome da base).
+            continue
         if motivo:
             ativas[m.id] = m
             vias[m.id] = f"listar:{motivo}"
     usadas = [m for m in ativas.values() if m.regiao == regiao and m.id not in ids_subst]
     return usadas, list(subst.values()), {m.id: vias[m.id] for m in usadas}
+
+
+def _puxar_por_memoria(memoria: ClienteMemoria, regiao: str, repo: Repositorio, periodo: str,
+                       atuais: list[Ocorrencia]) -> list[tuple[Ocorrencia, Memoria]]:
+    """Ocorrências do período fora do top 15 citadas **pelo id** numa memória derivada ativa de reforço
+    ("cresceu", "persistiu forte", reignição). Sem isso, a célula que ficou sem recurso e cresceu continua fora
+    da lista (o top 15 é dominado pela prioridade do dia) e a memória não tem efeito nenhum."""
+    todas = [m for m in memoria.listar(regiao) if m.regiao == regiao]
+    subst = _ids_substituidos(memoria, todas)
+    no_top = {o.id for o in atuais}
+    por_cel: dict[str, Memoria] = {}
+    for m in sorted(todas, key=lambda x: x.criada_em):
+        if m.tipo != "derivada" or m.id in subst or not REFORCO.search(norm(m.texto)):
+            continue
+        for cel in _ids_cel([m.texto]):
+            cel = cel.rstrip("._")
+            if cel not in no_top:
+                por_cel[cel] = m
+    if not por_cel:
+        return []
+    candidatas = [o for o in repo.ocorrencias(regiao, periodo, top=TOP_ANTERIOR) if o.id in por_cel]
+    candidatas.sort(key=lambda o: -o.prioridade)
+    return [(o, por_cel[o.id]) for o in candidatas[:MAX_PUXADAS]]
 
 
 def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, memoria: ClienteMemoria,
@@ -157,6 +185,19 @@ def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, mem
         except Exception as e:  # noqa: BLE001 - sem período anterior, tudo vira "nova"
             log.evento("ferramenta", "consulta", {"consulta": f"ocorrencias({ant})", "erro": str(e)})
     atuais = repo.ocorrencias(regiao.nome, periodo, top=TOP)[:TOP]
+    if usar_memoria:
+        try:
+            puxadas = _puxar_por_memoria(memoria, regiao.nome, repo, periodo, atuais)
+        except Exception as e:  # noqa: BLE001 - H-MEM fora do ar não derruba o período
+            puxadas = []
+            log.evento("sistema", "memoria_lida", {"erro": f"{type(e).__name__}: {e}", "puxadas_por_memoria": []})
+        if puxadas:
+            atuais = atuais + [o for o, _ in puxadas]
+            log.evento("sistema", "memoria_lida", {
+                "puxadas_por_memoria": [{"ocorrencia_id": o.id, "memoria_id": m.id, "texto": m.texto,
+                                         "n_focos": o.n_focos, "prioridade": round(o.prioridade, 4)}
+                                        for o, m in puxadas],
+                "obs": f"fora do top {TOP}, entram na lista do período por memória derivada de reforço"})
     ocorrencias = monitor(atuais, anteriores)
     log.evento("ferramenta", "consulta", {"consulta": "monitor", "anterior": ant, "n_atuais": len(ocorrencias),
                                           "status": {o.id: o.status for o in ocorrencias}})

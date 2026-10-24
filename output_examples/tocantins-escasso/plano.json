@@ -7,7 +7,7 @@
     "modo": "offline",
     "simulado": true,
     "arquivo_cenario": "input_examples/tocantins-escasso.yaml",
-    "gerado_em": "2026-10-24T22:15:01.998572+00:00",
+    "gerado_em": "2026-10-24T22:27:05.798796+00:00",
     "aprovacao_humana": "pendente"
   },
   "plano": {
@@ -1045,5 +1045,5 @@
     }
   ],
   "rodadas": 1,
-  "log_path": "/tmp/tmp.cvX2riRIju/logs-tocantins-escasso/20261024T221501-be47ed.jsonl"
+  "log_path": "/tmp/tmp.LsycRlDpnm/logs-tocantins-escasso/20261024T222705-91dadb.jsonl"
 }

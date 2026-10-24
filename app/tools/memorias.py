@@ -12,7 +12,7 @@ from app.tools.texto import contem_termo, norm, sem_sufixo_simulada, tokens_nome
 
 BLOQUEIO = re.compile(r"alagad|bloquead|interditad|intransitavel|inacessivel|fechad|sem acesso|ponte caiu|atolad")
 LIBERACAO = re.compile(r"liberad|reabert|desbloquead|normalizad|(?<!in)transitavel|desimpedid")
-REFORCO = re.compile(r"cresceu|cresce|reign|reacend|subestimad|despriorizad.*(cresc|aument|volt)|aumentou|voltou a queimar")
+REFORCO = re.compile(r"cresceu|cresce|persistiu forte|reign|reacend|subestimad|despriorizad.*(cresc|aument|volt)|aumentou|voltou a queimar")
 NUMEROS = {"zero": 0, "um": 1, "uma": 1, "dois": 2, "duas": 2, "tres": 3, "quatro": 4, "cinco": 5}
 
 

@@ -26,11 +26,11 @@
 - **Correções do líder (commitadas):** recall do H-MEM com uma consulta por termo (a nota não voltava), `status` preenchido, escalação que não esconde ocorrências expostas, `pyproject` instalável
 - **Exemplos:** `input_examples/` e `output_examples/` (4 saídas, com trace), gerados por `scripts/gerar_exemplos.sh`
 - **avaliacao (pronto, commitado e3c95c9):** ablação offline A 22,2% / B 44,4% / C 62,1% / D 55,2%. Encontrou 7 bugs.
-- **agentes-llm (em andamento, sem commit):** corrigindo os 7 bugs da ablação (lista em eval/RELATORIO.md), com testes em `tests/test_regressao_ablacao.py`; depois roda a ablação offline de novo e `scripts/gerar_exemplos.sh`.
+- **agentes-llm (pronto, b97dfe7):** os 7 bugs da ablação (lista em eval/RELATORIO.md), com testes em `tests/test_regressao_ablacao.py`; depois roda a ablação offline de novo e `scripts/gerar_exemplos.sh`.
 - **docs-submissao (pronto, commitado):** README em inglês (com marcador `<!-- EVAL_RESULTS -->`), `docs/PATROCINADORES.md`, `docs/ROTEIRO-VIDEO.md`, `slides/conteudo.md`, `docs/FORMULARIO.md`
 
 ## Depois
-- **Lacunas de produto encontradas pela documentação:** (1) as memórias derivadas não são gravadas automaticamente no fim do período, só a `nota` e o eval chamam `gravar`; (2) nenhum exemplo em `output_examples/` chama o Analista; (3) a Ibéria não tem cache.
+- **Lacunas de produto:** (1) e (2) resolvidas (aprendizado automático, `scripts/demo_3_periodos.sh`, exemplo com o Analista). (3) A Ibéria continua sem cache.
 - Colar a tabela da ablação em `<!-- EVAL_RESULTS -->` (README) e nos `[[...]]` dos slides; colar um log real do Nemotron em `<!-- NEMOTRON_LOG_EXCERPT -->`
 - Ligar o Nightshift real e rodar a ablação no modo LLM
 - Ligar o Zetaris real: `scripts/setup_zetaris.py` e depois `run` sem `--sample`

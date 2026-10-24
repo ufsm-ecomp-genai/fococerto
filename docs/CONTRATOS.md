@@ -166,3 +166,9 @@ Implementações: `ClienteHMEM(base_url)` (HTTP, porta 7070) e `MemoriaLocal(cam
 - `exposta_sem_recurso` só é rígida se algum recurso que está numa ocorrência sem exposição chega à exposta dentro de `eta_max_h` (evidência: `liberaveis`, `liberaveis_em`); senão, a violação vira `exposta_nao_atendida` (não rígida).
 - `Ocorrencia.status` pode vir `None` quando a célula já existia (`periodos_seguidos > 1`) mas não há par no período anterior.
 - Citação incorreta nunca força escalação sozinha: o Crítico reescreve a justificativa a partir dos dados, e o plano final passa de novo pelo `checar_citacoes`.
+
+## 15. Aprendizado entre períodos
+- A CLI `run` chama `app.agents.aprendizado.plano_anterior` e depois `aprender_entre_periodos` antes de `executar_periodo` (a assinatura da seção 10 não muda). Fonte do plano de P-1: as decisões aprovadas (`repo.decisoes_salvas`, quando existir) ou então `<saida>/<regiao>/<P-1>/plano.json`.
+- As memórias geradas são `tipo="derivada"`, `fonte="aprendizado:<P-1>-><P>"`, com o id da célula e a localidade no texto. O evento é `memoria_gravada`. A geração é idempotente.
+- A lista do período é o top 15 mais até 5 ocorrências citadas pelo id numa derivada ativa de reforço (`memoria_lida.puxadas_por_memoria`), então o LLM pode ver até 20 ocorrências. Pela via `listar`, uma derivada só entra por célula ou localidade do período.
+- Risco conhecido: derivadas de texto parecido com números diferentes podem ser marcadas como conflito pelo engine. O `substituida_por` aparece no evento `memoria_gravada` para isso ficar visível.

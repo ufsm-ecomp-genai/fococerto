@@ -27,5 +27,28 @@ nome=tocantins-escasso-com-nota
 mkdir -p "output_examples/$nome"
 cp "$TMP/out-$nome/tocantins/2026-10-23/"{plano.json,plano.md,mapa.html} "output_examples/$nome/"
 cp "$TMP"/logs-"$nome"/*.jsonl "output_examples/$nome/trace.jsonl"
+# Analyst example: a small recurring burn far from people (Paranã, 24/10). The Critic asks the Analyst
+# "agricultural burn or vegetation fire?" before spending the only nearby resource on it. The input is the
+# eval scenario eval/cenarios/agricola_recorrente_parana_24out.yaml copied as a plain scenario (eval-only
+# fields removed: no answer key, no injected memories).
+rm -rf data/estado
+nome=tocantins-parana-analista
+"$PY" - eval/cenarios/agricola_recorrente_parana_24out.yaml "input_examples/$nome.yaml" <<'PYEOF'
+import sys, yaml
+src, dst = sys.argv[1:]
+d = yaml.safe_load(open(src, encoding="utf-8"))
+for k in ("id", "tipo", "titulo", "situacao_nos_dados", "como_verificamos", "injecao", "memorias_iniciais"):
+    d.pop(k, None)
+cab = ("# DADOS SIMULADOS (simulado: true): recursos e bases de demonstração (cidades reais do GeoNames, unidade\n"
+       "# não verificada). Focos, localidades e tempo são reais (cache FIRMS/GeoNames/Open-Meteo, 24/10/2026, dia parcial).\n"
+       "# Copiado de eval/cenarios/agricola_recorrente_parana_24out.yaml sem os campos de avaliação.\n")
+open(dst, "w", encoding="utf-8").write(cab + yaml.safe_dump(d, allow_unicode=True, sort_keys=False))
+PYEOF
+"$PY" -m app.cli run --sample --regiao tocantins --recursos "input_examples/$nome.yaml" \
+      --saida "$TMP/out-$nome" --pasta-logs "$TMP/logs-$nome" > /dev/null 2>&1
+mkdir -p "output_examples/$nome"
+cp "$TMP/out-$nome/tocantins/2026-10-24/"{plano.json,plano.md,mapa.html} "output_examples/$nome/"
+cp "$TMP"/logs-"$nome"/*.jsonl "output_examples/$nome/trace.jsonl"
+grep -q '"agente": "analista"' "output_examples/$nome/trace.jsonl" || { echo "erro: o Analista não foi chamado em $nome" >&2; exit 1; }
 rm -rf data/estado "$TMP"
 echo "ok: $(ls input_examples | wc -l) inputs, $(ls output_examples | wc -l) outputs"

@@ -7,7 +7,7 @@
     "modo": "offline",
     "simulado": true,
     "arquivo_cenario": "input_examples/tocantins-escasso.yaml",
-    "gerado_em": "2026-10-24T22:15:09.743101+00:00",
+    "gerado_em": "2026-10-24T22:27:12.200238+00:00",
     "aprovacao_humana": "pendente"
   },
   "plano": {
@@ -770,7 +770,7 @@
       "fonte": "coordenador:enzo",
       "confianca": 1.0,
       "supersedes": null,
-      "criada_em": "2026-10-24T22:15:07.880000Z"
+      "criada_em": "2026-10-24T22:27:10.533000Z"
     }
   ],
   "historico": [
@@ -1157,5 +1157,5 @@
     }
   ],
   "rodadas": 1,
-  "log_path": "/tmp/tmp.cvX2riRIju/logs-tocantins-escasso-com-nota/20261024T221509-5d2a21.jsonl"
+  "log_path": "/tmp/tmp.LsycRlDpnm/logs-tocantins-escasso-com-nota/20261024T222712-8e86b7.jsonl"
 }

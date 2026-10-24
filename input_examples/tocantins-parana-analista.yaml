@@ -1,0 +1,65 @@
+# DADOS SIMULADOS (simulado: true): recursos e bases de demonstração (cidades reais do GeoNames, unidade
+# não verificada). Focos, localidades e tempo são reais (cache FIRMS/GeoNames/Open-Meteo, 24/10/2026, dia parcial).
+# Copiado de eval/cenarios/agricola_recorrente_parana_24out.yaml sem os campos de avaliação.
+regiao: tocantins
+periodo: '2026-10-24'
+simulado: true
+reserva: 0
+notas: []
+bases:
+- id: sim_guarai
+  nome: Guaraí (simulada)
+  lat: -8.83417
+  lon: -48.51028
+  fonte: GeoNames 3398573
+  simulada: true
+- id: sim_gurupi
+  nome: Gurupi (simulada)
+  lat: -11.72917
+  lon: -49.06861
+  fonte: GeoNames 3461724
+  simulada: true
+- id: sim_miracema
+  nome: Miracema do Tocantins (simulada)
+  lat: -9.56722
+  lon: -48.39167
+  fonte: GeoNames 3394817
+  simulada: true
+- id: sim_paraiso
+  nome: Paraíso do Tocantins (simulada)
+  lat: -10.17611
+  lon: -48.86667
+  fonte: GeoNames 3479329
+  simulada: true
+- id: sim_parana
+  nome: Paranã (simulada)
+  lat: -12.61528
+  lon: -47.88306
+  fonte: GeoNames 3455079
+  simulada: true
+recursos:
+- id: paraiso-t1
+  base_id: sim_paraiso
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: miracema-t1
+  base_id: sim_miracema
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: guarai-t1
+  base_id: sim_guarai
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: gurupi-t1
+  base_id: sim_gurupi
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: parana-t1
+  base_id: sim_parana
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
