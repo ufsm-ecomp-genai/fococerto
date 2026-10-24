@@ -85,6 +85,12 @@ def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, mem
     log.evento("ferramenta", "consulta", {"consulta": "monitor", "anterior": ant, "n_atuais": len(ocorrencias),
                                           "status": {o.id: o.status for o in ocorrencias}})
     bases = repo.bases(regiao.nome)
+    ids_repo = {b.id for b in bases}
+    declaradas = [b for b in cenario.bases if b.id not in ids_repo]
+    if declaradas:
+        bases = bases + declaradas
+        log.evento("sistema", "inicio", {"bases_declaradas_no_cenario": [
+            {"id": b.id, "nome": b.nome, "simulada": b.simulada} for b in declaradas]})
     recursos = list(cenario.recursos)
     ids_bases = {b.id for b in bases}
     sem_base = [r.id for r in recursos if r.base_id not in ids_bases]

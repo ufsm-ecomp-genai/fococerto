@@ -94,7 +94,11 @@ def test_cenarios_da_demo_sao_validos_e_simulados():
     for a in arquivos:
         c = ler_cenario(a)
         assert c.simulado is True and c.regiao == "tocantins" and c.recursos
-        assert all(r.base_id.startswith("osm_") for r in c.recursos)
+        # toda base de recurso existe no cache (OSM) ou foi declarada no cenário
+        ids_cache = {l.split(",")[0] for l in (RAIZ / "data/cache/tocantins/bases.csv").read_text().splitlines()[1:]}
+        ids_declarados = {b.id for b in c.bases}
+        assert all(b.simulada for b in c.bases)
+        assert all(r.base_id in ids_cache | ids_declarados for r in c.recursos)
 
 
 # ----------------------------------------------------------------------------- CLI
@@ -168,7 +172,8 @@ def test_cli_run_aprovar_nota_com_stubs(monkeypatch, tmp_path, capsys):
     rc = cli.main(["run", "--regiao", "tocantins", "--recursos", str(RAIZ / "cenarios/tocantins-escasso.yaml"), *comum])
     assert rc == 0, capsys.readouterr().err
     assert chamadas["executar"] == {"modo": "offline", "repo": "RepositorioCache", "memoria": "MemoriaLocal"}
-    pasta = tmp_path / "out" / "tocantins" / "2026-10-24"
+    periodo = ler_cenario(RAIZ / "cenarios/tocantins-escasso.yaml").periodo
+    pasta = tmp_path / "out" / "tocantins" / periodo
     assert {p.name for p in pasta.iterdir()} == {"plano.json", "plano.md", "mapa.html"}
     md = (pasta / "plano.md").read_text()
     assert "RECURSOS SIMULADOS" in md and "tocantins-escasso.yaml" in md and "](../../../logs/" in md
@@ -178,7 +183,7 @@ def test_cli_run_aprovar_nota_com_stubs(monkeypatch, tmp_path, capsys):
     assert eventos[0] == "inicio" and eventos[-1] == "fim" and "proposta" in eventos
     assert "planejador: proposta" in capsys.readouterr().err  # progresso no terminal
 
-    rc = cli.main(["aprovar", "--regiao", "tocantins", "--periodo", "2026-10-24", "--autor", "coord", *comum])
+    rc = cli.main(["aprovar", "--regiao", "tocantins", "--periodo", periodo, "--autor", "coord", *comum])
     assert rc == 0
     plano, autor = chamadas["decisoes"]
     assert autor == "coord" and len(plano.designacoes) == 2

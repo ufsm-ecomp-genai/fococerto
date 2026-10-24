@@ -100,6 +100,11 @@ def checar_citacoes(plano: Plano, ocorrencias: list[Ocorrencia], bases: list[Bas
         # texto livre
         t = norm(d.justificativa)
         nomes_base = {norm(b.nome) for b in bases}
+        # o nome da base de saída ("saindo de Porto Nacional (simulada)") não é localidade citada
+        # nem o id do recurso ("dianopolis-t1")
+        ids_recurso = {norm(d.recurso_id)} | {norm(r.id) for r in (recursos or [])}
+        for nb in sorted(nomes_base | ids_recurso, key=len, reverse=True):
+            t = t.replace(nb, " ")
         for nome in todas_locs:
             n = norm(nome)
             if len(n) >= 4 and n not in locs and n not in nomes_base and contem_termo(t, nome):

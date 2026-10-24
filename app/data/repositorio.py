@@ -94,7 +94,7 @@ class RepositorioCache:
                                   passo_clima=d["passo_clima"])
 
     def bases(self, regiao: str) -> list[Base]:
-        return [Base(id=b["id"], nome=b["nome"], lat=b["lat"], lon=b["lon"]) for b in self._carregar(regiao)["bases"]]
+        return [Base(id=b["id"], nome=b["nome"], lat=b["lat"], lon=b["lon"], fonte=b.get("fonte", "")) for b in self._carregar(regiao)["bases"]]
 
     def historico_celula(self, ocorrencia_id: str, dias: int = 7) -> list[dict]:
         regiao = self._regiao_da_celula(ocorrencia_id)

@@ -32,6 +32,8 @@ class Base(BaseModel):
     nome: str
     lat: float
     lon: float
+    fonte: str = ""
+    simulada: bool = False  # declarada no cenário, sem verificação de que a unidade existe
 
 
 class Recurso(BaseModel):
@@ -112,6 +114,7 @@ class Cenario(BaseModel):
     regiao: str
     periodo: str
     recursos: list[Recurso]
+    bases: list[Base] = Field(default_factory=list)  # bases declaradas pelo coordenador, além das do repositório
     reserva: int = 0
     notas: list[str] = Field(default_factory=list)
     simulado: bool = True

@@ -112,6 +112,26 @@ def test_citacao_errada_no_texto_e_nas_evidencias():
     assert campos == ["dist", "dist_texto", "eta_texto", "localidade", "pop", "pop_texto"]
 
 
+def test_nome_da_base_de_saida_nao_e_localidade_citada():
+    # regressão: base com nome de cidade ("Ponte Alta (simulada)") que também é localidade de outra ocorrência
+    base = Base(id="pa", nome="Ponte Alta (simulada)", lat=-10.6, lon=-47.0, simulada=True)
+    occs = [oc("a", -10.1, -47.0, 0.9, pop=500, localidades=VILA),
+            oc("b", -10.6, -47.0, 0.5, localidades=[{"nome": "Ponte Alta", "pop": 200, "dist_km": 3.0}])]
+    recs = [rec("t1", "pa")]
+    p = alocador_simples(occs[:1], recs, [base], CFG, reserva=0)
+    assert "Ponte Alta (simulada)" in p.designacoes[0].justificativa
+    assert checar_citacoes(p, occs, [base], recursos=recs, regiao_cfg=CFG) == []
+
+
+def test_id_do_recurso_nao_e_localidade_citada():
+    # regressão: id "ponte-alta-t1" contém o nome de uma localidade de outra ocorrência
+    occs = [oc("a", -10.1, -47.0, 0.9, pop=500, localidades=VILA),
+            oc("b", -10.6, -47.0, 0.5, localidades=[{"nome": "Ponte Alta", "pop": 200, "dist_km": 3.0}])]
+    recs = [rec("ponte-alta-t1", "bn")]
+    p = alocador_simples(occs[:1], recs, [BN], CFG, reserva=0)
+    assert checar_citacoes(p, occs, [BN], recursos=recs, regiao_cfg=CFG) == []
+
+
 def test_citacao_eta_h_do_campo_errado():
     occs = [oc("a", -10.1, -47.0, 0.9)]
     d = Designacao(recurso_id="t1", ocorrencia_id="a", ordem=1, eta_h=4.0, justificativa="ok")

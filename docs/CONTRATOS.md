@@ -108,7 +108,9 @@ Uma linha por evento em `logs/<execucao_id>.jsonl`:
 ## 8. Configuração
 `config/regioes/<regiao>.yaml`: `bbox [lat_min, lat_max, lon_min, lon_max]`, `idioma`, `velocidade_kmh`, `fator_tortuosidade`, `raio_exposicao_km`, `eta_max_h`.
 
-`cenarios/<nome>.yaml`: `regiao`, `periodo`, `recursos: [{id, base_id, tipo, capacidade, disponivel}]`, `reserva`, `notas: [texto]`, `simulado: true`.
+`cenarios/<nome>.yaml`: `regiao`, `periodo`, `recursos: [{id, base_id, tipo, capacidade, disponivel}]`, `bases: [{id, nome, lat, lon, fonte, simulada}]` (opcional; as bases declaradas pelo coordenador são somadas às do repositório pelo grafo), `reserva`, `notas: [texto]`, `simulado: true`.
+
+Motivo das bases declaradas: o OSM tem só 2 bases de bombeiros dentro do Tocantins, as duas em Palmas. Como os recursos, as bases são informação que o coordenador tem, e não dado público. As bases da demo ficam em cidades reais do GeoNames e são marcadas `simulada: true`.
 
 ## 9. CLI
 ```
