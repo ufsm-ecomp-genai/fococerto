@@ -1,0 +1,116 @@
+# Contratos entre módulos
+
+Este arquivo é do **líder**. Mudanças só por pedido no relatório de um agente. Os tipos em Python ficam em `app/core/models.py` e devem seguir exatamente o que está aqui.
+
+## 1. Estrutura de pastas
+```
+app/core/        models.py (tipos), config.py (lê .env e YAML de região), logging.py (logger JSONL)
+app/data/        repositorio.py: acesso a dados (Zetaris ou cache), insere decisões e notas no Postgres
+app/tools/       monitor, checar_regras, checar_citacoes, alocador_simples, consultar
+app/llm/         client.py: Nightshift | offline
+app/agents/      planejador.py, critico.py, analista.py, grafo.py (LangGraph)
+app/memory_client.py   cliente HTTP do serviço H-MEM (+ versão em memória para o sample mode)
+app/output/      templates Markdown e JSON, gerador do mapa
+app/cli.py       ponto de entrada
+services/hmem/   serviço TypeScript do H-MEM
+sql/             DDL do Postgres e views do Zetaris
+scripts/         ingest_firms.py, ingest_geonames.py, ingest_osm.py, setup_zetaris.py
+config/regioes/  <regiao>.yaml
+cenarios/        recursos por cenário (YAML)
+eval/            ablação: cenarios/, gabaritos/, run_ablacao.py, resultados/
+data/cache/      dados congelados para o sample mode (pequenos; o repositório tem que ficar leve)
+```
+
+## 2. Tipos (app/core/models.py, pydantic)
+```python
+class Ocorrencia:      id: str  # "cel_<lat10>_<lon10>"
+                       lat: float; lon: float; n_focos: int; frp_soma: float; frp_max: float
+                       primeiro: datetime; ultimo: datetime; periodos_seguidos: int
+                       status: Literal["nova","crescendo","estavel","diminuindo"] | None
+                       pop_raio: int; dist_ti_uc_km: float | None; vpd_kpa: float | None; vento_kmh: float | None
+                       prioridade: float; componentes: dict[str, float]   # exposicao, intensidade, tempo, ...
+                       localidades: list[dict]   # [{nome, pop, dist_km}]
+class Base:            id: str; nome: str; lat: float; lon: float
+class Recurso:         id: str; base_id: str; tipo: Literal["terrestre","aereo"]; capacidade: int; disponivel: bool
+class Designacao:      recurso_id: str; ocorrencia_id: str; ordem: int; eta_h: float; justificativa: str
+                       evidencias: list[str]   # ids de focos, "pop:...", "eta:..."
+class Plano:           periodo: str; regiao: str; designacoes: list[Designacao]; reserva: list[str]
+                       nao_atendidas: list[str]; resumo: str; rodada: int
+class Violacao:        regra: str; ocorrencia_id: str | None; recurso_id: str | None
+                       evidencia: dict; sugestao: str; rigida: bool
+class ParecerAnalista: ocorrencia_id: str; pergunta: str
+                       conclusao: Literal["queima_agricola_provavel","incendio_vegetacao_provavel","indeterminado"]
+                       confianca: Literal["baixa","media","alta"]; evidencias: list[str]; consultas: list[str]
+class VeredictoCritico: decisao: Literal["aprova","rejeita","escala"]; motivos: list[str]
+                       contra_proposta: Plano | None; pedir_analista: list[str]   # ids de ocorrências
+class Memoria:         id: str; regiao: str; texto: str; tipo: Literal["derivada","nota"]
+                       fonte: str; confianca: float; supersedes: str | None; criada_em: datetime
+```
+
+Também em `models.py`: `RegiaoCfg` (o YAML de região, seção 8) e `Cenario` (o YAML de cenário). Para lê-los, use `app/core/config.py`: `regiao(nome)` e `cenario(caminho)`. O logger fica em `app/core/logging.py`: `LogExecucao(regiao, periodo).evento(agente, evento, dados, modelo=…, routed_model=…, receipt=…, tokens=…, latencia_s=…)`.
+
+## 3. Dados (o que o repositório entrega)
+`app/data/repositorio.py`:
+```python
+class Repositorio(Protocol):
+    def ocorrencias(self, regiao: str, periodo: str, top: int = 15) -> list[Ocorrencia]
+    def bases(self, regiao: str) -> list[Base]
+    def historico_celula(self, ocorrencia_id: str, dias: int = 7) -> list[dict]   # por dia: n_focos, frp, dia_noite
+    def salvar_decisoes(self, plano: Plano, aprovado_por: str) -> None             # Postgres direto
+    def salvar_nota(self, regiao: str, periodo: str, texto: str, autor: str) -> None
+```
+Duas implementações: `RepositorioZetaris` (REST do Zetaris + Postgres) e `RepositorioCache` (lê `data/cache/`).
+
+As views do Zetaris se chamam `ocorrencias`, `ocorrencias_contexto` e `ocorrencias_prioridade`, com as colunas de `Ocorrencia`.
+
+## 4. LLM (app/llm/client.py)
+```python
+def chat(messages: list[dict], papel: str, json_schema: dict | None = None) -> LLMResult
+class LLMResult: texto: str; json: dict | None; modelo: str; routed_model: str | None
+                 receipt: str | None; tokens: int | None; latencia_s: float
+```
+- Provider por variável de ambiente: `LLM_PROVIDER=nightshift|offline`.
+- Nightshift: compatível com OpenAI em `METERLESS_BASE_URL`, com o token `METERLESS_RUNTIME_TOKEN`.
+- `offline`: **não chama LLM**. Os agentes usam a própria lógica determinística (cada agente implementa `decidir_offline()`).
+- Toda chamada é registrada no log com `modelo`, `routed_model` e `receipt`.
+
+## 5. H-MEM (serviço HTTP, porta 7070)
+```
+GET  /health                                   -> {ok: true}
+POST /memorias   {regiao, texto, tipo, fonte, confianca, supersedes?}  -> Memoria
+POST /recall     {regiao, consulta, k}         -> {memorias: [Memoria], substituidas: [Memoria]}
+GET  /memorias?regiao=..                       -> [Memoria]   (para auditoria)
+```
+- A resolução de conflito e o *supersedes* seguem a semântica do engine de referência.
+- `app/memory_client.py` expõe as mesmas operações, com uma versão `MemoriaLocal` em memória para o sample mode e os testes.
+
+## 6. Ferramentas (app/tools/)
+```python
+monitor(atuais: list[Ocorrencia], anteriores: list[Ocorrencia]) -> list[Ocorrencia]   # preenche status
+checar_regras(plano: Plano, ocorrencias, recursos, bases, regiao_cfg, memorias) -> list[Violacao]
+checar_citacoes(plano: Plano, ocorrencias, bases) -> list[Violacao]                   # regra="citacao_incorreta"
+alocador_simples(ocorrencias, recursos, bases, regiao_cfg, reserva: int) -> Plano
+eta_h(lat1, lon1, lat2, lon2, regiao_cfg) -> float   # haversine × tortuosidade ÷ velocidade
+```
+
+## 7. Log JSONL (app/core/logging.py)
+Uma linha por evento em `logs/<execucao_id>.jsonl`:
+```json
+{"t":"ISO8601","execucao":"…","regiao":"…","periodo":"…","agente":"planejador|critico|analista|ferramenta|sistema",
+ "evento":"inicio|proposta|violacao|rejeita|aprova|escala|consulta|memoria_lida|memoria_gravada|llm_call|fim",
+ "dados":{…},"modelo":null,"routed_model":null,"receipt":null,"tokens":null,"latencia_s":null}
+```
+
+## 8. Configuração
+`config/regioes/<regiao>.yaml`: `bbox [lat_min, lat_max, lon_min, lon_max]`, `idioma`, `velocidade_kmh`, `fator_tortuosidade`, `raio_exposicao_km`, `eta_max_h`.
+
+`cenarios/<nome>.yaml`: `regiao`, `periodo`, `recursos: [{id, base_id, tipo, capacidade, disponivel}]`, `reserva`, `notas: [texto]`, `simulado: true`.
+
+## 9. CLI
+```
+python -m app.cli run --regiao R --periodo P --recursos cenarios/X.yaml [--sample]
+python -m app.cli nota --regiao R "texto"
+python -m app.cli aprovar --regiao R --periodo P
+python -m app.cli avaliar --regiao R
+```
+Saídas em `out/<regiao>/<periodo>/`: `plano.json`, `plano.md`, `mapa.html`.

@@ -1,0 +1,10 @@
+.env
+.env.local
+.venv/
+node_modules/
+__pycache__/
+*.pyc
+logs/*.jsonl
+out/
+data/raw/
+.pytest_cache/
