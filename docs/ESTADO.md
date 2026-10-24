@@ -25,11 +25,13 @@
 - **qa-integracao (pronto):** 44 testes de integração e anti-trapaça, Docker (build e run testados), `.env.example`, `scripts/check_clean_clone.sh`, `scripts/check_submissao.py`
 - **Correções do líder (commitadas):** recall do H-MEM com uma consulta por termo (a nota não voltava), `status` preenchido, escalação que não esconde ocorrências expostas, `pyproject` instalável
 - **Exemplos:** `input_examples/` e `output_examples/` (4 saídas, com trace), gerados por `scripts/gerar_exemplos.sh`
-- **avaliacao (em andamento):** cenários e gabaritos commitados ANTES de rodar (fcf42df); faltam `eval/run_ablacao.py`, `eval/RELATORIO.md` e `tests/test_eval.py`. Se interrompido: retomar e rodar a ablação offline com o código atual.
-- **docs-submissao (em andamento):** README em inglês (com marcador `<!-- EVAL_RESULTS -->`), `docs/PATROCINADORES.md`, `docs/ROTEIRO-VIDEO.md`, `slides/conteudo.md`, `docs/FORMULARIO.md`
+- **avaliacao (pronto, commitado e3c95c9):** ablação offline A 22,2% / B 44,4% / C 62,1% / D 55,2%. Encontrou 7 bugs.
+- **agentes-llm (em andamento, sem commit):** corrigindo os 7 bugs da ablação (lista em eval/RELATORIO.md), com testes em `tests/test_regressao_ablacao.py`; depois roda a ablação offline de novo e `scripts/gerar_exemplos.sh`.
+- **docs-submissao (pronto, commitado):** README em inglês (com marcador `<!-- EVAL_RESULTS -->`), `docs/PATROCINADORES.md`, `docs/ROTEIRO-VIDEO.md`, `slides/conteudo.md`, `docs/FORMULARIO.md`
 
 ## Depois
-- docs-submissao: README (em inglês), patrocinadores, roteiro do vídeo, slides (depois da ablação)
+- **Lacunas de produto encontradas pela documentação:** (1) as memórias derivadas não são gravadas automaticamente no fim do período, só a `nota` e o eval chamam `gravar`; (2) nenhum exemplo em `output_examples/` chama o Analista; (3) a Ibéria não tem cache.
+- Colar a tabela da ablação em `<!-- EVAL_RESULTS -->` (README) e nos `[[...]]` dos slides; colar um log real do Nemotron em `<!-- NEMOTRON_LOG_EXCERPT -->`
 - Ligar o Nightshift real e rodar a ablação no modo LLM
 - Ligar o Zetaris real: `scripts/setup_zetaris.py` e depois `run` sem `--sample`
 
@@ -37,3 +39,6 @@
 - [ ] Zetaris rodando na máquina do time + `.env`
 - [ ] Nightshift: roda sem GPU dedicada? Porta 8088 acessível? Onde vêm o `routed_model` e o `receipt`?
 - [ ] Respostas do Help Meterless (seção 19 da especificação)
+
+## Infraestrutura (24/10, noite)
+- O professor não respondeu. Plano B: servidor pessoal Debian 13 (12 threads, 15 GB, KVM, AMD RX 550, Tailscale 100.70.74.48). Passos: Docker → Zetaris → VM Windows 11 de avaliação para o Nightshift (teste: pode não rodar sem GPU NVIDIA) → opção C (provedor Runtime + Nemotron hospedado; elegível segundo a resposta da Meterless em chat5:1642, mas provavelmente perde o prêmio NVIDIA).
