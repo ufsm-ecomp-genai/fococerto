@@ -1,0 +1,35 @@
+# DADOS SIMULADOS (simulado: true): recursos e bases de demonstração, não um inventário real.
+# A única base real usada é o 1º Batalhão de Bombeiros Militar em Palmas (OpenStreetMap node/5067657890).
+# O OSM tem só 2 bases dentro do Tocantins (as duas em Palmas). As demais bases ficam em cidades reais
+# e são declaradas pelo coordenador, como os recursos, marcadas com simulada: true.
+# Cenário FOLGADO: 16 recursos, reserva de 2.
+regiao: tocantins
+periodo: "2026-10-23"
+simulado: true
+reserva: 2
+notas: []
+bases:  # SIMULADAS: cidades reais (GeoNames), presença de unidade de combate não verificada
+  - {id: sim_porto_nacional, nome: "Porto Nacional (simulada)",        lat: -10.70806, lon: -48.41722, fonte: "GeoNames 3452711", simulada: true}
+  - {id: sim_paraiso,        nome: "Paraíso do Tocantins (simulada)",  lat: -10.17611, lon: -48.86667, fonte: "GeoNames 3479329", simulada: true}
+  - {id: sim_gurupi,         nome: "Gurupi (simulada)",                lat: -11.72917, lon: -49.06861, fonte: "GeoNames 3461724", simulada: true}
+  - {id: sim_dianopolis,     nome: "Dianópolis (simulada)",            lat: -11.62778, lon: -46.82056, fonte: "GeoNames 3464720", simulada: true}
+  - {id: sim_mateiros,       nome: "Mateiros/Jalapão (simulada)",      lat: -10.54750, lon: -46.42111, fonte: "GeoNames 6317561", simulada: true}
+  - {id: sim_taguatinga,     nome: "Taguatinga (simulada)",            lat: -12.40389, lon: -46.43611, fonte: "GeoNames 3447075", simulada: true}
+  - {id: sim_miracema,       nome: "Miracema do Tocantins (simulada)", lat: -9.56722,  lon: -48.39167, fonte: "GeoNames 3394817", simulada: true}
+recursos:
+  - {id: palmas-t1,     base_id: osm_n5067657890,    tipo: terrestre, capacidade: 1, disponivel: true}
+  - {id: palmas-t2,     base_id: osm_n5067657890,    tipo: terrestre, capacidade: 1, disponivel: true}
+  - {id: palmas-t3,     base_id: osm_n5067657890,    tipo: terrestre, capacidade: 1, disponivel: true}
+  - {id: palmas-a1,     base_id: osm_n5067657890,    tipo: aereo,     capacidade: 1, disponivel: true}
+  - {id: palmas-a2,     base_id: osm_n5067657890,    tipo: aereo,     capacidade: 1, disponivel: true}
+  - {id: portonac-t1,   base_id: sim_porto_nacional, tipo: terrestre, capacidade: 1, disponivel: true}
+  - {id: portonac-t2,   base_id: sim_porto_nacional, tipo: terrestre, capacidade: 1, disponivel: true}
+  - {id: paraiso-t1,    base_id: sim_paraiso,        tipo: terrestre, capacidade: 1, disponivel: true}
+  - {id: gurupi-t1,     base_id: sim_gurupi,         tipo: terrestre, capacidade: 1, disponivel: true}
+  - {id: gurupi-t2,     base_id: sim_gurupi,         tipo: terrestre, capacidade: 1, disponivel: true}
+  - {id: dianopolis-t1, base_id: sim_dianopolis,     tipo: terrestre, capacidade: 1, disponivel: true}
+  - {id: dianopolis-t2, base_id: sim_dianopolis,     tipo: terrestre, capacidade: 1, disponivel: true}
+  - {id: mateiros-t1,   base_id: sim_mateiros,       tipo: terrestre, capacidade: 1, disponivel: true}
+  - {id: mateiros-t2,   base_id: sim_mateiros,       tipo: terrestre, capacidade: 1, disponivel: true}
+  - {id: taguatinga-t1, base_id: sim_taguatinga,     tipo: terrestre, capacidade: 1, disponivel: true}
+  - {id: miracema-t1,   base_id: sim_miracema,       tipo: terrestre, capacidade: 1, disponivel: true}
