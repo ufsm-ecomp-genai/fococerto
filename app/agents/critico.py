@@ -117,6 +117,16 @@ def decidir_offline(ctx: Contexto, plano: Plano, violacoes: list[Violacao], roda
                                f"mas {d2.recurso_id} (em {o2.id}, sem exposição) chegaria em {eta_alt:.1f} h.")
                 break
 
+    # ocorrências expostas sem recurso: entram em TODA escalação, para o coordenador não perdê-las de vista
+    esc_expostas: list[str] = []
+    for v in violacoes:
+        if v.regra == "exposta_nao_atendida":
+            esc_expostas.append(f"Escalação: {v.ocorrencia_id} tem {v.evidencia.get('pop_raio')} hab. expostos e os "
+                                f"recursos viáveis estão em outras ocorrências com população ou na reserva.")
+        elif v.regra in INSOLUVEIS:
+            esc_expostas.append(f"Escalação obrigatória: {v.ocorrencia_id} tem {v.evidencia.get('pop_raio')} hab. "
+                                f"expostos e nenhum recurso chega em até {v.evidencia.get('eta_max_h')} h.")
+
     if proibidos or rebaixar or rigidas or tradeoff:
         cp = realocar(ctx, rodada, proibidos=proibidos, bases_bloqueadas=bb, rotas_bloqueadas=rb, rebaixar=rebaixar,
                       resumo_prefixo="Contra-proposta do Crítico (offline).")
@@ -124,24 +134,17 @@ def decidir_offline(ctx: Contexto, plano: Plano, violacoes: list[Violacao], roda
         if excecoes and expostas_perdidas:
             return VeredictoCritico(decisao="escala", contra_proposta=cp, motivos=motivos + [
                 f"Escalação: respeitar a memória deixa {', '.join(expostas_perdidas)} (com população) sem recurso "
-                f"viável; decisão humana sobre usar a rota."])
+                f"viável; decisão humana sobre usar a rota."] + esc_expostas)
         if pares(cp) != pares(plano):
             return VeredictoCritico(decisao="rejeita", contra_proposta=cp, motivos=motivos)
         if rigidas:
             return VeredictoCritico(decisao="escala", motivos=motivos + [
-                "Escalação: não encontrei plano alternativo que resolva as regras rígidas."])
+                "Escalação: não encontrei plano alternativo que resolva as regras rígidas."] + esc_expostas)
         motivos.append("Revisão não muda o plano.")
 
     # (3) escalação em zona cinzenta e obrigatória
-    for v in violacoes:
-        if v.regra == "exposta_nao_atendida":
-            motivos.append(f"Escalação: {v.ocorrencia_id} tem {v.evidencia.get('pop_raio')} hab. expostos e os "
-                           f"recursos viáveis estão em outras ocorrências com população ou na reserva.")
-        elif v.regra in INSOLUVEIS:
-            motivos.append(f"Escalação obrigatória: {v.ocorrencia_id} tem {v.evidencia.get('pop_raio')} hab. expostos "
-                           f"e nenhum recurso chega em até {v.evidencia.get('eta_max_h')} h.")
-    if any(v.regra == "exposta_nao_atendida" or v.regra in INSOLUVEIS for v in violacoes):
-        return VeredictoCritico(decisao="escala", motivos=motivos)
+    if esc_expostas:
+        return VeredictoCritico(decisao="escala", motivos=motivos + esc_expostas)
     return VeredictoCritico(decisao="aprova", motivos=motivos or ["Sem violações nem zona cinzenta relevante."])
 
 

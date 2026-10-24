@@ -100,11 +100,20 @@ def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, mem
 
     memorias: list[Memoria] = []
     if usar_memoria:
-        termos = ["estrada", "rota", "base", "reserva", "cresceu", "reignição"] + [b.nome for b in bases] + \
+        # O recall do H-MEM compara palavras: uma consulta enorme dilui a similaridade abaixo do limiar.
+        # Por isso, uma consulta por termo (nome de base sem o sufixo, localidade, célula), juntando os resultados.
+        nomes_base = [p.strip() for b in bases for p in re.sub(r"\(.*?\)", "", b.nome).split("/")]
+        termos = ["estrada", "rota", "reserva", "cresceu", "reignição"] + nomes_base + \
                  [l.get("nome", "") for o in ocorrencias for l in o.localidades[:2]] + [o.id for o in ocorrencias]
         try:
-            ativas, substituidas = memoria.recall(regiao.nome, " ".join(t for t in termos if t), k=10)
-            memorias = [m for m in ativas if m.regiao == regiao.nome]
+            ativas_por_id: dict[str, Memoria] = {}
+            subst_por_id: dict[str, Memoria] = {}
+            for termo in dict.fromkeys(t for t in termos if t and len(t) >= 3):
+                a, s = memoria.recall(regiao.nome, termo, k=5)
+                ativas_por_id.update({m.id: m for m in a})
+                subst_por_id.update({m.id: m for m in s})
+            substituidas = list(subst_por_id.values())
+            memorias = [m for m in ativas_por_id.values() if m.regiao == regiao.nome and m.id not in subst_por_id]
             log.evento("sistema", "memoria_lida", {
                 "ativas": [resumo_memoria(m) for m in memorias],
                 "substituidas": [resumo_memoria(m) for m in substituidas]})
@@ -257,7 +266,7 @@ def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, mem
     log.evento("sistema", "fim", {"status": final["status"], "rodadas": final["rodada"],
                                   "designacoes": len(plano.designacoes), "escalacoes": final["escalacoes"],
                                   "pareceres": sorted(pareceres), "modo": rotulo_modo})
-    return ResultadoPeriodo(plano=plano, ocorrencias=ocorrencias, bases=bases, recursos=recursos,
+    return ResultadoPeriodo(plano=plano, status=final["status"], ocorrencias=ocorrencias, bases=bases, recursos=recursos,
                             escalacoes=final["escalacoes"], pareceres=list(pareceres.values()),
                             memorias_usadas=memorias, historico=final["historico"], rodadas=final["rodada"],
                             log_path=str(log.caminho))

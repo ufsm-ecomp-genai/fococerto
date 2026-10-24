@@ -1,0 +1,15 @@
+.git
+.env
+.env.*
+!.env.example
+.venv
+**/__pycache__
+**/*.pyc
+.pytest_cache
+**/node_modules
+logs/*.jsonl
+out/
+data/raw/
+data/estado/
+services/hmem/data/
+.claude/
