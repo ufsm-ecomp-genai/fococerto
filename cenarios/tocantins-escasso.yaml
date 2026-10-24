@@ -1,0 +1,18 @@
+# DADOS SIMULADOS (simulado: true). Recursos de demonstração, não um inventário real.
+# Bases: ids PLACEHOLDER no formato osm_<id>. As bases OSM reais ainda estão sendo baixadas
+# pelo agente dados-zetaris: substituir pelos ids reais de data/cache após a ingestão
+# (bombeiros/brigadas próximos de Palmas, Porto Nacional, Paraíso do Tocantins, Gurupi,
+#  Araguaína, Dianópolis e Mateiros/Jalapão).
+# Cenário ESCASSO: 6 recursos para muitas ocorrências simultâneas (o caso da demo).
+regiao: tocantins
+periodo: "2026-10-24"
+simulado: true
+reserva: 0
+notas: []
+recursos:
+  - {id: palmas-t1,     base_id: osm_pendente_palmas,         tipo: terrestre, capacidade: 1, disponivel: true}
+  - {id: palmas-a1,     base_id: osm_pendente_palmas,         tipo: aereo,     capacidade: 1, disponivel: true}
+  - {id: portonac-t1,   base_id: osm_pendente_porto_nacional, tipo: terrestre, capacidade: 1, disponivel: true}
+  - {id: paraiso-t1,    base_id: osm_pendente_paraiso,        tipo: terrestre, capacidade: 1, disponivel: true}
+  - {id: dianopolis-t1, base_id: osm_pendente_dianopolis,     tipo: terrestre, capacidade: 1, disponivel: true}
+  - {id: mateiros-t1,   base_id: osm_pendente_mateiros,       tipo: terrestre, capacidade: 1, disponivel: true}

@@ -8,3 +8,4 @@ logs/*.jsonl
 out/
 data/raw/
 .pytest_cache/
+data/estado/

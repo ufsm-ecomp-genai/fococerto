@@ -109,11 +109,12 @@ Uma linha por evento em `logs/<execucao_id>.jsonl`:
 ## 9. CLI
 ```
 python -m app.cli run --regiao R --periodo P --recursos cenarios/X.yaml [--sample]
-python -m app.cli nota --regiao R "texto"
+python -m app.cli nota --regiao R [--periodo P] [--autor A] "texto"
 python -m app.cli aprovar --regiao R --periodo P
 python -m app.cli avaliar --regiao R
 ```
-Saídas em `out/<regiao>/<periodo>/`: `plano.json`, `plano.md`, `mapa.html`.
+Saídas em `out/<regiao>/<periodo>/`: `plano.json` (`{"meta": {...}, ...ResultadoPeriodo}`, com o plano na chave `"plano"`; é o que o `aprovar` lê), `plano.md`, `mapa.html`.
+Construtores usados pela CLI: `RepositorioCache()`, `RepositorioZetaris()` (configuração por variáveis de ambiente), `MemoriaLocal()`, `ClienteHMEM(HMEM_URL)`.
 
 ## 10. Execução de um período (a interface entre os agentes e a CLI)
 `app/agents/grafo.py` (dono: `agentes-llm`):
@@ -124,7 +125,7 @@ def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio,
                      usar_critico_llm: bool = True, usar_memoria: bool = True) -> ResultadoPeriodo
 ```
 - `usar_critico_llm` e `usar_memoria` existem para a ablação: a variante B usa `usar_critico_llm=False`, e a D usa `usar_memoria=False`.
-- `ResultadoPeriodo` está em `app/core/models.py`.
+- `ResultadoPeriodo` está em `app/core/models.py`. `executar_periodo` deve preencher `log_path` com `str(log.caminho)`.
 
 ## 11. Cliente de memória em Python (app/memory_client.py, dono: `hmem-engine`)
 ```python
