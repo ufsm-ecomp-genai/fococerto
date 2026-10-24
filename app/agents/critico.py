@@ -9,8 +9,9 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from app.agents.base import (Contexto, SaidaInvalida, SaidaPlano, chamar_json, dados_comuns, pares, plano_de_saida,
-                             realocar, registrar_fallback, resumo_plano, validar_ids)
+from app.agents.base import (CONFIANCA_MIN_MEMORIA, Contexto, SaidaInvalida, SaidaPlano, chamar_json, dados_comuns,
+                             pares, plano_de_saida, realocar, reescrever_citacoes, registrar_fallback, resumo_plano,
+                             validar_ids)
 from app.core.logging import LogExecucao
 from app.core.models import Plano, VeredictoCritico, Violacao
 from app.llm.client import LLMIndisponivel
@@ -18,7 +19,6 @@ from app.tools.geo import exposta
 from app.tools.regras import INSOLUVEIS
 
 PAPEL = "critico"
-CONFIANCA_MIN_MEMORIA = 0.5   # memória abaixo disso não justifica exceção
 FRACAO_ETA_TRADEOFF = 0.5     # exposta com ETA acima de 50% do limite é candidata a troca
 GANHO_ETA_TRADEOFF_H = 1.0    # troca só se outro recurso chega ≥ 1 h antes
 MAX_ANALISTA = 3
@@ -64,8 +64,11 @@ def decidir_offline(ctx: Contexto, plano: Plano, violacoes: list[Violacao], roda
             motivos.append(f"Memória {v.evidencia.get('memoria_id')} tem confiança {conf:.2f} < "
                            f"{CONFIANCA_MIN_MEMORIA}: designação {v.recurso_id}→{v.ocorrencia_id} mantida.")
 
-    # regras rígidas solúveis
+    # regras rígidas solúveis. Citação incorreta não muda a alocação: o texto é reescrito a partir dos dados
+    # (mais abaixo) e nunca, sozinha, força escalação.
     rigidas = [v for v in violacoes if v.rigida and v.regra not in INSOLUVEIS]
+    citacoes = [v for v in rigidas if v.regra == "citacao_incorreta"]
+    rig_alocacao = [v for v in rigidas if v.regra != "citacao_incorreta"]
     for v in rigidas:
         motivos.append(f"Regra rígida {v.regra} ({v.ocorrencia_id or ''} {v.recurso_id or ''}): {v.sugestao}.")
         if v.recurso_id and v.ocorrencia_id and v.regra in ("eta_acima_limite", "recurso_indisponivel",
@@ -90,7 +93,13 @@ def decidir_offline(ctx: Contexto, plano: Plano, violacoes: list[Violacao], roda
             if par is None or exposta(o):
                 continue
             longe = o.dist_ti_uc_km is None or o.dist_ti_uc_km > 5.0
-            if par.conclusao == "queima_agricola_provavel" and par.confianca in ("media", "alta") and longe:
+            mem = leitura.reforcos.get(oid)
+            if (par.conclusao == "queima_agricola_provavel" and mem is not None
+                    and mem.confianca >= CONFIANCA_MIN_MEMORIA):
+                motivos.append(f"Analista: {oid} parece queima agrícola ({par.confianca}), mas a memória {mem.id} "
+                               f"(\"{mem.texto[:160]}\", confiança {mem.confianca:.2f}) diz que este fogo já "
+                               f"reacendeu/cresceu: não rebaixo, designação mantida.")
+            elif par.conclusao == "queima_agricola_provavel" and par.confianca in ("media", "alta") and longe:
                 rebaixar.add(oid)
                 motivos.append(f"Analista: {oid} é queima agrícola provável (confiança {par.confianca}); o recurso "
                                f"rende mais em ocorrência não atendida.")
@@ -127,7 +136,7 @@ def decidir_offline(ctx: Contexto, plano: Plano, violacoes: list[Violacao], roda
             esc_expostas.append(f"Escalação obrigatória: {v.ocorrencia_id} tem {v.evidencia.get('pop_raio')} hab. "
                                 f"expostos e nenhum recurso chega em até {v.evidencia.get('eta_max_h')} h.")
 
-    if proibidos or rebaixar or rigidas or tradeoff:
+    if proibidos or rebaixar or rig_alocacao or tradeoff:
         cp = realocar(ctx, rodada, proibidos=proibidos, bases_bloqueadas=bb, rotas_bloqueadas=rb, rebaixar=rebaixar,
                       resumo_prefixo="Contra-proposta do Crítico (offline).")
         expostas_perdidas = [oid for oid in designadas if exposta(occ[oid]) and oid in cp.nao_atendidas]
@@ -137,10 +146,20 @@ def decidir_offline(ctx: Contexto, plano: Plano, violacoes: list[Violacao], roda
                 f"viável; decisão humana sobre usar a rota."] + esc_expostas)
         if pares(cp) != pares(plano):
             return VeredictoCritico(decisao="rejeita", contra_proposta=cp, motivos=motivos)
-        if rigidas:
-            return VeredictoCritico(decisao="escala", motivos=motivos + [
-                "Escalação: não encontrei plano alternativo que resolva as regras rígidas."] + esc_expostas)
+        if rig_alocacao:
+            return VeredictoCritico(decisao="escala", contra_proposta=reescrever_citacoes(ctx, plano, citacoes),
+                                    motivos=motivos + ["Escalação: não encontrei plano alternativo que resolva as "
+                                                       "regras rígidas."] + esc_expostas)
         motivos.append("Revisão não muda o plano.")
+
+    if citacoes:  # mesma alocação, justificativas reescritas a partir dos dados; volta ao Planejador
+        cp = reescrever_citacoes(ctx, plano, citacoes)
+        alvo = sorted({f"{v.recurso_id}→{v.ocorrencia_id}" for v in citacoes})
+        return VeredictoCritico(decisao="rejeita", contra_proposta=cp.model_copy(update={
+            "rodada": rodada, "resumo": ("Contra-proposta do Crítico (offline): justificativas reescritas a partir "
+                                         "dos dados. " + plano.resumo).strip()}),
+            motivos=motivos + [f"Citação incorreta em {', '.join(alvo)}: reescrevo a justificativa a partir dos "
+                               f"dados; a alocação fica igual."])
 
     # (3) escalação em zona cinzenta e obrigatória
     if esc_expostas:

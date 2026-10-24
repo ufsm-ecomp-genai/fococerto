@@ -47,7 +47,12 @@ def checar_citacoes(plano: Plano, ocorrencias: list[Ocorrencia], bases: list[Bas
         o = occ.get(d.ocorrencia_id)
         if o is None:
             continue
-        locs = {norm(l["nome"]): l for l in o.localidades if l.get("nome")}
+        # nome -> todas as localidades com esse nome (há homônimas na mesma ocorrência, ex. dois pontos do
+        # GeoNames com o mesmo nome a 10,4 e 14,3 km): a citação vale se bater com qualquer uma delas
+        locs: dict[str, list[dict]] = {}
+        for l in o.localidades:
+            if l.get("nome"):
+                locs.setdefault(norm(l["nome"]), []).append(l)
         pops_validas = [o.pop_raio] + [int(l.get("pop", 0) or 0) for l in o.localidades]
         base = None
         r = rec.get(d.recurso_id)
@@ -89,11 +94,15 @@ def checar_citacoes(plano: Plano, ocorrencias: list[Ocorrencia], bases: list[Bas
                         vs.append(_v(d, "ti_uc", valor, o.dist_ti_uc_km, "conferir a distância até TI/UC"))
                 elif chave in ("loc", "dist"):
                     nome, _, km = valor.partition(":")
-                    l = locs.get(norm(nome))
-                    if l is None:
+                    homonimas = locs.get(norm(nome))
+                    if not homonimas:
                         vs.append(_v(d, "localidade", nome, sorted(locs), "citar só localidades no raio desta ocorrência"))
-                    elif chave == "dist" and km and not _perto(float(km), float(l.get("dist_km", 0)), 0.15, 1):
-                        vs.append(_v(d, "dist", f"{nome}:{km}", l.get("dist_km"), f"{nome} fica a {l.get('dist_km')} km"))
+                    elif chave == "dist" and km and not any(
+                            _perto(float(km), float(l.get("dist_km", 0) or 0), 0.15, 1) for l in homonimas):
+                        reais = [l.get("dist_km") for l in homonimas]
+                        real = reais[0] if len(reais) == 1 else reais
+                        vs.append(_v(d, "dist", f"{nome}:{km}", real,
+                                     f"{nome} fica a {' ou '.join(str(x) for x in reais)} km"))
             except ValueError:
                 vs.append(_v(d, chave, valor, None, "evidência mal formatada"))
 

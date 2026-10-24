@@ -8,7 +8,7 @@ import re
 from dataclasses import dataclass, field
 
 from app.core.models import Base, Memoria, Ocorrencia
-from app.tools.texto import contem_termo, norm, tokens_nome
+from app.tools.texto import contem_termo, norm, sem_sufixo_simulada, tokens_nome
 
 BLOQUEIO = re.compile(r"alagad|bloquead|interditad|intransitavel|inacessivel|fechad|sem acesso|ponte caiu|atolad")
 LIBERACAO = re.compile(r"liberad|reabert|desbloquead|normalizad|(?<!in)transitavel|desimpedid")
@@ -26,10 +26,25 @@ class LeituraMemorias:
     aplicadas: list[str] = field(default_factory=list)                        # ids de memórias que casaram
 
 
-def _bases_citadas(t: str, bases: list[Base]) -> list[Base]:
+def tokens_distintivos(bases: list[Base], ignorar: set[str]) -> dict[str, list[str]]:
+    """Por base, as palavras do nome que só ela tem (sem '(simulada)', nome da região e palavras vazias).
+
+    Ex.: com a região 'tocantins', 'Paraíso do Tocantins (simulada)' -> ['paraiso']; uma palavra que aparece no
+    nome de duas bases ('porto' em 'Porto Nacional' e 'Porto Alegre') não identifica nenhuma das duas."""
+    por_base = {b.id: set(tokens_nome(b.nome, ignorar)) for b in bases}
+    contagem: dict[str, int] = {}
+    for tks in por_base.values():
+        for tk in tks:
+            contagem[tk] = contagem.get(tk, 0) + 1
+    return {bid: sorted(tk for tk in tks if contagem[tk] == 1) for bid, tks in por_base.items()}
+
+
+def _bases_citadas(t: str, bases: list[Base], distintivos: dict[str, list[str]]) -> list[Base]:
     achadas = []
     for b in bases:
-        if contem_termo(t, b.id) or contem_termo(t, b.nome) or any(contem_termo(t, tk) for tk in tokens_nome(b.nome)):
+        nome = sem_sufixo_simulada(b.nome)
+        if (contem_termo(t, b.id) or (len(nome) >= 4 and contem_termo(t, nome))
+                or any(contem_termo(t, tk) for tk in distintivos.get(b.id, []))):
             achadas.append(b)
     return achadas
 
@@ -56,15 +71,21 @@ def _reserva(t: str) -> int | None:
     return int(v) if v.isdigit() else NUMEROS.get(v, 1)
 
 
-def interpretar_memorias(memorias: list[Memoria], bases: list[Base], ocorrencias: list[Ocorrencia]) -> LeituraMemorias:
-    """Processa em ordem cronológica: uma liberação posterior anula um bloqueio anterior do mesmo lugar."""
+def interpretar_memorias(memorias: list[Memoria], bases: list[Base], ocorrencias: list[Ocorrencia],
+                         regiao: str | None = None) -> LeituraMemorias:
+    """Processa em ordem cronológica: uma liberação posterior anula um bloqueio anterior do mesmo lugar.
+
+    Base citada = id, nome completo (sem '(simulada)') ou palavra distintiva do nome. O nome da região
+    (``regiao`` e ``Memoria.regiao``) não conta: 'no Tocantins' não cita 'Paraíso do Tocantins'."""
     out = LeituraMemorias()
+    ignorar = {tk for r in {regiao, *(m.regiao for m in memorias)} if r for tk in tokens_nome(r.replace("_", " "))}
+    distintivos = tokens_distintivos(bases, ignorar)
     for m in sorted(memorias, key=lambda x: x.criada_em):
         t = norm(m.texto)
         casou = False
         libera, bloqueia = bool(LIBERACAO.search(t)), bool(BLOQUEIO.search(t))
         if libera or bloqueia:
-            for b in _bases_citadas(t, bases):
+            for b in _bases_citadas(t, bases, distintivos):
                 casou = True
                 if libera:
                     out.bases_bloqueadas.pop(b.id, None)

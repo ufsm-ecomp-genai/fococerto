@@ -9,9 +9,11 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from app.agents.base import Contexto, SaidaInvalida, chamar_json, registrar_fallback, resumo_ocorrencia
+from app.agents.base import (CONFIANCA_MIN_MEMORIA, Contexto, SaidaInvalida, chamar_json, registrar_fallback,
+                             resumo_memoria, resumo_ocorrencia)
 from app.core.logging import LogExecucao
-from app.core.models import ParecerAnalista
+from app.core.models import Memoria, ParecerAnalista
+from app.tools.texto import contem_termo, norm
 from app.llm.client import LLMIndisponivel
 from app.tools.consultar import CONSULTAS, Consultor
 
@@ -42,10 +44,26 @@ def coletar(c: Consultor, oid: str, dias: int = 7) -> dict:
     }
 
 
-def avaliar(ev: dict) -> tuple[str, str, list[str], float]:
-    """Pontua sinais de queima agrícola vs vegetação. Devolve (conclusao, confianca, evidencias, escore)."""
+def memorias_da_ocorrencia(ctx: Contexto, oid: str) -> tuple[list[Memoria], Memoria | None]:
+    """Memórias (H-MEM + notas) que citam a ocorrência, e a de reforço (reignição/cresceu) lida pela ferramenta."""
+    reforco = ctx.leitura().reforcos.get(oid)
+    citam = [m for m in ctx.memorias if contem_termo(norm(m.texto), oid)]
+    if reforco is not None and reforco not in citam:
+        citam.append(reforco)
+    return citam, reforco
+
+
+def avaliar(ev: dict, reforco: Memoria | None = None) -> tuple[str, str, list[str], float]:
+    """Pontua sinais de queima agrícola vs vegetação. Devolve (conclusao, confianca, evidencias, escore).
+
+    ``reforco``: memória que diz que o fogo desta célula já reacendeu/cresceu (ou que foi despriorizado e cresceu).
+    É um sinal contra "manejo controlado" que o histórico de 7 dias sozinho não mostra."""
     dn, frp, per, ti, tempo = ev["dia_noite"], ev["frp"], ev["persistencia"], ev["ti_uc"], ev["tempo"]
     agri, veg, evid = 0.0, 0.0, []
+    if reforco is not None and reforco.confianca >= CONFIANCA_MIN_MEMORIA:
+        veg += 1
+        evid.append(f"vegetação: memória {reforco.id} (confiança {reforco.confianca:.2f}) diz que este fogo já "
+                    f"reacendeu/cresceu: \"{reforco.texto[:160]}\"")
     total = (dn["n_dia"] or 0) + (dn["n_noite"] or 0)
     fn = dn["frac_noite"]
     if fn is not None and total >= 2:
@@ -112,7 +130,8 @@ def avaliar(ev: dict) -> tuple[str, str, list[str], float]:
 def decidir_offline(ctx: Contexto, oid: str, consultor: Consultor, pergunta: str = PERGUNTA) -> ParecerAnalista:
     """Heurística determinística de persistência, dia/noite, FRP e proximidade de TI/UC (sample mode)."""
     ev = coletar(consultor, oid)
-    conclusao, confianca, evid, _ = avaliar(ev)
+    _, reforco = memorias_da_ocorrencia(ctx, oid)
+    conclusao, confianca, evid, _ = avaliar(ev, reforco)
     return ParecerAnalista(ocorrencia_id=oid, pergunta=pergunta, conclusao=conclusao, confianca=confianca,
                            evidencias=evid, consultas=list(consultor.consultas))
 
@@ -144,9 +163,11 @@ def decidir(ctx: Contexto, oid: str, consultor: Consultor, log: LogExecucao | No
             pergunta: str = PERGUNTA) -> ParecerAnalista:
     """O LLM interpreta as consultas; pode pedir até uma rodada de consultas extras (``mais_consultas``)."""
     ev = coletar(consultor, oid)
-    sinal = avaliar(ev)
+    citam, reforco = memorias_da_ocorrencia(ctx, oid)
+    sinal = avaliar(ev, reforco)
     dados = {"pergunta": pergunta, "ocorrencia": resumo_ocorrencia(ctx.occ[oid]),
              "consultas": {k: v for k, v in ev.items()},
+             "memorias_sobre_a_ocorrencia": [resumo_memoria(m) for m in citam],
              "sinais_heuristicos": {"conclusao": sinal[0], "confianca": sinal[1], "evidencias": sinal[2]},
              "consultas_disponiveis": list(CONSULTAS)}
     try:

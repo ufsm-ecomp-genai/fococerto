@@ -74,6 +74,7 @@ class ClienteHMEM:
         self._http = client or httpx.Client(base_url=self.base_url, timeout=timeout)
         self.ultimos_conflitos: list[dict] = []  # conflitos detectados no último gravar()
         self.ultimo_trace: dict = {}             # trace do último recall() (scores, estratégia)
+        self._substituida_por: dict[str, str | None] = {}  # visto no último listar()/recall()
 
     def _checar(self, r: httpx.Response) -> httpx.Response:
         if r.status_code in (400, 404, 413):
@@ -107,7 +108,14 @@ class ClienteHMEM:
 
     def listar(self, regiao: str) -> list[Memoria]:
         dados = self._checar(self._http.get("/memorias", params={"regiao": regiao})).json()
+        self._substituida_por.update({m["id"]: m.get("substituida_por") for m in dados if "id" in m})
         return [Memoria.model_validate(m) for m in dados]
+
+    def substituida_por(self, memoria_id: str) -> str | None:
+        """Id da memória que substituiu ``memoria_id`` (None se ativa), pelo campo ``substituida_por`` que o
+        serviço devolve no último ``listar()`` (o tipo ``Memoria`` do contrato não tem esse campo).
+        Mesma assinatura de ``MemoriaLocal.substituida_por``."""
+        return self._substituida_por.get(memoria_id)
 
     def ledger(self, regiao: str) -> list[dict]:
         """Ledger de auditoria do engine (extra ao contrato)."""

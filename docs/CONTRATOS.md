@@ -159,3 +159,10 @@ Implementações: `ClienteHMEM(base_url)` (HTTP, porta 7070) e `MemoriaLocal(cam
 - As views do Zetaris são `ocorrencias`, `ocorrencias_localidades`, `ocorrencias_contexto` e `ocorrencias_prioridade`, todas com as colunas `regiao` e `dia`; os componentes ficam em `c_exposicao` … `c_crescimento`. Elas foram validadas em Spark SQL 4.0 local contra o Python (698/698 ocorrências iguais). **Ainda não foram testadas no Zetaris.**
 - Extras fora do Protocol: `RepositorioCache.decisoes_salvas/notas_salvas` (gravam em `data/estado/<regiao>/`) e `RepositorioZetaris.aquecer_cache/consultas/modo_usado`.
 - Constantes declaradas da fórmula (`app/data/ocorrencias.py` e o SQL): `POP_REF=100000` (log), `HDW_REF=400`, intensidade em log, `PERSIST_REF=4` dias.
+
+## 14. Ajustes depois da correção dos bugs da ablação
+- `ClienteMemoria` ganha `substituida_por(memoria_id) -> str | None` (nos dois clientes). O engine, ao resolver um conflito, marca só a memória perdedora; a vencedora não recebe `supersedes`.
+- O grafo lê memórias por duas vias, recall por termo **e** `listar(regiao)` filtrado (célula do período, base, localidade, palavra-chave), sem as substituídas. O log `memoria_lida` traz `vias` com a origem de cada memória.
+- `exposta_sem_recurso` só é rígida se algum recurso que está numa ocorrência sem exposição chega à exposta dentro de `eta_max_h` (evidência: `liberaveis`, `liberaveis_em`); senão, a violação vira `exposta_nao_atendida` (não rígida).
+- `Ocorrencia.status` pode vir `None` quando a célula já existia (`periodos_seguidos > 1`) mas não há par no período anterior.
+- Citação incorreta nunca força escalação sozinha: o Crítico reescreve a justificativa a partir dos dados, e o plano final passa de novo pelo `checar_citacoes`.

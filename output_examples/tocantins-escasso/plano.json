@@ -7,7 +7,7 @@
     "modo": "offline",
     "simulado": true,
     "arquivo_cenario": "input_examples/tocantins-escasso.yaml",
-    "gerado_em": "2026-10-24T22:00:31.762730+00:00",
+    "gerado_em": "2026-10-24T22:15:01.998572+00:00",
     "aprovacao_humana": "pendente"
   },
   "plano": {
@@ -886,9 +886,10 @@
             "viaveis": [
               "palmas-a1",
               "dianopolis-t1"
-            ]
+            ],
+            "sem_exposicao_atendidas": []
           },
-          "sugestao": "os recursos viáveis estão em ocorrências com exposição ou na reserva: avaliar escalação",
+          "sugestao": "os recursos viáveis estão em ocorrências com exposição ou na reserva (os que estão em ocorrências sem exposição não chegam aqui no ETA máximo): avaliar escalação",
           "rigida": false
         },
         {
@@ -904,9 +905,10 @@
               "mateiros-t1",
               "dianopolis-t1",
               "paraiso-t1"
-            ]
+            ],
+            "sem_exposicao_atendidas": []
           },
-          "sugestao": "os recursos viáveis estão em ocorrências com exposição ou na reserva: avaliar escalação",
+          "sugestao": "os recursos viáveis estão em ocorrências com exposição ou na reserva (os que estão em ocorrências sem exposição não chegam aqui no ETA máximo): avaliar escalação",
           "rigida": false
         },
         {
@@ -919,9 +921,10 @@
               "palmas-a1",
               "palmas-t1",
               "paraiso-t1"
-            ]
+            ],
+            "sem_exposicao_atendidas": []
           },
-          "sugestao": "os recursos viáveis estão em ocorrências com exposição ou na reserva: avaliar escalação",
+          "sugestao": "os recursos viáveis estão em ocorrências com exposição ou na reserva (os que estão em ocorrências sem exposição não chegam aqui no ETA máximo): avaliar escalação",
           "rigida": false
         },
         {
@@ -936,9 +939,10 @@
               "portonac-t1",
               "paraiso-t1",
               "mateiros-t1"
-            ]
+            ],
+            "sem_exposicao_atendidas": []
           },
-          "sugestao": "os recursos viáveis estão em ocorrências com exposição ou na reserva: avaliar escalação",
+          "sugestao": "os recursos viáveis estão em ocorrências com exposição ou na reserva (os que estão em ocorrências sem exposição não chegam aqui no ETA máximo): avaliar escalação",
           "rigida": false
         },
         {
@@ -950,9 +954,10 @@
             "viaveis": [
               "palmas-a1",
               "mateiros-t1"
-            ]
+            ],
+            "sem_exposicao_atendidas": []
           },
-          "sugestao": "os recursos viáveis estão em ocorrências com exposição ou na reserva: avaliar escalação",
+          "sugestao": "os recursos viáveis estão em ocorrências com exposição ou na reserva (os que estão em ocorrências sem exposição não chegam aqui no ETA máximo): avaliar escalação",
           "rigida": false
         },
         {
@@ -965,9 +970,10 @@
               "palmas-a1",
               "dianopolis-t1",
               "mateiros-t1"
-            ]
+            ],
+            "sem_exposicao_atendidas": []
           },
-          "sugestao": "os recursos viáveis estão em ocorrências com exposição ou na reserva: avaliar escalação",
+          "sugestao": "os recursos viáveis estão em ocorrências com exposição ou na reserva (os que estão em ocorrências sem exposição não chegam aqui no ETA máximo): avaliar escalação",
           "rigida": false
         },
         {
@@ -979,9 +985,10 @@
             "viaveis": [
               "palmas-a1",
               "mateiros-t1"
-            ]
+            ],
+            "sem_exposicao_atendidas": []
           },
-          "sugestao": "os recursos viáveis estão em ocorrências com exposição ou na reserva: avaliar escalação",
+          "sugestao": "os recursos viáveis estão em ocorrências com exposição ou na reserva (os que estão em ocorrências sem exposição não chegam aqui no ETA máximo): avaliar escalação",
           "rigida": false
         },
         {
@@ -995,9 +1002,10 @@
               "portonac-t1",
               "palmas-t1",
               "paraiso-t1"
-            ]
+            ],
+            "sem_exposicao_atendidas": []
           },
-          "sugestao": "os recursos viáveis estão em ocorrências com exposição ou na reserva: avaliar escalação",
+          "sugestao": "os recursos viáveis estão em ocorrências com exposição ou na reserva (os que estão em ocorrências sem exposição não chegam aqui no ETA máximo): avaliar escalação",
           "rigida": false
         },
         {
@@ -1010,9 +1018,10 @@
               "dianopolis-t1",
               "palmas-a1",
               "mateiros-t1"
-            ]
+            ],
+            "sem_exposicao_atendidas": []
           },
-          "sugestao": "os recursos viáveis estão em ocorrências com exposição ou na reserva: avaliar escalação",
+          "sugestao": "os recursos viáveis estão em ocorrências com exposição ou na reserva (os que estão em ocorrências sem exposição não chegam aqui no ETA máximo): avaliar escalação",
           "rigida": false
         }
       ],
@@ -1036,5 +1045,5 @@
     }
   ],
   "rodadas": 1,
-  "log_path": "/tmp/tmp.Xnvby5lYfs/logs-tocantins-escasso/20261024T220031-6f1c1a.jsonl"
+  "log_path": "/tmp/tmp.cvX2riRIju/logs-tocantins-escasso/20261024T221501-be47ed.jsonl"
 }

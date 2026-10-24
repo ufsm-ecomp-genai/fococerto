@@ -5,7 +5,10 @@ Regras (``Violacao.regra``):
 - ``capacidade_excedida``: recurso em mais ocorrências que a capacidade (cap. 1 = "em duas ocorrências")  rígida
 - ``recurso_duplicado``: o mesmo par recurso/ocorrência repetido                                          rígida
 - ``eta_acima_limite``: ETA recalculado > eta_max_h da região                                            rígida
-- ``exposta_sem_recurso``: ocorrência com população sem recurso enquanto outra sem exposição recebeu    rígida
+- ``exposta_sem_recurso``: ocorrência com população sem recurso enquanto um recurso que chegaria a ela
+   (ETA ≤ eta_max_h) está numa ocorrência sem exposição                                                 rígida
+   (se nenhum recurso de ocorrência sem exposição chega à exposta, realocar não resolve: vira
+   ``exposta_nao_atendida``, não rígida)
 - ``reserva_nao_mantida``: reserva pedida (cenário ou memória do coordenador) não mantida                rígida
 - ``exposicao_sem_recurso_viavel``: população exposta e nenhum recurso disponível com ETA viável.
    Rígida e **insolúvel pelo plano**: obriga escalação.
@@ -30,7 +33,7 @@ def checar_regras(plano: Plano, ocorrencias: list[Ocorrencia], recursos: list[Re
     occ = {o.id: o for o in ocorrencias}
     rec = {r.id: r for r in recursos}
     por_base = {b.id: b for b in bases}
-    leitura = interpretar_memorias(memorias, bases, ocorrencias)
+    leitura = interpretar_memorias(memorias, bases, ocorrencias, regiao=regiao_cfg.nome)
     vs: list[Violacao] = []
 
     pares = Counter((d.recurso_id, d.ocorrencia_id) for d in plano.designacoes)
@@ -86,7 +89,12 @@ def checar_regras(plano: Plano, ocorrencias: list[Ocorrencia], recursos: list[Re
 
     # prioridade da vida e escalação
     designadas = {d.ocorrencia_id for d in plano.designacoes if d.ocorrencia_id in occ}
-    sem_exposicao_atendidas = [oid for oid in designadas if not exposta(occ[oid])]
+    sem_exposicao_atendidas = sorted(oid for oid in designadas if not exposta(occ[oid]))
+    # recurso -> ocorrências sem exposição em que ele está (candidatos a ser liberados para uma exposta)
+    em_sem_exposicao: dict[str, list[str]] = {}
+    for d in plano.designacoes:
+        if d.ocorrencia_id in occ and not exposta(occ[d.ocorrencia_id]) and d.recurso_id in rec:
+            em_sem_exposicao.setdefault(d.recurso_id, []).append(d.ocorrencia_id)
     disp = [r for r in recursos if r.disponivel]
     for o in ocorrencias:
         if not exposta(o) or o.id in designadas:
@@ -99,13 +107,21 @@ def checar_regras(plano: Plano, ocorrencias: list[Ocorrencia], recursos: list[Re
                                           "eta_min_h": round(min(etas.values()), 2) if etas else None,
                                           "eta_max_h": regiao_cfg.eta_max_h},
                                sugestao="escalar: nenhum recurso chega dentro do limite"))
-        elif sem_exposicao_atendidas:
+            continue
+        viaveis_ids = [rid for _, rid in viaveis]
+        liberaveis = [rid for rid in viaveis_ids if rid in em_sem_exposicao]
+        if liberaveis:
             vs.append(Violacao(regra="exposta_sem_recurso", ocorrencia_id=o.id,
                                evidencia={"pop_raio": o.pop_raio, "sem_exposicao_atendidas": sem_exposicao_atendidas,
-                                          "viaveis": [rid for _, rid in viaveis]},
-                               sugestao="realocar um recurso de ocorrência sem exposição para esta"))
+                                          "viaveis": viaveis_ids, "liberaveis": liberaveis,
+                                          "liberaveis_em": {rid: em_sem_exposicao[rid] for rid in liberaveis}},
+                               sugestao="realocar para esta um recurso que está em ocorrência sem exposição: "
+                                        + ", ".join(liberaveis)))
         else:
             vs.append(Violacao(regra="exposta_nao_atendida", ocorrencia_id=o.id, rigida=False,
-                               evidencia={"pop_raio": o.pop_raio, "viaveis": [rid for _, rid in viaveis]},
-                               sugestao="os recursos viáveis estão em ocorrências com exposição ou na reserva: avaliar escalação"))
+                               evidencia={"pop_raio": o.pop_raio, "viaveis": viaveis_ids,
+                                          "sem_exposicao_atendidas": sem_exposicao_atendidas},
+                               sugestao="os recursos viáveis estão em ocorrências com exposição ou na reserva (os que "
+                                        "estão em ocorrências sem exposição não chegam aqui no ETA máximo): avaliar "
+                                        "escalação"))
     return vs

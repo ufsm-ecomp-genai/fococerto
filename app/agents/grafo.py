@@ -13,19 +13,21 @@ from typing import Any, Literal, Protocol, TypedDict
 from langgraph.graph import END, START, StateGraph
 
 from app.agents import analista, critico, planejador
-from app.agents.base import Contexto, resumo_memoria, resumo_plano
+from app.agents.base import Contexto, reescrever_citacoes, resumo_memoria, resumo_plano
 from app.core.logging import LogExecucao
 from app.core.models import (Base, Cenario, Memoria, Ocorrencia, ParecerAnalista, Plano, RegiaoCfg,
                              ResultadoPeriodo, VeredictoCritico, Violacao)
 from app.tools.alocador import alocador_simples
 from app.tools.citacoes import checar_citacoes
 from app.tools.consultar import Consultor
-from app.tools.memorias import interpretar_memorias
+from app.tools.memorias import interpretar_memorias, tokens_distintivos
+from app.tools.texto import contem_termo, norm, sem_sufixo_simulada, tokens_nome
 from app.tools.monitor import monitor
 from app.tools.regras import INSOLUVEIS, checar_regras
 
 MAX_RODADAS = 3
 TOP = 15
+TOP_ANTERIOR = 5000  # sem corte relevante: o monitor precisa do par de cada célula de ontem (dia típico: ~200)
 
 
 class Repositorio(Protocol):  # docs/CONTRATOS.md, seção 3 (só o que o grafo usa)
@@ -63,6 +65,77 @@ def _ids_cel(textos: list[str]) -> list[str]:
     return sorted({m for t in textos for m in re.findall(r"cel_[-\d_.]+", t)})
 
 
+PALAVRAS_MEMORIA = ["estrada", "rota", "reserva", "cresceu", "reignição"]
+RE_PALAVRAS_MEMORIA = re.compile(r"estrada|rota\b|reserva|cresc|reign|reacend|alagad|bloquead|interditad|liberad"
+                                 r"|ponte|despriorizad")
+
+
+def _ids_substituidos(memoria: ClienteMemoria, todas: list[Memoria]) -> set[str]:
+    """Memórias que outra substituiu: as apontadas por ``supersedes`` e as que o serviço marca com
+    ``substituida_por`` (inclui conflito resolvido pelo engine, que não preenche ``supersedes`` na vencedora)."""
+    ids = {m.supersedes for m in todas if m.supersedes}
+    por = getattr(memoria, "substituida_por", None)
+    if callable(por):
+        ids |= {m.id for m in todas if por(m.id)}
+    return ids
+
+
+def _motivo_listar(texto: str, ocorrencias: list[Ocorrencia], bases: list[Base],
+                   distintivos: dict[str, list[str]]) -> str | None:
+    """Por que uma memória da região interessa a este período (None se não interessa)."""
+    t = norm(texto)
+    for o in ocorrencias:
+        if contem_termo(t, o.id):
+            return f"celula:{o.id}"
+    for b in bases:
+        nome = sem_sufixo_simulada(b.nome)
+        if contem_termo(t, b.id) or (len(nome) >= 4 and contem_termo(t, nome)) or \
+                any(contem_termo(t, tk) for tk in distintivos.get(b.id, [])):
+            return f"base:{b.id}"
+    for o in ocorrencias:
+        for l in o.localidades:
+            nome = l.get("nome") or ""
+            if len(norm(nome)) >= 4 and contem_termo(t, nome):
+                return f"localidade:{nome}"
+    m = RE_PALAVRAS_MEMORIA.search(t)
+    return f"palavra:{m.group(0)}" if m else None
+
+
+def _ler_memorias(memoria: ClienteMemoria, regiao: str, bases: list[Base], ocorrencias: list[Ocorrencia]
+                  ) -> tuple[list[Memoria], list[Memoria], dict[str, str]]:
+    """Memórias ativas que interessam ao período, por duas vias (registradas em ``vias``):
+
+    1. ``recall`` do H-MEM, uma consulta por termo (o recall compara palavras: consulta longa dilui a similaridade);
+    2. ``listar(regiao)`` (o escopo por região é pequeno, CONTRATOS §5): entram as ativas que citam célula do
+       período, base, localidade ou palavra-chave. Sem isso, uma memória longa (ex.: derivada de reignição) não
+       passa do limiar 0,35 do recall contra um termo curto, nem pelo id da célula.
+    Substituídas (``supersedes``/``substituida_por``) nunca entram como ativas."""
+    nomes_base = [p.strip() for b in bases for p in re.sub(r"\(.*?\)", "", b.nome).split("/")]
+    termos = PALAVRAS_MEMORIA + nomes_base + \
+        [l.get("nome", "") for o in ocorrencias for l in o.localidades[:2]] + [o.id for o in ocorrencias]
+    ativas: dict[str, Memoria] = {}
+    subst: dict[str, Memoria] = {}
+    vias: dict[str, str] = {}
+    for termo in dict.fromkeys(t for t in termos if t and len(t) >= 3):
+        a, sb = memoria.recall(regiao, termo, k=5)
+        for m in a:
+            ativas.setdefault(m.id, m)
+            vias.setdefault(m.id, f"recall:{termo}")
+        subst.update({m.id: m for m in sb})
+    todas = [m for m in memoria.listar(regiao) if m.regiao == regiao]
+    ids_subst = _ids_substituidos(memoria, todas) | set(subst)
+    distintivos = tokens_distintivos(bases, set(tokens_nome(regiao.replace("_", " "))))
+    for m in todas:
+        if m.id in ativas or m.id in ids_subst:
+            continue
+        motivo = _motivo_listar(m.texto, ocorrencias, bases, distintivos)
+        if motivo:
+            ativas[m.id] = m
+            vias[m.id] = f"listar:{motivo}"
+    usadas = [m for m in ativas.values() if m.regiao == regiao and m.id not in ids_subst]
+    return usadas, list(subst.values()), {m.id: vias[m.id] for m in usadas}
+
+
 def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, memoria: ClienteMemoria,
                      log: LogExecucao, modo: Literal["llm", "offline"] = "llm",
                      usar_critico_llm: bool = True, usar_memoria: bool = True) -> ResultadoPeriodo:
@@ -73,14 +146,17 @@ def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, mem
                                      "cenario_simulado": cenario.simulado, "max_rodadas": MAX_RODADAS})
 
     # ------------------------------------------------------------ preparação (ferramentas, sem LLM)
-    atuais = repo.ocorrencias(regiao.nome, periodo, top=TOP)[:TOP]
+    # O período anterior é consultado ANTES do atual: o RepositorioCache/Zetaris usa o último período consultado
+    # como fim do historico_celula, e o Analista precisa ver o dia do período (bug 4 da ablação).
+    # Sem corte relevante no anterior: com top 100, uma célula que já existia ficava "nova" (bug 5).
     anteriores: list[Ocorrencia] = []
     ant = _periodo_anterior(periodo)
     if ant:
         try:
-            anteriores = repo.ocorrencias(regiao.nome, ant, top=100)
+            anteriores = repo.ocorrencias(regiao.nome, ant, top=TOP_ANTERIOR)
         except Exception as e:  # noqa: BLE001 - sem período anterior, tudo vira "nova"
             log.evento("ferramenta", "consulta", {"consulta": f"ocorrencias({ant})", "erro": str(e)})
+    atuais = repo.ocorrencias(regiao.nome, periodo, top=TOP)[:TOP]
     ocorrencias = monitor(atuais, anteriores)
     log.evento("ferramenta", "consulta", {"consulta": "monitor", "anterior": ant, "n_atuais": len(ocorrencias),
                                           "status": {o.id: o.status for o in ocorrencias}})
@@ -100,23 +176,12 @@ def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, mem
 
     memorias: list[Memoria] = []
     if usar_memoria:
-        # O recall do H-MEM compara palavras: uma consulta enorme dilui a similaridade abaixo do limiar.
-        # Por isso, uma consulta por termo (nome de base sem o sufixo, localidade, célula), juntando os resultados.
-        nomes_base = [p.strip() for b in bases for p in re.sub(r"\(.*?\)", "", b.nome).split("/")]
-        termos = ["estrada", "rota", "reserva", "cresceu", "reignição"] + nomes_base + \
-                 [l.get("nome", "") for o in ocorrencias for l in o.localidades[:2]] + [o.id for o in ocorrencias]
         try:
-            ativas_por_id: dict[str, Memoria] = {}
-            subst_por_id: dict[str, Memoria] = {}
-            for termo in dict.fromkeys(t for t in termos if t and len(t) >= 3):
-                a, s = memoria.recall(regiao.nome, termo, k=5)
-                ativas_por_id.update({m.id: m for m in a})
-                subst_por_id.update({m.id: m for m in s})
-            substituidas = list(subst_por_id.values())
-            memorias = [m for m in ativas_por_id.values() if m.regiao == regiao.nome and m.id not in subst_por_id]
+            memorias, substituidas, vias = _ler_memorias(memoria, regiao.nome, bases, ocorrencias)
             log.evento("sistema", "memoria_lida", {
                 "ativas": [resumo_memoria(m) for m in memorias],
-                "substituidas": [resumo_memoria(m) for m in substituidas]})
+                "substituidas": [resumo_memoria(m) for m in substituidas],
+                "vias": vias})
         except Exception as e:  # noqa: BLE001 - H-MEM fora do ar não derruba o período
             log.evento("sistema", "memoria_lida", {"erro": f"{type(e).__name__}: {e}", "ativas": []})
     agora = datetime.now(timezone.utc)
@@ -132,7 +197,7 @@ def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, mem
     log.evento("ferramenta", "proposta", {"origem": "alocador_simples", "plano": resumo_plano(baseline)})
     ctx = Contexto(regiao=regiao, periodo=periodo, ocorrencias=ocorrencias, recursos=recursos, bases=bases,
                    reserva=cenario.reserva, memorias=memorias + notas, baseline=baseline)
-    leitura = interpretar_memorias(ctx.memorias, bases, ocorrencias)
+    leitura = interpretar_memorias(ctx.memorias, bases, ocorrencias, regiao=regiao.nome)
     if leitura.aplicadas:
         log.evento("sistema", "memoria_lida", {
             "interpretacao": {"bases_bloqueadas": {k: v.id for k, v in leitura.bases_bloqueadas.items()},
@@ -234,6 +299,13 @@ def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, mem
                 esc.append({"ocorrencia_id": None, "motivo": " ".join(v.motivos if v else [])[:600]})
         if v is not None and v.decisao == "rejeita":
             log.evento("sistema", "escala", {"rodada": rodada, "motivo": "impasse", "escalacoes": esc})
+        # guarda-corpo: o plano que vai ao coordenador nunca leva citação que não confere com os dados
+        cit = [x for x in checar_citacoes(plano, ocorrencias, bases, recursos=recursos, regiao_cfg=regiao)
+               if x.regra == "citacao_incorreta"]
+        if cit:
+            plano = reescrever_citacoes(ctx, plano, cit)
+            log.evento("sistema", "violacao", {"rodada": rodada, "acao": "justificativa_reescrita_no_plano_final",
+                                               "violacoes": [x.model_dump() for x in cit]})
         return {"status": status, "escalacoes": esc, "plano": plano}
 
     # ------------------------------------------------------------ arestas

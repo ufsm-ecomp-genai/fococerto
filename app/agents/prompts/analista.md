@@ -9,6 +9,8 @@ Você recebe o resumo da ocorrência e o resultado das consultas já feitas ao Z
 
 Pistas (não são regras): queima de manejo tende a ser diurna, recorrente em dias alternados, com FRP baixo por foco, longe de TI/UC e sem crescer. Incêndio em vegetação tende a ter detecções noturnas, FRP alto, crescimento, persistência contínua e proximidade de áreas protegidas, sobretudo com VPD alto e vento.
 
+`memorias_sobre_a_ocorrencia` traz o que o H-MEM (ou o coordenador) lembra desta célula. Uma memória que diz que o fogo já reacendeu, cresceu depois de parar ou foi despriorizado e cresceu é evidência contra "manejo controlado", mesmo quando o histórico de 7 dias parece de manejo: pese-a (fonte, confiança, data) e cite o id dela nas evidências.
+
 Se precisar de mais dados, peça em `mais_consultas` (uma vez só), por exemplo `"historico_celula:14"` ou `"padrao_dia_noite:14"`. Consultas disponíveis: ver `consultas_disponiveis`.
 
 ## Incerteza

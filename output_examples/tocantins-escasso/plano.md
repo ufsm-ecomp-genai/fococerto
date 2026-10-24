@@ -128,6 +128,6 @@ Nenhuma memória foi usada neste período.
 - O índice de tempo é uma simplificação de superfície.
 - A doutrina é simplificada, e não houve validação com operadores.
 
-[Log completo da execução](../../../logs-tocantins-escasso/20261024T220031-6f1c1a.jsonl)
+[Log completo da execução](../../../logs-tocantins-escasso/20261024T221501-be47ed.jsonl)
 
-_Gerado em 2026-10-24 22:00 UTC_
+_Gerado em 2026-10-24 22:15 UTC_

@@ -7,7 +7,7 @@
     "modo": "offline",
     "simulado": true,
     "arquivo_cenario": "input_examples/tocantins-folgado.yaml",
-    "gerado_em": "2026-10-24T22:00:35.827419+00:00",
+    "gerado_em": "2026-10-24T22:15:07.031239+00:00",
     "aprovacao_humana": "pendente"
   },
   "plano": {
@@ -1143,9 +1143,10 @@
               "taguatinga-t1",
               "mateiros-t1",
               "mateiros-t2"
-            ]
+            ],
+            "sem_exposicao_atendidas": []
           },
-          "sugestao": "os recursos viáveis estão em ocorrências com exposição ou na reserva: avaliar escalação",
+          "sugestao": "os recursos viáveis estão em ocorrências com exposição ou na reserva (os que estão em ocorrências sem exposição não chegam aqui no ETA máximo): avaliar escalação",
           "rigida": false
         }
       ],
@@ -1161,5 +1162,5 @@
     }
   ],
   "rodadas": 1,
-  "log_path": "/tmp/tmp.Xnvby5lYfs/logs-tocantins-folgado/20261024T220035-9daebb.jsonl"
+  "log_path": "/tmp/tmp.cvX2riRIju/logs-tocantins-folgado/20261024T221506-151bc5.jsonl"
 }

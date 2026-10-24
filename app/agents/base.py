@@ -13,11 +13,12 @@ from pydantic import BaseModel, Field, ValidationError
 from app.core.logging import LogExecucao
 from app.core.models import (Base, Designacao, Memoria, Ocorrencia, ParecerAnalista, Plano, Recurso, RegiaoCfg)
 from app.llm import client
-from app.tools.alocador import alocar, completar_plano
+from app.tools.alocador import alocar, completar_plano, justificar
 from app.tools.geo import eta_recurso, exposta, matriz_eta
 from app.tools.memorias import LeituraMemorias, interpretar_memorias
 
 PROMPTS = Path(__file__).parent / "prompts"
+CONFIANCA_MIN_MEMORIA = 0.5   # memória abaixo disso não justifica exceção nem pesa contra parecer
 T = TypeVar("T", bound=BaseModel)
 
 
@@ -55,7 +56,7 @@ class Contexto:
         return matriz_eta(self.recursos, self.bases, self.ocorrencias, self.regiao)
 
     def leitura(self) -> LeituraMemorias:
-        return interpretar_memorias(self.memorias, self.bases, self.ocorrencias)
+        return interpretar_memorias(self.memorias, self.bases, self.ocorrencias, regiao=self.regiao.nome)
 
     def reserva_pedida(self) -> int:
         return max(self.reserva, self.leitura().reserva_minima)
@@ -77,7 +78,13 @@ def prioridades_ajustadas(ctx: Contexto) -> tuple[dict[str, float], dict[str, st
             ajustes.append({"ocorrencia_id": o.id, "memoria_id": m.id, "delta": 0.15, "texto": m.texto})
         par = ctx.pareceres.get(o.id)
         if par is not None:
-            if par.conclusao == "queima_agricola_provavel" and par.confianca in ("media", "alta") and not exposta(o):
+            if (par.conclusao == "queima_agricola_provavel" and m is not None
+                    and m.confianca >= CONFIANCA_MIN_MEMORIA and not exposta(o)):
+                notas.append(f"Analista: queima agrícola provável, mas a memória {m.id} (reignição/crescimento) "
+                             f"pesa contra rebaixar: prioridade mantida")
+                ajustes.append({"ocorrencia_id": o.id, "parecer": par.conclusao, "fator": 1.0,
+                                "memoria_contra": m.id})
+            elif par.conclusao == "queima_agricola_provavel" and par.confianca in ("media", "alta") and not exposta(o):
                 p *= 0.5
                 notas.append(f"Analista: queima agrícola provável (confiança {par.confianca}), prioridade ×0,5")
                 ajustes.append({"ocorrencia_id": o.id, "parecer": par.conclusao, "fator": 0.5})
@@ -101,6 +108,27 @@ def realocar(ctx: Contexto, rodada: int, *, proibidos=(), bases_bloqueadas=(), r
                regiao=ctx.regiao.nome, prioridades=pri, exposicao_primeiro=True, proibidos=proibidos,
                bases_bloqueadas=bases_bloqueadas, rotas_bloqueadas=rotas_bloqueadas, extras=extras)
     return p.model_copy(update={"rodada": rodada, "resumo": (resumo_prefixo + " " + p.resumo).strip()})
+
+
+def reescrever_citacoes(ctx: Contexto, plano: Plano, violacoes: list) -> Plano:
+    """Reescreve, a partir dos dados (template verificável do alocador), justificativa, evidências e ETA das
+    designações com ``citacao_incorreta``. Mantém os pares: a alocação não muda, só o texto falso sai."""
+    alvo = {(v.recurso_id, v.ocorrencia_id) for v in violacoes if v.regra == "citacao_incorreta"}
+    if not alvo:
+        return plano
+    pri, extras, _ = prioridades_ajustadas(ctx)
+    ds = []
+    for d in plano.designacoes:
+        o, r = ctx.occ.get(d.ocorrencia_id), ctx.rec.get(d.recurso_id)
+        if (d.recurso_id, d.ocorrencia_id) in alvo and o is not None and r is not None:
+            b = ctx.base_por_id.get(r.base_id)
+            eta = eta_recurso(r, b, o, ctx.regiao)
+            texto, ev = justificar(o, r, b, eta, pri.get(o.id), extras.get(o.id, ""))
+            d = d.model_copy(update={"eta_h": round(eta, 2), "evidencias": ev, "justificativa":
+                                     texto + " (Justificativa reescrita a partir dos dados: a anterior citava fato "
+                                             "que não confere.)"})
+        ds.append(d)
+    return plano.model_copy(update={"designacoes": ds})
 
 
 def pares(plano: Plano | None) -> set[tuple[str, str]]:
