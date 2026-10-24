@@ -140,3 +140,14 @@ class ClienteMemoria(Protocol):
     def listar(self, regiao: str) -> list[Memoria]
 ```
 Implementações: `ClienteHMEM(base_url)` (HTTP, porta 7070) e `MemoriaLocal(caminho: str | Path | None = None)` (em memória; com `caminho`, persiste em JSON). A CLI usa `data/estado/memoria_<regiao>.json`.
+
+## 12. Semântica adotada na leva 1 (agentes-llm)
+- `Recurso.capacidade` = número de ocorrências que o recurso atende ao mesmo tempo (1 = não pode estar em duas). `Plano.reserva` = recursos disponíveis sem designação.
+- `RegiaoCfg.velocidade_aereo_kmh` (padrão 180, linha reta, suposição declarada). `ResultadoPeriodo.status`: `aprova` ou `escala`.
+- `historico_celula` devolve, por dia: `{dia, n_focos, frp_soma, frp_max, dia_noite: {D, N}}`.
+- As notas de `cenario.notas` entram como contexto do período, mesmo com `usar_memoria=False`. Quem grava no H-MEM é a CLI (`nota`).
+- `LLMResult` é um `dataclass` (o campo `json` conflita com o pydantic).
+- Parâmetros opcionais extras: `chat(..., log=None)`, `checar_regras(..., reserva_minima=0)`, `checar_citacoes(..., recursos=None, regiao_cfg=None)`, `alocador_simples(..., periodo="", regiao=None)`, `eta_h(..., tipo="terrestre")`.
+- Nomes de `Violacao.regra`:
+  - rígidas: `capacidade_excedida`, `recurso_duplicado`, `eta_acima_limite`, `recurso_indisponivel`, `recurso_inexistente`, `ocorrencia_inexistente`, `exposta_sem_recurso`, `reserva_nao_mantida`, `citacao_incorreta`, `exposicao_sem_recurso_viavel` (esta não tem solução no plano e obriga escalação);
+  - não rígidas (zona cinzenta, decididas pelo Crítico): `exposta_nao_atendida`, `restricao_memoria`.

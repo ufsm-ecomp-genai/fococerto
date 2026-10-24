@@ -102,6 +102,7 @@ class RegiaoCfg(BaseModel):
     bbox: tuple[float, float, float, float]  # lat_min, lat_max, lon_min, lon_max
     idioma: str = "pt-BR"
     velocidade_kmh: float = 40.0
+    velocidade_aereo_kmh: float = 180.0  # suposição declarada: linha reta
     fator_tortuosidade: float = 1.4
     raio_exposicao_km: float = 15.0
     eta_max_h: float = 6.0
@@ -119,6 +120,7 @@ class Cenario(BaseModel):
 class ResultadoPeriodo(BaseModel):
     """Saída de app.agents.grafo.executar_periodo (docs/CONTRATOS.md, seção 10)."""
     plano: Plano
+    status: Literal["aprova", "escala"] | None = None
     ocorrencias: list[Ocorrencia]
     bases: list[Base]
     recursos: list[Recurso]
