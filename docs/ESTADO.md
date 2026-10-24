@@ -2,7 +2,7 @@
 
 > Para retomar numa sessão nova: leia este arquivo, `CLAUDE.md` e `docs/CONTRATOS.md`. Depois rode `git status`, `git log --oneline` e `.venv/bin/python -m pytest -q` para ver o estado real. O que estiver aqui como "em andamento" pode ter ficado pela metade.
 
-Última atualização: 24/10/2026, ~19h40 UTC.
+Última atualização: 24/10/2026, ~22h30 UTC.
 
 ## Pronto (commitado)
 - Estrutura, `CLAUDE.md`, contratos (seções 1 a 13), agentes em `.claude/agents/`, `app/core/`
@@ -21,11 +21,12 @@
 - O Planejador offline é igual ao baseline (alocador simples). As diferenças entre as variantes da ablação aparecem no modo LLM.
 - TI/UC não foram ingeridos (`dist_ti_uc_km` fica nulo).
 
-## Leva 2 (em andamento, sem commit)
-| Agente | Tarefa | Próximo passo se interrompido |
-|---|---|---|
-| avaliacao | cenários e gabaritos **antes** de rodar; `eval/run_ablacao.py` validado em modo offline | conferir `eval/`; o commit dos gabaritos deve vir antes de qualquer execução |
-| qa-integracao | testes de integração, `scripts/check_clean_clone.sh`, Dockerfile, `.env.example`, `scripts/check_submissao.py` | rodar `scripts/check_clean_clone.sh` |
+## Leva 2
+- **qa-integracao (pronto):** 44 testes de integração e anti-trapaça, Docker (build e run testados), `.env.example`, `scripts/check_clean_clone.sh`, `scripts/check_submissao.py`
+- **Correções do líder (commitadas):** recall do H-MEM com uma consulta por termo (a nota não voltava), `status` preenchido, escalação que não esconde ocorrências expostas, `pyproject` instalável
+- **Exemplos:** `input_examples/` e `output_examples/` (4 saídas, com trace), gerados por `scripts/gerar_exemplos.sh`
+- **avaliacao (em andamento):** cenários e gabaritos commitados ANTES de rodar (fcf42df); faltam `eval/run_ablacao.py`, `eval/RELATORIO.md` e `tests/test_eval.py`. Se interrompido: retomar e rodar a ablação offline com o código atual.
+- **docs-submissao (em andamento):** README em inglês (com marcador `<!-- EVAL_RESULTS -->`), `docs/PATROCINADORES.md`, `docs/ROTEIRO-VIDEO.md`, `slides/conteudo.md`, `docs/FORMULARIO.md`
 
 ## Depois
 - docs-submissao: README (em inglês), patrocinadores, roteiro do vídeo, slides (depois da ablação)
