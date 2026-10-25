@@ -6,7 +6,7 @@ Open Agent Hackathon 2026 · **Track 3: Reasoning Architecture** · Team UFSM (U
 
 FocoCerto crosses NASA FIRMS heat detections with weather, nearby communities, fire stations and the resources the coordinator declares. A **Planner** proposes a resource order, a **Critic** challenges it (trade-offs, exceptions from memory, when to escalate) and can call an **Analyst** to answer an open question with stated uncertainty. The output is a **priority list plus a resource order**, where every assignment carries its evidence. Nothing is dispatched without human approval.
 
-> **Status, stated plainly:** the full pipeline runs end to end in **sample mode** (real cached FIRMS data, offline deterministic agents). The **Zetaris** integration and the **Meterless Nightshift** provider are implemented but **have not yet been exercised against a real Zetaris instance or a real Nightshift service**. See [Sponsor technology](#sponsor-technology) and [Limitations](#limitations).
+> **Status, stated plainly:** the full pipeline runs end to end in **sample mode** (real cached FIRMS data, offline deterministic agents). **Meterless Nightshift works against the real service** since 25 Oct 2026 (~01:00 UTC): Nightshift for Windows on a team machine with an NVIDIA GPU, reached over Tailscale, serving `nvidia/nemotron-3-ultra-550b-a55b`; every call returns a signed receipt that the app logs. A full LLM-mode period (scarce scenario) took ~23 s with 2 calls (Planner and Critic). The **ablation in LLM mode is running and has no results yet**. The **Zetaris** integration is implemented but **not yet tested on a real Zetaris instance** (views validated only in a local Spark SQL). See [Sponsor technology](#sponsor-technology) and [Limitations](#limitations).
 
 ---
 
@@ -135,7 +135,7 @@ flowchart TD
 ```
 
 - Maximum 3 Planner→Critic rounds; at most one Analyst call per round.
-- **Mandatory escalation** when an exposed population has no feasible resource, or on deadlock after 3 rounds. The Critic **may** also escalate grey-zone cases, explaining why.
+- **Mandatory escalation** when an occurrence with exposed population is left without a resource (whether no resource can reach it in time or the feasible ones are committed elsewhere), or on deadlock after 3 rounds. The Critic **may** also escalate grey-zone cases, explaining why. *(The "left without a resource" rule is a team decision being enforced in the code after the current LLM-mode ablation; the numbers in this README were measured before it.)*
 - **Guard rails in the graph:** an approval with a solvable hard-rule violation is turned into a rejection; an approval with an unsolvable exposure violation becomes an escalation (`app/agents/grafo.py`).
 - If the LLM output is invalid or Nightshift is unreachable, the agent falls back to its deterministic logic and logs `llm_call` with `status: fallback_offline`.
 
@@ -174,6 +174,7 @@ docker run --rm fococerto            # default command = the sample run above
 ```
 To keep the outputs on the host, mount volumes **and run as your user**, otherwise files are written as root:
 ```bash
+mkdir -p out logs   # create them first; if Docker creates them they belong to root and the run fails with PermissionError
 docker run --rm --user $(id -u):$(id -g) \
   -v "$PWD/out:/app/out" -v "$PWD/logs:/app/logs" fococerto
 ```
@@ -192,6 +193,17 @@ npm ci
 npm test      # official conformance suite against src/engine -> 13/13, saved to conformance-report.txt
 npm start     # http://127.0.0.1:7070  (set HMEM_URL=http://127.0.0.1:7070 in .env)
 ```
+`npm test` rewrites `services/hmem/conformance-report.txt` (it includes the run date), so the file shows up as modified in git; restore it with `git checkout services/hmem/conformance-report.txt`.
+
+**Seeing the real H-MEM engine (no Zetaris, Nightshift or key needed).** `--sample` always uses `MemoriaLocal`, the Python port. To make the CLI talk to the TypeScript service instead, leave `npm start` running in one terminal and, in another, run **without** `--sample`, forcing the cache and the offline agents through environment variables (they take precedence over `.env`):
+```bash
+cd services/hmem && npm ci && npm start          # terminal 1, port 7070
+# terminal 2, from the repository root:
+export LLM_PROVIDER=offline HMEM_URL=http://127.0.0.1:7070 ZETARIS_API_KEY=
+.venv/bin/python -m app.cli nota --regiao tocantins --periodo 2026-10-23 "estrada para Mateiros alagada"
+.venv/bin/python -m app.cli run  --regiao tocantins --recursos cenarios/tocantins-escasso.yaml
+```
+The CLI prints `Memória: H-MEM em http://127.0.0.1:7070` (instead of `MemoriaLocal`) and `Dados: cache local (data/cache/) [ZETARIS_API_KEY ausente]`. The empty `ZETARIS_API_KEY=` matters if your `.env` has a Zetaris key: with a key set, the CLI tries the real Zetaris. The service keeps its memories in `services/hmem/data/`.
 
 ### 5. Zetaris (data layer) — implemented, not yet run against a real instance
 Follow the Participant Setup Guide (HackOS Resource Center) to start Zetaris in Docker, then:
@@ -204,21 +216,29 @@ Follow the Participant Setup Guide (HackOS Resource Center) to start Zetaris in 
 ```
 `setup_zetaris.py` registers everything by script: the Postgres JDBC datasource, the GeoNames/OSM/region CSVs in the file store (`docker cp` + `CREATE LIGHTNING FILESTORE TABLE … FORMAT CSV`), one Open-Meteo REST table per region with `CACHE TABLE`, and the views in `sql/zetaris_views.sql`. Variables: `ZETARIS_REST_URL`, `ZETARIS_API_KEY`, `ZETARIS_ORG_ID`, `POSTGRES_DSN`, `ZETARIS_PG_HOST`, `ZETARIS_DRIVER_CONTAINER`, `ZETARIS_FILESTORE_DIR`.
 
-### 6. Meterless Nightshift (AI provider) — implemented, not yet run against the real service
+### 6. Meterless Nightshift (AI provider) — working against the real service
 Run Nightshift, add the NVIDIA key in **Nightshift's Providers tab** (not in this project), and set in `.env`:
 ```
 LLM_PROVIDER=nightshift
-METERLESS_BASE_URL=http://127.0.0.1:8088/v1
-METERLESS_RUNTIME_TOKEN=<your runtime token>
-METERLESS_MODEL=meterless/auto
+METERLESS_BASE_URL=http://127.0.0.1:8088/v1          # we reach a team machine over Tailscale: use its address
+METERLESS_RUNTIME_TOKEN=<content of the runtime's proxy-token file>
+METERLESS_MODEL=nvidia/nemotron-3-ultra-550b-a55b
 ```
-Then run without `--sample`.
+Then run without `--sample`. What we learned on the real service (25 Oct 2026):
+- **Token:** use the content of the runtime's `proxy-token` file; the token shown in the Nightshift UI returned 401.
+- **Model:** ask for Nemotron by name. With `meterless/auto` the router may try to load a local model instead.
+- **Reasoning off by default:** the client sends `chat_template_kwargs: {"enable_thinking": false}` (plus a `/no_think` system message). With reasoning on, Nemotron spent the whole 4096-token budget thinking and never wrote the JSON. `LLM_NO_THINK=0` turns reasoning back on. The client also strips any reasoning text glued before the answer (`…</think>`).
+- Each call returns a signed receipt (`meterless.compute_receipt.v1`, Ed25519) with `routed_model` and a `receipt_id` (e.g. `rcpt_req_7yxkcil7`); the app writes both into every `llm_call` log line.
 
 ---
 
 ## Usage
 
+Activate the virtual environment first (`source .venv/bin/activate`), or replace `python` below with `.venv/bin/python`.
+
 ```bash
+source .venv/bin/activate
+
 # Plan one period (writes out/<region>/<period>/plano.json, plano.md, mapa.html and logs/<run>.jsonl)
 python -m app.cli run --regiao tocantins --recursos cenarios/tocantins-escasso.yaml [--periodo 2026-10-23] [--sample]
 
@@ -228,10 +248,10 @@ python -m app.cli nota --regiao tocantins [--periodo P] [--autor A] "estrada par
 # Approve the last saved plan of a period (writes the decisions)
 python -m app.cli aprovar --regiao tocantins --periodo 2026-10-23
 
-# Run the ablation (eval/run_ablacao.py)
-python -m app.cli avaliar --regiao tocantins [--sample]
+# Run the ablation: 12 scenarios x 4 variants x 3 repetitions (writes eval/resultados/<timestamp>_<mode>/)
+python -m eval.run_ablacao --modo offline            # --modo llm needs Nightshift; --estimar prints the expected cost first
 ```
-Every subcommand accepts `--sample`. Plan text follows the region's language (`idioma: pt-BR` for Tocantins).
+Every subcommand (`run`, `nota`, `aprovar`) accepts `--sample`. Plan text follows the region's language (`idioma: pt-BR` for Tocantins).
 
 **Memory demo you can reproduce in sample mode** (state is kept in `data/estado/`, git-ignored; delete it to start fresh):
 ```bash
@@ -248,7 +268,7 @@ python -m app.cli run  --sample --regiao tocantins --recursos cenarios/tocantins
 
 ## Examples
 
-All examples are produced by real `--sample` runs (`scripts/gerar_exemplos.sh`) on real FIRMS data for **23 Oct 2026**; resources are **simulated**. The app never reads these folders.
+All examples are produced by real `--sample` runs (`scripts/gerar_exemplos.sh`) on real FIRMS data for **23 Oct 2026** (the Analyst example: 24 Oct); resources are **simulated**. The app never reads these folders.
 
 | Input (`input_examples/`) | Resources | Output (`output_examples/`) | Result |
 |---|---|---|---|
@@ -256,6 +276,7 @@ All examples are produced by real `--sample` runs (`scripts/gerar_exemplos.sh`) 
 | `tocantins-medio.yaml` | 10, reserve 1 | `tocantins-medio/` | 8 assignments, 7 escalations, 1 in reserve |
 | `tocantins-folgado.yaml` | 16, reserve 2 | `tocantins-folgado/` | 14 assignments, 1 escalation, 2 in reserve |
 | `tocantins-escasso.yaml` + note *"estrada para Mateiros alagada, sem acesso"* | 6 | `tocantins-escasso-com-nota/` | 5 assignments, 10 escalations: the Critic accepts the memory exception, `mateiros-t1` no longer goes by road to `cel_-96_-468` (Lizarda) and that occurrence is escalated |
+| `tocantins-parana-analista.yaml` (copy of the eval scenario `agricola_recorrente_parana_24out`, period 24 Oct) | 5, reserve 0 | `tocantins-parana-analista/` | 5 assignments, 3 escalations. The Critic calls the Analyst about `cel_-124_-479` (no population nearby); after 7 queries it answers **`indeterminado`, confidence `baixa`** (low FRP and far from protected areas, but the occurrence is growing), so the assignment is kept as a precaution. The scarce scenario above never calls the Analyst |
 
 Each output folder has `plano.md` (human-readable plan: escalations, resource order, priority list, justifications with evidence ids, memories used, review cycle, limitations), `plano.json` (the same as data, read by `aprovar`), `mapa.html` (Leaflet) and `trace.jsonl` (the full event log).
 
@@ -278,8 +299,9 @@ In LLM mode each `llm_call` line records `modelo`, `routed_model` and `receipt` 
 ## Tests
 
 ```bash
-.venv/bin/python -m pytest -q                       # 150 passed, 1 skipped (needs a throwaway Postgres: POSTGRES_DSN_TESTE)
-(cd services/hmem && npm test)                      # H-MEM conformance: 13/13 checks passed
+(cd services/hmem && npm ci)                        # first: without it the H-MEM HTTP tests below are skipped
+.venv/bin/python -m pytest -q                       # 176 passed, 1 skipped (needs a throwaway Postgres: POSTGRES_DSN_TESTE)
+(cd services/hmem && npm test)                      # H-MEM conformance: 13/13 checks passed (rewrites conformance-report.txt)
 .venv/bin/python scripts/check_submissao.py         # secrets, .env, examples, README sections, repo size, dates
 scripts/check_clean_clone.sh                        # fresh clone -> venv -> pytest -> run --sample -> npm ci && npm test
 ```
@@ -302,7 +324,7 @@ The Track 3 question: **do the agents and the memory make better decisions?** We
 
 **Metrics:** answer-key accuracy (split into decision, detection and false alarm), false citations, exposure-weighted ETA (how long, on average, exposed population waits for a resource), rounds to approval, escalations, and variance over **3 runs per scenario and variant**.
 
-**Honesty notes:** the answer keys were written by the team, there is no field ground truth, and the reservations for each case are in the key itself. In offline mode every run is deterministic and A and B tend to coincide, so offline results only validate the pipeline; **the comparison that matters is in LLM mode**. Details: `eval/README.md` and `eval/RELATORIO.md`.
+**Honesty notes:** the answer keys were written by the team, there is no field ground truth, and the reservations for each case are in the key itself. The agents' code already existed when the keys were committed (commit `0cfcb66`, 28 minutes before `fcf42df`), and after the first offline runs we fixed **7 bugs** that we found because checks failed (commit `b97dfe7`). The fixes are general behaviour fixes with regression tests, each one documented with how to reproduce it in `eval/RELATORIO.md`, but they were made after seeing the results, and the "before" table is kept there. In offline mode every run is deterministic and A and B tend to coincide, so offline results only validate the pipeline; **the comparison that matters is in LLM mode**. Details: `eval/README.md` and `eval/RELATORIO.md`.
 
 **Ablation results: offline deterministic agents — LLM-mode results pending.** These numbers validate the
 evaluation pipeline (12 scenarios × 4 variants × 3 repetitions, `python -m eval.run_ablacao --modo offline --repeticoes 3`);
@@ -330,14 +352,14 @@ Full write-up: [`docs/PATROCINADORES.md`](docs/PATROCINADORES.md).
 |---|---|---|
 | **Zetaris** | Data layer: federates Postgres (FIRMS detections), file-store CSVs (GeoNames localities, OSM stations, region table) and an Open-Meteo REST table with `CACHE TABLE`; four views compute occurrences, localities, context and priority. Registered entirely by `scripts/setup_zetaris.py` | Views validated in a local **Spark SQL 4.0** against the Python logic (**698/698 occurrences identical**, `sql/validar_views_spark.py`). **Not yet run on a real Zetaris.** Missing: a running Zetaris + `.env`, then `setup_zetaris.py` and `run` without `--sample` |
 | **Meterless H-MEM** | Memory across periods, scoped per region: coordinator notes become memories that change the plan; a contradicting note **supersedes** the old one; data-derived memories (e.g. "cell X was deprioritized and grew") raise priority | Official Meterless reference engine (Apache-2.0) in `services/hmem/`, adaptations marked "FocoCerto adaptation". **Conformance 13/13** (`npm test`). Persistent Python port `MemoriaLocal` for sample mode, checked against the service in tests |
-| **Meterless Nightshift** | Primary AI provider for Planner, Critic and Analyst, via its OpenAI-compatible endpoint; each call logs `modelo`, `routed_model`, `receipt` | Implemented and unit-tested with a fake HTTP layer. **Not yet exercised against a real Nightshift** |
-| **NVIDIA Nemotron** | The reasoning model behind the agents, reached only through Nightshift | Pending the real Nightshift run (see `docs/PATROCINADORES.md`) |
+| **Meterless Nightshift** | Primary AI provider for Planner, Critic and Analyst, via its OpenAI-compatible endpoint; each call logs `modelo`, `routed_model`, `receipt` | **Working against the real service** since 25 Oct 2026: Nightshift for Windows on a team GPU machine over Tailscale; each call returns a signed receipt (`meterless.compute_receipt.v1`, Ed25519) logged in every `llm_call`. Also unit-tested with a fake HTTP layer |
+| **NVIDIA Nemotron** | The reasoning model behind the agents, reached only through Nightshift | `nvidia/nemotron-3-ultra-550b-a55b` answers the real calls (`routed_model` in the log); one LLM-mode period ≈ 23 s, 2 calls. LLM-mode ablation running, no results yet |
 
 ---
 
 ## Limitations
 
-- **Not tested against the real sponsor services yet:** Zetaris (views validated only in local Spark SQL) and Nightshift/Nemotron (client tested only with a fake HTTP layer).
+- **Zetaris not yet tested on a real instance:** the views were validated only in a local Spark SQL 4.0. Nightshift/Nemotron does run against the real service, but the **LLM-mode ablation has no results yet**, so we cannot yet say whether the LLM agents beat the offline ones.
 - **Offline agents are simple:** in sample mode the Planner is essentially the greedy baseline; differences between ablation variants depend on LLM mode.
 - **Data-derived memories are learned between periods**: before each `run`, the system compares the previous period's plan with the new FIRMS data and stores, for example, "cell X was left without a resource and grew from 2 to 8 detections" (`app/agents/aprendizado.py`). Each ablation scenario has a single period, so the ablation seeds these memories; the multi-period effect is shown by `scripts/demo_3_periodos.sh`.
 - **Exposure is overestimated near mid-size towns:** `pop_raio` sums GeoNames population, which is often the whole municipality (e.g. Porto Nacional ~53k), not just the town.

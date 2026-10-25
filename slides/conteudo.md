@@ -13,7 +13,7 @@ Estrutura do `pitch-deck-template.md` (12 slides + apêndice), adaptada ao que o
 | Visuais do produto | 1, 5, 8 |
 | Melhorias futuras | 12 |
 
-**Regras:** todo número vem do repositório (cache de 23/10/2026, `output_examples/`, `npm test`, `eval/RELATORIO.md`). Onde houver `[[...]]`, preencher com o valor real antes de exportar. Nada de "testado no Zetaris/Nightshift" enquanto não for verdade. Sugestão: os slides exportados ficam em inglês (juízes internacionais); este arquivo é a base em português.
+**Regras:** todo número vem do repositório (cache de 23/10/2026, `output_examples/`, `npm test`, `eval/RELATORIO.md`). Onde houver `[[...]]`, preencher com o valor real antes de exportar. Nada de "testado no Zetaris" enquanto não for verdade (o Nightshift real funciona desde 25/10/2026; o Zetaris real ainda não foi testado). Sugestão: os slides exportados ficam em inglês (juízes internacionais); este arquivo é a base em português.
 
 ---
 
@@ -58,7 +58,7 @@ Estrutura do `pitch-deck-template.md` (12 slides + apêndice), adaptada ao que o
 ## Slide 6: Arquitetura dos agentes
 - **Agentes:** Planejador (ordem de recursos; pode desviar do alocador guloso, explicando por quê) · Crítico (trade-offs, exceções da memória, escalação, contra-proposta) · Analista (chamado pelo Crítico; 7 consultas; conclusão + confiança).
 - **Ferramentas (determinísticas):** `monitor`, `alocador_simples`, `checar_regras`, `checar_citacoes`, `consultar`, `interpretar_memorias`.
-- **Padrão de colaboração (não linear):** Planejador → checagens → Crítico ⇄ Analista; o Crítico rejeita → Planejador (máx. 3 rodadas); aprova → plano; escala → humano. Guarda-corpos no grafo: não há aprovação com regra rígida solúvel violada; população exposta sem recurso viável obriga a escalar.
+- **Padrão de colaboração (não linear):** Planejador → checagens → Crítico ⇄ Analista; o Crítico rejeita → Planejador (máx. 3 rodadas); aprova → plano; escala → humano. Guarda-corpos no grafo: não há aprovação com regra rígida solúvel violada; toda ocorrência com população exposta que fica sem recurso obriga a escalar (decisão do time, entra no código depois da ablação LLM em curso).
 - **Visual:** o diagrama mermaid do README ("The loop is not linear").
 
 **Notas:** "O LLM decide o que o código não decide; números como ETA e população vêm sempre das ferramentas."
@@ -70,15 +70,15 @@ Estrutura do `pitch-deck-template.md` (12 slides + apêndice), adaptada ao que o
 | IA | **Meterless Nightshift** (compatível com OpenAI) → **NVIDIA Nemotron** |
 | Engine Meterless | **H-MEM**, referência oficial (serviço TypeScript, porta 7070) + versão em Python para o modo offline |
 | Agentes | Python 3.12, LangGraph, pydantic, httpx |
-| Interface | CLI (`run`, `nota`, `aprovar`, `avaliar`), plano em Markdown/JSON, mapa Leaflet |
-| Qualidade | pytest 150 passaram / 1 pulado, `npm test` 13/13, `check_submissao.py`, script de clone limpo, Docker, sample mode |
+| Interface | CLI (`run`, `nota`, `aprovar`) + `eval.run_ablacao`, plano em Markdown/JSON, mapa Leaflet |
+| Qualidade | pytest 176 passaram / 1 pulado (com `npm ci` em `services/hmem`), `npm test` 13/13, `check_submissao.py`, script de clone limpo, Docker, sample mode |
 
-- **Status:** Zetaris e Nightshift implementados, **ainda não testados nos serviços reais** **[[atualizar se mudar]]**.
+- **Status:** **Nightshift real funcionando** desde 25/10/2026 (Nightshift Windows numa máquina do time com GPU NVIDIA, via Tailscale; `nvidia/nemotron-3-ultra-550b-a55b`; cada chamada traz recibo assinado `meterless.compute_receipt.v1` e o log grava `routed_model` e o `receipt_id`; um período no modo LLM ≈ 23 s, 2 chamadas). **Zetaris implementado, ainda não testado numa instância real** **[[atualizar se mudar]]**.
 - **Visual:** a tabela acima com os logos dos patrocinadores.
 
 ## Slide 8: Demo
 - **Cenário:** Tocantins, 23/10/2026, cenário escasso (6 equipes).
-- **O que observar:** (1) o Crítico escala 9 ocorrências com população em vez de escondê-las; (2) o Analista conclui "provável queima agrícola, confiança média" (12 focos em 7 dias, 0% à noite, FRP baixo); (3) a nota *"estrada para Mateiros alagada"* tira `mateiros-t1` de Lizarda, e a nota *"liberada"* a substitui e devolve o recurso; (4) a linha do log com o modelo que respondeu **[[só se a execução com o Nightshift real tiver acontecido]]**.
+- **O que observar:** (1) no cenário escasso (modo offline), o Crítico escala 9 ocorrências com população em vez de escondê-las; (2) noutro cenário (Paranã, 24/10; `output_examples/tocantins-parana-analista/`), o Crítico chama o Analista, que faz 7 consultas e responde "**indeterminado**, confiança **baixa**" (FRP baixo e longe de TI/UC, mas a ocorrência está crescendo); o Crítico mantém a designação por precaução e escala as 3 ocorrências com população sem recurso. O cenário escasso não chama o Analista; (3) a nota *"estrada para Mateiros alagada"* tira `mateiros-t1` de Lizarda, e a nota *"liberada"* a substitui e devolve o recurso; (4) a linha `llm_call` do log com `routed_model: nvidia/nemotron-3-ultra-550b-a55b` e o `receipt` (execução real pelo Nightshift).
 - **Plano B:** o sample mode (`--sample`) roda o mesmo pipeline sem nenhum serviço; saídas em `output_examples/`.
 - **Visual:** 3 capturas: terminal com o ciclo, `plano.md` com a memória, mapa.
 
@@ -94,13 +94,14 @@ Estrutura do `pitch-deck-template.md` (12 slides + apêndice), adaptada ao que o
 - **O que precisamos:** acesso a operadores (Corpo de Bombeiros do Tocantins, PrevFogo/Ibama, ICMBio) e a inventários reais de recursos.
 
 ## Slide 11: Riscos, limitações e mitigações
-- **Ainda não testado no Zetaris e no Nightshift reais** → views validadas em Spark SQL 4.0 (698/698 iguais ao Python); cliente LLM com testes unitários; passos para ligar documentados (`scripts/setup_zetaris.py`, `.env`).
+- **Zetaris ainda não testado numa instância real** → views validadas em Spark SQL 4.0 (698/698 iguais ao Python); passos para ligar documentados (`scripts/setup_zetaris.py`, `.env`).
+- **Ablação no modo LLM ainda sem resultado** (rodando) → por enquanto só a tabela offline, que valida o pipeline; o Nightshift/Nemotron real já responde às chamadas.
 - **Agentes offline são simples** (Planejador ≈ alocador guloso) → o ganho das variantes da ablação depende do modo LLM.
 - **Exposição superestimada** (população municipal do GeoNames) · **detecção ≠ incêndio** · queima agrícola inferida com incerteza · distância em linha reta × fator · Hot-Dry-Windy simplificado de superfície · TI/UC não ingeridos · recursos simulados · sem validação com operadores.
 - **IA responsável:** aprovação humana em todo plano; escalação obrigatória; incerteza declarada; só dados públicos, sem dados pessoais; dados simulados identificados.
 
 ## Slide 12: Próximos passos
-- **Já:** rodar no Zetaris e no Nightshift/Nemotron reais; rodar a ablação no modo LLM.
+- **Já:** rodar no Zetaris real (servidor do time); terminar a ablação no modo LLM (Nightshift/Nemotron real já funciona).
 - **Em 2 a 3 meses:** validação com operadores; TI/UC (FUNAI/ICMBio) na exposição; filtro de queima agrícola por cobertura do solo; rotas reais; tipos de recurso (terrestre, aéreo, fluvial).
 - **Depois:** modelo de propagação; outras doutrinas como configuração; outros desastres.
 - **Fechamento:** *"Os painéis mostram onde está o fogo. O FocoCerto propõe qual atender primeiro e com quem, mostrando por quê, e um crítico revisa o plano antes de o coordenador aprovar."*
@@ -112,11 +113,11 @@ Estrutura do `pitch-deck-template.md` (12 slides + apêndice), adaptada ao que o
 ### A. Patrocinadores: como usamos e o que foi único
 - **Zetaris:** a análise mora nas views (agrupamento, persistência, exposição, prioridade), federando três tipos de fonte; validação em Spark 698/698. *Ainda não rodou num Zetaris real.*
 - **Meterless H-MEM:** as notas do coordenador mudam o plano; uma nota contrária substitui a antiga (*supersedes*, com ledger de auditoria, nada é apagado); memória por região; referência oficial + suíte de conformidade sem alterações: **13/13**.
-- **Meterless Nightshift + NVIDIA Nemotron:** toda chamada de LLM passa por um único cliente; cada chamada registra `modelo`, `routed_model` e `receipt`. **[[status e trecho do log de docs/PATROCINADORES.md]]**
+- **Meterless Nightshift + NVIDIA Nemotron:** toda chamada de LLM passa por um único cliente; cada chamada registra `modelo`, `routed_model` e `receipt`. Funcionando no Nightshift real desde 25/10 com `nvidia/nemotron-3-ultra-550b-a55b`; raciocínio desligado (`enable_thinking=false`) porque com ele o Nemotron gastava os 4096 tokens pensando e não devolvia o JSON. **[[trecho do log de docs/PATROCINADORES.md]]**
 - Detalhes: `docs/PATROCINADORES.md`.
 
 ### B. Trecho do log
-- Uma linha `critico`/`escala` e uma `analista`/`consulta` de `output_examples/*/trace.jsonl` ou da execução do cenário agrícola; no modo LLM, uma linha `llm_call` com `routed_model` **[[quando existir]]**.
+- Uma linha `critico`/`escala` e uma `analista`/`consulta` de `output_examples/*/trace.jsonl` ou da execução do cenário agrícola; no modo LLM, uma linha `llm_call` com `routed_model` e `receipt` (de `logs/` da execução real pelo Nightshift).
 
 ### C. Avaliação
 - Variantes A (alocador guloso), B (Planejador + checador), C (completo), D (C sem H-MEM); 12 cenários com dados reais; gabaritos commitados antes de qualquer execução (commit `fcf42df`); 3 execuções por cenário e variante.

@@ -3,14 +3,15 @@
 > **ATENÇÃO: este é o resultado do modo OFFLINE.** Os agentes são as versões determinísticas (`decidir_offline`),
 > sem LLM. Este relatório **valida o pipeline da ablação** (cenários, injeção, checagens e métricas) e mostra o que
 > as ferramentas e as heurísticas offline fazem. **Não é o resultado final do FocoCerto**: a comparação que responde à
-> pergunta da Track 3 é a do modo `llm` (Nightshift), que ainda não foi rodada.
+> pergunta da Track 3 é a do modo `llm` (Nightshift). O Nightshift real funciona desde 25/10/2026 e a ablação no modo
+> `llm` está rodando; os resultados ainda não existem.
 
 - Método, variantes, definições das checagens e das métricas: `eval/README.md`.
 - Cenários e gabaritos: commit `fcf42df` ("Avaliação: cenários e gabaritos escritos antes de qualquer execução",
   24/10/2026 15:56 -03:00). Nenhum gabarito foi alterado depois.
 - **Execução atual:** `.venv/bin/python -m eval.run_ablacao --modo offline --repeticoes 3`, com o código depois da
   correção dos 7 bugs (commit `b97dfe7`) e da memória derivada automática entre períodos
-  (`app/agents/aprendizado.py`, ainda sem commit). São 12 cenários × 4 variantes × 3 repetições = 144 execuções, em
+  (`app/agents/aprendizado.py`, commitada depois em `211bb40`). São 12 cenários × 4 variantes × 3 repetições = 144 execuções, em
   cerca de 15 s. Resultados: `eval/resultados/20261024T222738Z_offline/` (um JSON por execução, logs JSONL,
   `resumo.json` e `tabela.md`).
 - A tabela é idêntica, célula por célula, à da execução logo depois das correções

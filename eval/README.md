@@ -17,7 +17,15 @@ checador, e conferimos cada execução contra um gabarito escrito **antes** de r
   por célula e dia no cache, a matriz de ETA (`app.tools.geo.eta_recurso`), o `monitor` e o `alocador_simples`
   (o baseline), para confirmar que a situação de cada caso acontece de fato nos dados. **Nenhuma variante B, C ou D
   foi executada antes do commit.**
-- Não ajustamos prompts nem código dos agentes para passar nos gabaritos. Problemas encontrados vão para o líder.
+- **O código dos agentes já existia quando os gabaritos foram escritos:** o commit dos agentes (`0cfcb66`, 24/10
+  15:28 -03:00) é 28 minutos anterior ao dos gabaritos (`fcf42df`, 15:56). Quem escreveu os gabaritos podia ter lido
+  esse código; a garantia é só que nenhuma variante B, C ou D tinha sido executada.
+- **Corrigimos 7 bugs depois de ver checagens falharem** (commit `b97dfe7`, com testes de regressão em
+  `tests/test_regressao_ablacao.py`). São correções de comportamento geral (recall de memórias, localidades de mesmo
+  nome, histórico do Analista sem o dia atual, etc.), cada uma documentada com a reprodução em `RELATORIO.md`, e não
+  regras para cenários específicos. Mesmo assim, foram feitas depois de ver os resultados offline, e isso favorece os
+  números offline publicados; a tabela "antes" continua no `RELATORIO.md`. Não ajustamos prompts para passar nos
+  gabaritos, e nenhum gabarito foi alterado. Problemas encontrados vão para o líder.
 - Se C não ganhar de B, isso fica escrito no relatório, com a análise dos casos que falharam.
 
 ## O que é real e o que é simulado

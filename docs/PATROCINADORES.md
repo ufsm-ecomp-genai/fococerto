@@ -6,8 +6,8 @@ This document answers the sponsor-technology questions of the submission: how Ze
 |---|---|---|---|
 | Zetaris | data layer (federated read path + 4 views) | Spark SQL 4.0 local vs Python: 698/698 occurrences identical | **No, not yet** |
 | Meterless H-MEM | memory across periods, per region | official conformance suite 13/13 + our tests | Yes (the engine is the official reference, run locally) |
-| Meterless Nightshift | primary AI provider for all three agents | unit tests with a fake HTTP layer | **No, not yet** |
-| NVIDIA Nemotron | reasoning model behind the agents, via Nightshift | none yet | **No, not yet** |
+| Meterless Nightshift | primary AI provider for all three agents | real runs since 25 Oct 2026 (~01:00 UTC) + unit tests with a fake HTTP layer | **Yes** (Nightshift for Windows on a team GPU machine, over Tailscale) |
+| NVIDIA Nemotron | reasoning model behind the agents, via Nightshift | real runs: `nvidia/nemotron-3-ultra-550b-a55b` in `routed_model` of every `llm_call` | **Yes** (LLM-mode ablation still running, no results yet) |
 
 ---
 
@@ -81,24 +81,24 @@ The suite runs against `src/engine/index.ts`, the same engine the server uses; t
 
 ### How the app connects
 All LLM calls go through `app/llm/client.py::chat()` (a test forbids direct provider calls anywhere else). With `LLM_PROVIDER=nightshift`:
-- `POST {METERLESS_BASE_URL}/chat/completions` (OpenAI-compatible), `Authorization: Bearer $METERLESS_RUNTIME_TOKEN`, headers `meterless-app: fococerto` and `meterless-scope: user`, model `METERLESS_MODEL` (default `meterless/auto`, letting Nightshift route).
+- `POST {METERLESS_BASE_URL}/chat/completions` (OpenAI-compatible), `Authorization: Bearer $METERLESS_RUNTIME_TOKEN`, headers `meterless-app: fococerto` and `meterless-scope: user`, model `METERLESS_MODEL`. We ask for Nemotron by name (`nvidia/nemotron-3-ultra-550b-a55b`, as in `.env.example`): with `meterless/auto` the router may try to load a local model instead. The token is the content of the runtime's `proxy-token` file; the token shown in the Nightshift UI returned 401.
 - Retries with exponential backoff on 408/409/425/429/5xx and transport errors; client errors are not retried.
 - JSON outputs are requested with the schema in a system message, then validated with pydantic by the agent; on invalid output or an unreachable Nightshift the agent falls back to its deterministic logic and logs `status: fallback_offline`.
-- Optional `/no_think` system message (`LLM_NO_THINK=1`, tip from the help channels) to avoid the model spending the token budget on reasoning text.
+- **Reasoning is off by default** (`LLM_NO_THINK=1`): the request carries `chat_template_kwargs: {"enable_thinking": false}`, plus a `/no_think` system message. Measured on the real Nightshift: with reasoning on, Nemotron spent the whole 4096-token budget thinking and never wrote the JSON (the Planner's prompt is large), and `/no_think` alone was not enough; `enable_thinking=false` fixed it. `LLM_NO_THINK=0` turns reasoning back on. The client also strips any reasoning text that comes glued before the answer (everything up to the last `</think>`).
 
 ### What is logged
-Every call (success or failure) becomes an `llm_call` line in `logs/<run>.jsonl` with **`modelo`** (the `model` returned), **`routed_model`** (the model Nightshift actually routed to) and **`receipt`**, plus tokens, latency and number of attempts. Because the receipt format is not documented, `_extrair_meta` looks for `routed_model` and the receipt tolerantly in the body (`meterless_receipt`, `receipt`, `meterless`) and in response headers. `tests/test_llm_client.py` checks this with a fake response (`routed_model: "nvidia/nemotron-x"`, `receipt: "rcpt_123"`).
+Every call (success or failure) becomes an `llm_call` line in `logs/<run>.jsonl` with **`modelo`** (the `model` returned), **`routed_model`** (the model Nightshift actually routed to) and **`receipt`**, plus tokens, latency and number of attempts. On the real Nightshift each response carries a signed receipt (`meterless.compute_receipt.v1`, Ed25519) with `routed_model` and a `receipt_id` (e.g. `rcpt_req_7yxkcil7`); the app logs the routed model and the receipt id. `_extrair_meta` looks for them tolerantly in the body (`meterless_receipt`, `receipt`, `meterless`) and in response headers. `tests/test_llm_client.py` checks this with a fake response (`routed_model: "nvidia/nemotron-x"`, `receipt: "rcpt_123"`).
 
 ### Test status (honest)
-**Not yet exercised against a real Nightshift.** There was no Nightshift on the development machine. The client is unit-tested only. To switch it on: run Nightshift, put the NVIDIA key in Nightshift's Providers tab, set `LLM_PROVIDER=nightshift`, `METERLESS_BASE_URL` and `METERLESS_RUNTIME_TOKEN` in `.env`, and run without `--sample`.
+**Working against the real service since 25 Oct 2026 (~01:00 UTC).** Nightshift for Windows runs on a team machine with an NVIDIA GPU and the app reaches it over Tailscale. A full LLM-mode period on the scarce scenario took about 23 s with 2 calls (Planner and Critic), each logged with `routed_model` and its receipt id. The **ablation in LLM mode is running now; its results are not in yet** (see `eval/RELATORIO.md`). To switch it on: run Nightshift, put the NVIDIA key in Nightshift's Providers tab, set `LLM_PROVIDER=nightshift`, `METERLESS_BASE_URL`, `METERLESS_RUNTIME_TOKEN` (the `proxy-token` file) and `METERLESS_MODEL` in `.env`, and run without `--sample`.
 
 ---
 
 ## 4. NVIDIA: Nemotron through Nightshift
 
-The Planner, Critic and Analyst are designed to run on an **NVIDIA Nemotron** model routed by Nightshift; NVIDIA is never called directly from the project. Nemotron makes the decisions the code deliberately does not: deviating from the greedy baseline with a justification, judging trade-offs and memory exceptions, deciding when to escalate, and concluding (with confidence) whether an occurrence looks like agricultural burning. The model that answered each request is recorded in the log (`routed_model`).
+The Planner, Critic and Analyst run on **NVIDIA Nemotron** (`nvidia/nemotron-3-ultra-550b-a55b`) routed by Nightshift; NVIDIA is never called directly from the project. Nemotron makes the decisions the code deliberately does not: deviating from the greedy baseline with a justification, judging trade-offs and memory exceptions, deciding when to escalate, and concluding (with confidence) whether an occurrence looks like agricultural burning. The model that answered each request is recorded in the log (`routed_model`).
 
-**Status:** not exercised yet (depends on the real Nightshift run above). The excerpt below will be pasted from a real log once that run happens.
+**Status:** real calls work (section 3); the model that answered is in `routed_model` of every `llm_call`. The LLM-mode ablation is still running, so we do not claim yet that Nemotron improves the decisions. A log excerpt from the real run goes below.
 
 <!-- NEMOTRON_LOG_EXCERPT -->
 

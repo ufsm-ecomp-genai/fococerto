@@ -2,12 +2,12 @@
 
 Baseado na seção 14 da especificação, ajustado ao que **existe de fato** no repositório em 24/10/2026. O vídeo vale 15 pontos e precisa mostrar o agente funcionando (não slides), a integração com o Zetaris, o engine Meterless e **uma requisição real passando pelo Nightshift**.
 
-Legenda: **[NIGHTSHIFT]** = depende do Nightshift real (ainda não testado). **[ZETARIS]** = depende do Zetaris real (ainda não testado). Cada trecho marcado tem um **plano B** que já funciona hoje e não finge o que não aconteceu.
+Legenda: **[NIGHTSHIFT]** = precisa do Nightshift real no ar na hora de gravar (funciona desde 25/10/2026 ~01h UTC: Nightshift Windows na máquina do time com GPU NVIDIA, via Tailscale, modelo `nvidia/nemotron-3-ultra-550b-a55b`). **[ZETARIS]** = depende do Zetaris real (ainda não testado; vai ser instalado no servidor do time). Cada trecho marcado tem um **plano B** que já funciona hoje e não finge o que não aconteceu.
 
 ## Antes de gravar (checklist)
 - [ ] `rm -rf data/estado out` para começar com a memória vazia.
 - [ ] Terminal com fonte grande; `.env` **nunca** aparece na tela (nem token, nem chave da NVIDIA).
-- [ ] Se o Nightshift estiver no ar: `LLM_PROVIDER=nightshift` e rodar **sem** `--sample`. Rodar uma vez antes para medir o tempo (cada chamada pode levar dezenas de segundos) e gravar a execução real, cortando só a espera.
+- [ ] Nightshift: ligar a máquina do time e o Tailscale; `.env` com `LLM_PROVIDER=nightshift`, `METERLESS_BASE_URL` (endereço Tailscale), `METERLESS_RUNTIME_TOKEN` (conteúdo do arquivo `proxy-token`) e `METERLESS_MODEL=nvidia/nemotron-3-ultra-550b-a55b`; rodar **sem** `--sample`. Rodar uma vez antes: no teste de 25/10 um período do cenário escasso levou ~23 s com 2 chamadas (Planejador e Crítico). Gravar a execução real, cortando só a espera.
 - [ ] Se o Zetaris estiver no ar: `scripts/setup_zetaris.py --regioes tocantins` feito antes e `--so-cache` depois de qualquer reinício.
 - [ ] Abrir `out/tocantins/2026-10-23/mapa.html` no navegador já com o zoom no Tocantins.
 - [ ] Ter a tabela da ablação pronta (de `eval/RELATORIO.md`, do modo que tiver rodado de verdade).
@@ -34,7 +34,7 @@ Legenda: **[NIGHTSHIFT]** = depende do Nightshift real (ainda não testado). **[
 python -m app.cli run --regiao tocantins --recursos cenarios/tocantins-escasso.yaml   # [NIGHTSHIFT]
 # plano B: o mesmo comando com --sample
 ```
-**Mostrar:** as linhas de progresso (planejador: proposta → ferramenta: violacao → critico: escala) e o resultado: 6 designações e 9 escaladas no modo offline.
+**Mostrar:** as linhas de progresso (planejador: proposta → ferramenta: violacao → critico: escala) e o resultado: 6 designações e 9 escaladas no modo offline. No modo LLM o resultado pode ser outro: mostrar o que sair, sem trocar pelos números do offline. Neste cenário o Crítico **não** chama o Analista (no teste real de 25/10 foram só 2 chamadas: Planejador e Crítico); o Analista aparece no cenário abaixo.
 
 **[NIGHTSHIFT] Se o Nightshift estiver no ar:** mostrar no log as linhas `llm_call` com `routed_model` e `receipt`:
 ```bash
@@ -42,13 +42,15 @@ grep llm_call logs/<execucao>.jsonl | python -c "import sys,json;[print(j['agent
 ```
 Fala: "Cada agente fala com o Nemotron pelo Nightshift, e o log registra qual modelo respondeu." **É o trecho que prova a requisição real pelo Nightshift: não cortar.**
 
-**Fala (vale nos dois modos):** "O alocador guloso propõe. As ferramentas aplicam as regras rígidas e conferem cada fato citado. O Crítico julga o que fica em zona cinzenta: aqui há 9 ocorrências com população e nenhum recurso viável livre, então ele escala para o coordenador em vez de esconder o problema."
+**Fala (vale nos dois modos):** "O alocador guloso propõe. As ferramentas aplicam as regras rígidas e conferem cada fato citado. O Crítico julga o que fica em zona cinzenta: aqui há 9 ocorrências com população que ficaram sem recurso [trocar pelo número que aparecer na execução gravada], então ele escala para o coordenador em vez de esconder o problema."
 
-**O Analista (≈20 s):** rodar um cenário em que o Crítico tem uma pergunta em aberto:
+**O Analista (≈20 s):** rodar o cenário em que o Crítico tem uma pergunta em aberto (o mesmo de `output_examples/tocantins-parana-analista/`, período 24/10):
 ```bash
-python -m app.cli run --sample --regiao tocantins --recursos eval/cenarios/agricola_recorrente_parana_24out.yaml
+python -m app.cli run --sample --regiao tocantins --recursos input_examples/tocantins-parana-analista.yaml
 ```
-Mostrar as linhas `analista: consulta` (7 consultas) e, no `plano.md`, o parecer: "`cel_-124_-479`: provável queima agrícola ou de manejo (confiança média): 12 focos em 7 dias, 0% à noite, FRP baixo". Fala: "O Crítico chama o Analista, que consulta o histórico de 7 dias e conclui, com incerteza declarada, que é provável queima de manejo. O Crítico usa isso: o recurso rende mais numa ocorrência com população. Como não encontra um plano que resolva todas as regras rígidas, ele escala, com o parecer anexado."
+Mostrar as linhas `analista: consulta` (7 consultas: histórico, dia/noite, FRP, persistência, TI/UC, tempo, exposição) e, no `plano.md`, a seção "Pareceres do Analista". **Resultado real no modo offline:** "`cel_-124_-479`: **indeterminado** (confiança: **baixa**)", com evidências dos dois lados: FRP baixo (6,7 MW por foco) e longe de TI/UC apontam para queima agrícola, mas a ocorrência está crescendo em relação ao período anterior; escore +0,5 com limiar ±1,5 (heurística não calibrada). No ciclo de revisão: "Analista inconclusivo sobre cel_-124_-479 (indeterminado, baixa): designação mantida por precaução", e o Crítico escala as 3 ocorrências com população que ficaram sem recurso (Juarina, Santa Maria do Tocantins, Centenário).
+
+Fala: "O Crítico pergunta ao Analista se essa ocorrência sem população perto é queima agrícola recorrente. O Analista faz 7 consultas e responde com incerteza declarada: não dá para saber, os sinais apontam para os dois lados. Com confiança baixa, o Crítico não tira o recurso de lá, mantém por precaução, e escala para o coordenador as ocorrências com população que ficaram sem equipe." **Não** dizer que o Analista concluiu "queima agrícola": no exemplo atual ele não conclui. Se gravar no modo LLM, mostrar o parecer que sair.
 
 **No modo offline, dizer:** "Aqui os agentes rodam em modo determinístico, sem LLM; no modo LLM, as mesmas decisões passam pelo Nemotron."
 
@@ -80,7 +82,7 @@ python -m app.cli run  --regiao tocantins --recursos cenarios/tocantins-escasso.
 
 **Fala:** "Para saber se o Crítico e a memória decidem melhor, comparamos quatro variantes em 12 cenários com dados reais, com gabaritos escritos e commitados antes de rodar: A, só o alocador; B, Planejador com o checador; C, o sistema completo; D, o completo sem memória. Medimos acerto nos gabaritos, alarmes falsos, o tempo médio de espera da população exposta e a variância em 3 execuções."
 
-**Regra:** só mostrar números que estejam no `RELATORIO.md`. Se a tabela for do modo offline, dizer: "No modo offline os agentes são determinísticos, então isso valida o pipeline; a comparação que vale é no modo LLM." **[NIGHTSHIFT]** para a tabela do modo LLM. Se C não ganhar de B, dizer isso.
+**Regra:** só mostrar números que estejam no `RELATORIO.md`. Se a tabela for do modo offline, dizer: "No modo offline os agentes são determinísticos, então isso valida o pipeline; a comparação que vale é no modo LLM." **[NIGHTSHIFT]** para a tabela do modo LLM (ablação rodando; usar só se os resultados estiverem no `RELATORIO.md` na hora de gravar). Se C não ganhar de B, dizer isso.
 
 ## 6. (3:30–3:45) Saída para o coordenador
 **Tela:** `plano.md` rolando (justificativas com evidências `pop:`, `eta:`, `dist:`) e o mapa.
@@ -99,4 +101,4 @@ python -m app.cli aprovar --regiao tocantins --periodo 2026-10-23
 |---|---|
 | "Mesmo código, outra região" (Península Ibérica) | Só existe `config/regioes/iberia.yaml`; não há dados em cache nem execução. Não mostrar, a não ser que alguém rode de verdade antes de gravar. |
 | SQL federada ao vivo no Zetaris | **[ZETARIS]**: só se o Zetaris real estiver no ar. |
-| Nemotron respondendo, com `routed_model` | **[NIGHTSHIFT]**: obrigatório pelas regras ("one real request passing through Nightshift"); sem isso, o vídeo fica incompleto nesse requisito. |
+| Nemotron respondendo, com `routed_model` | **[NIGHTSHIFT]**: obrigatório pelas regras ("one real request passing through Nightshift"). Já funciona (25/10); basta o Nightshift estar no ar na hora de gravar. Mostrar a linha `llm_call` com `routed_model` e o `receipt` (ex.: `rcpt_req_…`). |
