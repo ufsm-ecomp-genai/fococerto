@@ -1,6 +1,6 @@
 """Registra no Zetaris, POR SCRIPT (nunca à mão), todas as fontes e views do FocoCerto.
 
-** NÃO TESTADO contra um Zetaris real ** (não havia Zetaris rodando no desenvolvimento). A sintaxe segue
+Testado contra um Zetaris 2.4 real em 25/10/2026 (0 falhas; views iguais ao cálculo em Python: 698 ocorrências). A sintaxe segue
 01-zetaris/getting-started (guia de comandos Lightning SQL e receitas REST) e as dicas confirmadas nos chats:
 - CSV: copiar para o file store do container (docker cp) e CREATE LIGHTNING FILESTORE TABLE … FORMAT CSV.
 - Dentro do SQL do Zetaris, serviços do host ficam em host.docker.internal.
@@ -20,7 +20,8 @@ Uso:
   python scripts/setup_zetaris.py --so-cache                # refaz CACHE TABLE (depois de reiniciar o Zetaris)
 Variáveis (.env): ZETARIS_REST_URL, ZETARIS_API_KEY, ZETARIS_ORG_ID, POSTGRES_DSN,
   ZETARIS_PG_HOST (padrão host.docker.internal), ZETARIS_DRIVER_CONTAINER (padrão zetaris-driver-1),
-  ZETARIS_FILESTORE_DIR (padrão /home/zetaris/customer-data/shared/fococerto).
+  ZETARIS_FILESTORE_DIR (padrão /home/zetaris/customer-data/shared/fococerto),
+  ZETARIS_PG_PORT (porta do Postgres dentro da rede do Zetaris), ZETARIS_DOCKER_SSH (host do Docker, se for remoto).
 """
 from __future__ import annotations
 
@@ -51,11 +52,13 @@ VIEWS = ["ocorrencias", "ocorrencias_localidades", "ocorrencias_contexto", "ocor
 # --------------------------------------------------------------------------- comandos SQL
 def sql_datasource_pg(dsn: str, host: str) -> list[tuple[str, str]]:
     u = urlparse(dsn)
-    jdbc = f"jdbc:postgresql://{host}:{u.port or 5432}{u.path or '/postgres'}"
+    # porta vista de DENTRO da rede do Zetaris; pode diferir da do DSN (ex.: o DSN usa um túnel SSH no notebook)
+    porta = os.environ.get("ZETARIS_PG_PORT") or u.port or 5432
+    jdbc = f"jdbc:postgresql://{host}:{porta}{u.path or '/postgres'}"
     lista = ", ".join(f"'{t}'" for t in TABELAS_PG)
     return [
         ("datasource Postgres",
-         f'CREATE DATASOURCE {PG} DESCRIBE BY "FocoCerto Postgres (focos, decisoes, notas)" OPTIONS ('
+         f'CREATE DATASOURCE {PG} DESCRIBE BY "FocoCerto_Postgres,focos,decisoes,notas" OPTIONS ('
          f'jdbcdriver "org.postgresql.Driver", jdbcurl "{jdbc}", username "{u.username or "postgres"}", '
          f'password "{u.password or ""}", fetchsize "1000")'),
         ("tabelas do Postgres", f"REGISTER DATASOURCE TABLES ({lista}) FROM {PG}"),
@@ -63,7 +66,7 @@ def sql_datasource_pg(dsn: str, host: str) -> list[tuple[str, str]]:
 
 
 def sql_filestore(dir_container: str) -> list[tuple[str, str]]:
-    cmds = [("database de arquivos", f'CREATE LIGHTNING DATABASE {ARQ.upper()} DESCRIBE BY "FocoCerto CSV (GeoNames, OSM, regioes)"')]
+    cmds = [("database de arquivos", f'CREATE LIGHTNING DATABASE {ARQ.upper()} DESCRIBE BY "FocoCerto_CSV,GeoNames,OSM,regioes"')]
     for t in ("regioes", "localidades", "bases", "bases_oficiais"):
         cmds.append((f"file store {t}",
                      f"CREATE LIGHTNING FILESTORE TABLE {t} FROM {ARQ.upper()} FORMAT CSV OPTIONS ("
@@ -72,7 +75,7 @@ def sql_filestore(dir_container: str) -> list[tuple[str, str]]:
 
 
 def sql_rest(regioes: list[str]) -> list[tuple[str, str]]:
-    cmds = [("database REST", f'CREATE LIGHTNING DATABASE {REST.upper()} DESCRIBE BY "FocoCerto Open-Meteo (grade fixa)"')]
+    cmds = [("database REST", f'CREATE LIGHTNING DATABASE {REST.upper()} DESCRIBE BY "FocoCerto_Open-Meteo,grade_fixa"')]
     for r in regioes:
         url = fontes.url_open_meteo(grade(carregar_regiao(r).bbox, fontes.passo_clima(r)), past_days=7)
         cmds.append((f"REST clima {r}",
@@ -173,9 +176,20 @@ def preparar_csvs(regioes: list[str], destino: Path) -> dict[str, int]:
 
 
 def copiar_para_container(origem: Path, container: str, dir_container: str, dry: bool) -> None:
-    cmds = [["docker", "exec", container, "mkdir", "-p", dir_container]]
-    cmds += [["docker", "cp", str(origem / f"{t}.csv"), f"{container}:{dir_container}/{t}.csv"]
-             for t in ("regioes", "localidades", "bases", "bases_oficiais")]
+    """docker cp dos CSVs para o file store. Com ZETARIS_DOCKER_SSH=<host>, o Docker está em outra máquina: os CSVs
+    vão por scp para /tmp do host e o docker cp roda lá por ssh."""
+    nomes = ("regioes", "localidades", "bases", "bases_oficiais")
+    remoto = os.environ.get("ZETARIS_DOCKER_SSH")
+    if remoto:
+        tmp = "/tmp/fococerto-zetaris"
+        cmds = [["ssh", remoto, "mkdir", "-p", tmp],
+                ["scp", "-q", *[str(origem / f"{t}.csv") for t in nomes], f"{remoto}:{tmp}/"],
+                ["ssh", remoto, "docker", "exec", container, "mkdir", "-p", dir_container]]
+        cmds += [["ssh", remoto, "docker", "cp", f"{tmp}/{t}.csv", f"{container}:{dir_container}/{t}.csv"]
+                 for t in nomes]
+    else:
+        cmds = [["docker", "exec", container, "mkdir", "-p", dir_container]]
+        cmds += [["docker", "cp", str(origem / f"{t}.csv"), f"{container}:{dir_container}/{t}.csv"] for t in nomes]
     for c in cmds:
         print("$ " + " ".join(c))
         if not dry:

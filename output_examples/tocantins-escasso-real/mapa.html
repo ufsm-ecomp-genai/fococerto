@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FocoCerto: mapa tocantins 2026-10-23</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>:root { --topo: 100px; }
+html, body { height: 100%; margin: 0; font-family: system-ui, sans-serif; background: #fff; color: #111; }
+#topo { padding: 8px 16px; background: #222; color: #fff; font-size: 15px; }
+#aviso { padding: 6px 16px; background: #fff3cd; color: #5c4400; font-weight: 600; font-size: 14px; }
+#mapa { position: absolute; top: var(--topo, 40px); bottom: 0; left: 0; right: 0; }
+.legenda { background: #fff; padding: 8px 10px; border-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,.3); font-size: 12px; line-height: 1.7; }
+.pt { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; vertical-align: middle; border: 1px solid #333; }
+.pt.anel { background: transparent; border: 2px dashed #000; }
+.base-q { width: 12px; height: 12px; background: #1565c0; border: 2px solid #fff; outline-offset: 0; }
+.base-q.vazia { opacity: 0.55; }
+.base-q.inl { display: inline-block; margin-right: 6px; vertical-align: middle; width: 8px; height: 8px; }
+.ln { display: inline-block; width: 18px; height: 3px; background: #1565c0; margin-right: 6px; vertical-align: middle; }
+.esc { margin-top: 4px; padding: 4px 6px; background: #000; color: #fff; font-weight: 600; }
+</style>
+</head>
+<body>
+<div id="topo">FocoCerto: mapa tocantins 2026-10-23</div>
+<div id="aviso">RECURSOS SIMULADOS: as equipes e aeronaves deste plano vêm de um cenário de demonstração (cenarios/tocantins-escasso.yaml), não de um inventário real.<br>Bases: localização real com fonte; quantidade de equipes simulada (cenário).</div>
+<div id="mapa"></div>
+<script id="dados" type="application/json">{"ocorrencias": [{"id": "cel_-91_-474", "lat": -9.02206, "lon": -47.30267, "prioridade": 0.685, "faixa": "alta", "faixa_nome": "alta", "cor": "#c62828", "status": "nova", "n_focos": 2, "frp_max": 199.14, "pop_raio": 2135, "localidade": "Centenário (8.7 km)", "escalada": true, "motivo_escalacao": "Obrigatória: 2135 hab. expostos e nenhum recurso designado no plano final. Sugestão: solicitar apoio externo.", "designacoes": []}, {"id": "cel_-96_-468", "lat": -9.56671, "lon": -46.71507, "prioridade": 0.685, "faixa": "alta", "faixa_nome": "alta", "cor": "#c62828", "status": "crescendo", "n_focos": 6, "frp_max": 19.96, "pop_raio": 2991, "localidade": "Lizarda (5.5 km)", "escalada": false, "motivo_escalacao": null, "designacoes": [{"ordem": 2, "recurso": "saofelix-t1", "eta_h": 2.35, "justificativa": "Único recurso terrestre viável para cel_-96_-468 (ETA 2,35 h ≤ 6 h); população 2.991 em Lizarda a 5,5 km; prioridade 0,685; 6 focos, FRP 63,3 MW.", "evidencias": ["pop:2991", "eta:2.35", "dist:Lizarda:5.5", "base:prevfogo_sao_felix", "focos:6", "frp:63.3"]}]}, {"id": "cel_-117_-491", "lat": -11.68048, "lon": -49.00484, "prioridade": 0.658, "faixa": "alta", "faixa_nome": "alta", "cor": "#c62828", "status": "nova", "n_focos": 8, "frp_max": 4.01, "pop_raio": 87545, "localidade": "Gurupi (8.8 km)", "escalada": false, "motivo_escalacao": null, "designacoes": [{"ordem": 3, "recurso": "portonac-t1", "eta_h": 4.4, "justificativa": "Maior população exposta (87.545 em Gurupi a 8,8 km); portonac-t1 chega em 4,4 h ≤ 6 h. Prioridade 0,658; 8 focos, FRP 24,5 MW.", "evidencias": ["pop:87545", "eta:4.4", "dist:Gurupi:8.8", "base:cbmto_porto_nacional", "focos:8", "frp:24.5"]}]}, {"id": "cel_-107_-476", "lat": -10.67027, "lon": -47.59331, "prioridade": 0.636, "faixa": "alta", "faixa_nome": "alta", "cor": "#c62828", "status": "nova", "n_focos": 3, "frp_max": 11.33, "pop_raio": 7842, "localidade": "Ponte Alta do Tocantins (10.3 km)", "escalada": false, "motivo_escalacao": null, "designacoes": [{"ordem": 4, "recurso": "palmas-t1", "eta_h": 3.39, "justificativa": "Palmas-t1 chega em 3,39 h ≤ 6 h; população 7.842 em Ponte Alta do Tocantins a 10,3 km. Prioridade 0,636; 3 focos, FRP 23,2 MW.", "evidencias": ["pop:7842", "eta:3.39", "dist:Ponte Alta do Tocantins:10.3", "base:osm_n5067657890", "focos:3", "frp:23.2"]}]}, {"id": "cel_-122_-464", "lat": -12.11782, "lon": -46.39112, "prioridade": 0.617, "faixa": "alta", "faixa_nome": "alta", "cor": "#c62828", "status": "nova", "n_focos": 1, "frp_max": 38.37, "pop_raio": 4295, "localidade": "Ponte Alta do Bom Jesus (10.0 km)", "escalada": true, "motivo_escalacao": "Obrigatória: 4295 hab. expostos e nenhum recurso designado no plano final. Sugestão: solicitar apoio externo.", "designacoes": []}, {"id": "cel_-113_-493", "lat": -11.27941, "lon": -49.25654, "prioridade": 0.615, "faixa": "media", "faixa_nome": "média", "cor": "#ef6c00", "status": "nova", "n_focos": 4, "frp_max": 20.38, "pop_raio": 4321, "localidade": "Dueré (7.3 km)", "escalada": true, "motivo_escalacao": "Obrigatória: 4321 hab. expostos e nenhum recurso designado no plano final. Sugestão: solicitar apoio externo.", "designacoes": []}, {"id": "cel_-122_-473", "lat": -12.13529, "lon": -47.26468, "prioridade": 0.615, "faixa": "media", "faixa_nome": "média", "cor": "#ef6c00", "status": "nova", "n_focos": 2, "frp_max": 47.88, "pop_raio": 3956, "localidade": "Conceição do Tocantins (10.0 km)", "escalada": true, "motivo_escalacao": "Obrigatória: 3956 hab. expostos e nenhum recurso designado no plano final. Sugestão: solicitar apoio externo.", "designacoes": []}, {"id": "cel_-105_-475", "lat": -10.46009, "lon": -47.45804, "prioridade": 0.606, "faixa": "media", "faixa_nome": "média", "cor": "#ef6c00", "status": "nova", "n_focos": 3, "frp_max": 13.96, "pop_raio": 3610, "localidade": "Lagoa do Tocantins (13.7 km)", "escalada": true, "motivo_escalacao": "Obrigatória: 3610 hab. expostos e nenhum recurso designado no plano final. Sugestão: solicitar apoio externo.", "designacoes": []}, {"id": "cel_-90_-486", "lat": -8.96196, "lon": -48.53019, "prioridade": 0.605, "faixa": "media", "faixa_nome": "média", "cor": "#ef6c00", "status": "nova", "n_focos": 2, "frp_max": 12.1, "pop_raio": 29357, "localidade": "Fortaleza do Tabocão (10.7 km)", "escalada": true, "motivo_escalacao": "Obrigatória: 29357 hab. expostos e nenhum recurso designado no plano final. Sugestão: solicitar apoio externo.", "designacoes": []}, {"id": "cel_-103_-478", "lat": -10.22666, "lon": -47.73829, "prioridade": 0.602, "faixa": "media", "faixa_nome": "média", "cor": "#ef6c00", "status": "crescendo", "n_focos": 11, "frp_max": 7.08, "pop_raio": 2463, "localidade": "Santa Tereza do Tocantins (9.8 km)", "escalada": false, "motivo_escalacao": null, "designacoes": [{"ordem": 1, "recurso": "palmas-a1", "eta_h": 0.37, "justificativa": "Único recurso aéreo viável para cel_-103_-478 (ETA 0,37 h ≤ 6 h); população 2.463 em Santa Tereza do Tocantins a 9,8 km; prioridade 0,602; 11 focos, FRP 51,9 MW. Troca ganha 0,6 h e atende população maior que cel_-91_-474.", "evidencias": ["pop:2463", "eta:0.37", "dist:Santa Tereza do Tocantins:9.8", "base:osm_n5067657890", "focos:11", "frp:51.9"]}]}, {"id": "cel_-95_-462", "lat": -9.4707, "lon": -46.19405, "prioridade": 0.597, "faixa": "baixa", "faixa_nome": "baixa", "cor": "#f9a825", "status": "nova", "n_focos": 1, "frp_max": 9.49, "pop_raio": 4829, "localidade": "Morros (12.0 km)", "escalada": true, "motivo_escalacao": "Obrigatória: 4829 hab. expostos e nenhum recurso designado no plano final. Sugestão: solicitar apoio externo.", "designacoes": []}, {"id": "cel_-121_-466", "lat": -12.02473, "lon": -46.59017, "prioridade": 0.596, "faixa": "baixa", "faixa_nome": "baixa", "cor": "#f9a825", "status": "nova", "n_focos": 4, "frp_max": 7.62, "pop_raio": 4295, "localidade": "Ponte Alta do Bom Jesus (14.1 km)", "escalada": true, "motivo_escalacao": "Obrigatória: 4295 hab. expostos e nenhum recurso designado no plano final. Sugestão: solicitar apoio externo.", "designacoes": []}, {"id": "cel_-95_-468", "lat": -9.46733, "lon": -46.71439, "prioridade": 0.595, "faixa": "baixa", "faixa_nome": "baixa", "cor": "#f9a825", "status": "nova", "n_focos": 1, "frp_max": 6.05, "pop_raio": 2991, "localidade": "Lizarda (14.8 km)", "escalada": true, "motivo_escalacao": "Obrigatória: 2991 hab. expostos e nenhum recurso designado no plano final. Sugestão: solicitar apoio externo.", "designacoes": []}, {"id": "cel_-107_-483", "lat": -10.68088, "lon": -48.291, "prioridade": 0.594, "faixa": "baixa", "faixa_nome": "baixa", "cor": "#f9a825", "status": "nova", "n_focos": 1, "frp_max": 6.8, "pop_raio": 53316, "localidade": "Porto Nacional (14.1 km)", "escalada": false, "motivo_escalacao": null, "designacoes": [{"ordem": 6, "recurso": "paraiso-t1", "eta_h": 2.95, "justificativa": "Troca obrigatória: população 53.316 em Porto Nacional a 14,1 km; ETA 2,95 h ≤ 6 h (ganho 1,59 h vs cel_-113_-493). Prioridade 0,594; 1 foco, FRP 6,8 MW.", "evidencias": ["pop:53316", "eta:2.95", "dist:Porto Nacional:14.1", "base:cbmto_paraiso", "focos:1", "frp:6.8"]}]}, {"id": "cel_-117_-469", "lat": -11.6102, "lon": -46.85868, "prioridade": 0.593, "faixa": "baixa", "faixa_nome": "baixa", "cor": "#f9a825", "status": "nova", "n_focos": 1, "frp_max": 8.69, "pop_raio": 22424, "localidade": "Dianópolis (4.6 km)", "escalada": false, "motivo_escalacao": null, "designacoes": [{"ordem": 5, "recurso": "dianopolis-t1", "eta_h": 0.16, "justificativa": "Troca obrigatória: população 22.424 em Dianópolis a 4,6 km; ETA 0,16 h ≤ 6 h (ganho 2,35 h vs cel_-122_-464). Prioridade 0,593; 1 foco, FRP 8,7 MW.", "evidencias": ["pop:22424", "eta:0.16", "dist:Dianópolis:4.6", "base:cbmto_dianopolis", "focos:1", "frp:8.7"]}]}], "bases": [{"id": "osm_n5067657890", "nome": "CBMTO 1º BBM Palmas", "lat": -10.206127, "lon": -48.343395, "procedencia": "oficial", "procedencia_nome": "oficial", "procedencia_desc": "lista oficial da região, com fonte", "fonte": "CBMTO — https://conexaoto.com.br/2023/01/16/1o-batalhao-e-quatro-companhias-de-bombeiros-militar-com-novos-comandos (2023); coordenada: quartel mapeado no OpenStreetMap (node/5067657890); id reaproveitado do OSM, a mesma unidade; fundida com osm_n5067657890 (OpenStreetMap: OpenStreetMap node/5067657890)", "recursos": ["palmas-t1 (terrestre)", "palmas-a1 (aereo)"]}, {"id": "cbmto_paraiso", "nome": "CBMTO 3ª Cia do 1º BBM Paraíso do Tocantins", "lat": -10.17611, "lon": -48.86667, "procedencia": "oficial", "procedencia_nome": "oficial", "procedencia_desc": "lista oficial da região, com fonte", "fonte": "CBMTO — https://conexaoto.com.br/2023/01/27/companhia-de-bombeiros-em-paraiso-tem-novo-comandante-que-vai-atuar-frente-a-uma-das-cidades-mais-movimentadas-do-estado (2023); coordenada: sede do município (GeoNames); endereço do quartel não georreferenciado", "recursos": ["paraiso-t1 (terrestre)"]}, {"id": "cbmto_porto_nacional", "nome": "CBMTO 5ª Cia do 1º BBM Porto Nacional", "lat": -10.70806, "lon": -48.41722, "procedencia": "oficial", "procedencia_nome": "oficial", "procedencia_desc": "lista oficial da região, com fonte", "fonte": "CBMTO — https://conexaoto.com.br/2022/02/17/governador-wanderlei-autoriza-inicio-das-obras-do-quartel-do-corpo-de-bombeiros-de-porto-nacional (2022); coordenada: sede do município (GeoNames); endereço do quartel não georreferenciado", "recursos": ["portonac-t1 (terrestre)"]}, {"id": "cbmto_gurupi", "nome": "CBMTO 3º BBM Gurupi", "lat": -11.72917, "lon": -49.06861, "procedencia": "oficial", "procedencia_nome": "oficial", "procedencia_desc": "lista oficial da região, com fonte", "fonte": "CBMTO — https://conexaoto.com.br/2023/07/09/praias-de-palmas-e-do-interior-recebem-apoio-com-presenca-de-bombeiros-militares (2023); coordenada: sede do município (GeoNames); endereço do quartel não georreferenciado", "recursos": []}, {"id": "cbmto_dianopolis", "nome": "CBMTO Companhia de Dianópolis", "lat": -11.62778, "lon": -46.82056, "procedencia": "oficial", "procedencia_nome": "oficial", "procedencia_desc": "lista oficial da região, com fonte", "fonte": "CBMTO — https://conexaoto.com.br/2023/01/16/1o-batalhao-e-quatro-companhias-de-bombeiros-militar-com-novos-comandos (2023); coordenada: sede do município (GeoNames); endereço do quartel não georreferenciado", "recursos": ["dianopolis-t1 (terrestre)"]}, {"id": "cbmto_colinas", "nome": "CBMTO Companhia de Colinas do Tocantins", "lat": -8.05917, "lon": -48.475, "procedencia": "oficial", "procedencia_nome": "oficial", "procedencia_desc": "lista oficial da região, com fonte", "fonte": "CBMTO — https://conexaoto.com.br/2023/01/16/1o-batalhao-e-quatro-companhias-de-bombeiros-militar-com-novos-comandos (2023); coordenada: sede do município (GeoNames); endereço do quartel não georreferenciado", "recursos": []}, {"id": "prevfogo_sao_felix", "nome": "Brigada Prevfogo/Ibama São Félix do Tocantins", "lat": -10.16833, "lon": -46.65944, "procedencia": "oficial", "procedencia_nome": "oficial", "procedencia_desc": "lista oficial da região, com fonte", "fonte": "Prevfogo/Ibama — https://sbtnews.sbt.com.br/noticia/brasil/ibama-autoriza-contratacao-de-brigadas-federais-para-combate-a-incendios-em-municipios-de-19-estados (2024); coordenada: sede do município (GeoNames); Portaria Ibama nº 114/2024", "recursos": ["saofelix-t1 (terrestre)"]}, {"id": "prevfogo_santa_tereza", "nome": "Brigada Prevfogo/Ibama Santa Tereza do Tocantins", "lat": -10.28222, "lon": -47.80833, "procedencia": "oficial", "procedencia_nome": "oficial", "procedencia_desc": "lista oficial da região, com fonte", "fonte": "Prevfogo/Ibama — https://sbtnews.sbt.com.br/noticia/brasil/ibama-autoriza-contratacao-de-brigadas-federais-para-combate-a-incendios-em-municipios-de-19-estados (2024); coordenada: sede do município (GeoNames); Portaria Ibama nº 114/2024", "recursos": []}, {"id": "prevfogo_itacaja", "nome": "Brigada Prevfogo/Ibama Itacajá", "lat": -8.39167, "lon": -47.76778, "procedencia": "oficial", "procedencia_nome": "oficial", "procedencia_desc": "lista oficial da região, com fonte", "fonte": "Prevfogo/Ibama — https://sbtnews.sbt.com.br/noticia/brasil/ibama-autoriza-contratacao-de-brigadas-federais-para-combate-a-incendios-em-municipios-de-19-estados (2024); coordenada: sede do município (GeoNames); Portaria Ibama nº 114/2024", "recursos": []}, {"id": "prevfogo_goiatins", "nome": "Brigada Prevfogo/Ibama Goiatins", "lat": -7.71, "lon": -47.31417, "procedencia": "oficial", "procedencia_nome": "oficial", "procedencia_desc": "lista oficial da região, com fonte", "fonte": "Prevfogo/Ibama — https://sbtnews.sbt.com.br/noticia/brasil/ibama-autoriza-contratacao-de-brigadas-federais-para-combate-a-incendios-em-municipios-de-19-estados (2024); coordenada: sede do município (GeoNames); Portaria Ibama nº 114/2024", "recursos": []}, {"id": "prevfogo_arraias", "nome": "Brigada Prevfogo/Ibama Arraias", "lat": -12.93139, "lon": -46.93833, "procedencia": "oficial", "procedencia_nome": "oficial", "procedencia_desc": "lista oficial da região, com fonte", "fonte": "Prevfogo/Ibama — https://sbtnews.sbt.com.br/noticia/brasil/ibama-autoriza-contratacao-de-brigadas-federais-para-combate-a-incendios-em-municipios-de-19-estados (2024); coordenada: sede do município (GeoNames); Portaria Ibama nº 114/2024", "recursos": []}, {"id": "icmbio_rio_conceicao", "nome": "ICMBio Esec Serra Geral do Tocantins em Rio da Conceição", "lat": -11.40028, "lon": -46.88333, "procedencia": "oficial", "procedencia_nome": "oficial", "procedencia_desc": "lista oficial da região, com fonte", "fonte": "ICMBio — https://folha.qconcursos.com/n/icmbio-concurso-abre-cadastro-reserva-para-agentes-temporarios-em-rio-da-conceicao-to (2026); coordenada: sede do município (GeoNames); brigada temporária da Esec Serra Geral do Tocantins", "recursos": []}, {"id": "osm_n3165869368", "nome": "Bombeiros (perto de Porangatu, 1 km)", "lat": -13.445225, "lon": -49.136863, "procedencia": "osm", "procedencia_nome": "OSM", "procedencia_desc": "OpenStreetMap (amenity=fire_station)", "fonte": "OpenStreetMap node/3165869368", "recursos": []}, {"id": "osm_w1022455273", "nome": "SCI (Palmas)", "lat": -10.293075, "lon": -48.360013, "procedencia": "osm", "procedencia_nome": "OSM", "procedencia_desc": "OpenStreetMap (amenity=fire_station)", "fonte": "OpenStreetMap way/1022455273", "recursos": []}, {"id": "osm_w365506007", "nome": "Corpo de Bombeiros Militar", "lat": -13.274527, "lon": -50.167664, "procedencia": "osm", "procedencia_nome": "OSM", "procedencia_desc": "OpenStreetMap (amenity=fire_station)", "fonte": "OpenStreetMap way/365506007", "recursos": []}, {"id": "osm_w412958353", "nome": "Bombeiros (perto de Barreiras, 1 km)", "lat": -12.15074, "lon": -44.998205, "procedencia": "osm", "procedencia_nome": "OSM", "procedencia_desc": "OpenStreetMap (amenity=fire_station)", "fonte": "OpenStreetMap way/412958353", "recursos": []}], "linhas": [{"de": [-10.206127, -48.343395], "para": [-10.22666, -47.73829], "ordem": 1, "recurso": "palmas-a1", "ocorrencia": "cel_-103_-478", "eta_h": 0.37, "aereo": true, "justificativa": "Único recurso aéreo viável para cel_-103_-478 (ETA 0,37 h ≤ 6 h); população 2.463 em Santa Tereza do Tocantins a 9,8 km; prioridade 0,602; 11 focos, FRP 51,9 MW. Troca ganha 0,6 h e atende população maior que cel_-91_-474."}, {"de": [-10.16833, -46.65944], "para": [-9.56671, -46.71507], "ordem": 2, "recurso": "saofelix-t1", "ocorrencia": "cel_-96_-468", "eta_h": 2.35, "aereo": false, "justificativa": "Único recurso terrestre viável para cel_-96_-468 (ETA 2,35 h ≤ 6 h); população 2.991 em Lizarda a 5,5 km; prioridade 0,685; 6 focos, FRP 63,3 MW."}, {"de": [-10.70806, -48.41722], "para": [-11.68048, -49.00484], "ordem": 3, "recurso": "portonac-t1", "ocorrencia": "cel_-117_-491", "eta_h": 4.4, "aereo": false, "justificativa": "Maior população exposta (87.545 em Gurupi a 8,8 km); portonac-t1 chega em 4,4 h ≤ 6 h. Prioridade 0,658; 8 focos, FRP 24,5 MW."}, {"de": [-10.206127, -48.343395], "para": [-10.67027, -47.59331], "ordem": 4, "recurso": "palmas-t1", "ocorrencia": "cel_-107_-476", "eta_h": 3.39, "aereo": false, "justificativa": "Palmas-t1 chega em 3,39 h ≤ 6 h; população 7.842 em Ponte Alta do Tocantins a 10,3 km. Prioridade 0,636; 3 focos, FRP 23,2 MW."}, {"de": [-11.62778, -46.82056], "para": [-11.6102, -46.85868], "ordem": 5, "recurso": "dianopolis-t1", "ocorrencia": "cel_-117_-469", "eta_h": 0.16, "aereo": false, "justificativa": "Troca obrigatória: população 22.424 em Dianópolis a 4,6 km; ETA 0,16 h ≤ 6 h (ganho 2,35 h vs cel_-122_-464). Prioridade 0,593; 1 foco, FRP 8,7 MW."}, {"de": [-10.17611, -48.86667], "para": [-10.68088, -48.291], "ordem": 6, "recurso": "paraiso-t1", "ocorrencia": "cel_-107_-483", "eta_h": 2.95, "aereo": false, "justificativa": "Troca obrigatória: população 53.316 em Porto Nacional a 14,1 km; ETA 2,95 h ≤ 6 h (ganho 1,59 h vs cel_-113_-493). Prioridade 0,594; 1 foco, FRP 6,8 MW."}], "bbox": [[-13.0, -49.5], [-8.0, -45.5]], "simulado": true, "cores": {"alta": "#c62828", "media": "#ef6c00", "baixa": "#f9a825"}, "estilo_base": {"oficial": {"cor": "#1565c0", "borda": "solid"}, "osm": {"cor": "#00838f", "borda": "solid"}, "declarada": {"cor": "#6a1b9a", "borda": "dashed"}, "estimada": {"cor": "#757575", "borda": "dotted"}}, "procedencias": {"oficial": "oficial", "osm": "OSM", "declarada": "declarada", "estimada": "estimada"}, "procedencias_presentes": ["oficial", "osm"], "t": {"mapa_legenda": "Legenda", "mapa_ocorrencia": "Ocorrência", "mapa_base": "Base", "mapa_designacao": "Designação (recurso → ocorrência)", "mapa_escalada": "Escalada (decisão humana)", "mapa_motivo": "Motivo da escalação", "mapa_recursos_na_base": "Recursos nesta base", "col_prioridade": "Prioridade", "col_status": "Status", "col_focos": "Focos", "col_frp": "FRP máx (MW)", "col_pop": "Pop. no raio", "col_localidade": "Localidade mais próxima", "col_eta": "ETA", "justificativa": "Justificativa", "evidencias": "Evidências", "faixa_alta": "alta", "faixa_media": "média", "faixa_baixa": "baixa", "nao_atendida": "não atendida", "col_ordem": "Ordem", "h": "h", "mapa_procedencia": "Procedência", "mapa_fonte": "Fonte"}, "aviso": "RECURSOS SIMULADOS: as equipes e aeronaves deste plano vêm de um cenário de demonstração (cenarios/tocantins-escasso.yaml), não de um inventário real.", "aviso_bases": "Bases: localização real com fonte; quantidade de equipes simulada (cenário)."}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function () {
+  var D = JSON.parse(document.getElementById('dados').textContent);
+  var T = D.t;
+  function esc(s) {
+    return String(s == null ? '-' : s).replace(/[&<>"']/g, function (c) {
+      return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c];
+    });
+  }
+  var mapa = L.map('mapa');
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+    maxZoom: 18, attribution: 'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, USGS, &copy; OpenStreetMap contributors'
+  }).addTo(mapa);
+  var limites = L.latLngBounds(D.bbox);
+
+  D.linhas.forEach(function (l) {
+    L.polyline([l.de, l.para], {color: '#1565c0', weight: 3, opacity: 0.8, dashArray: l.aereo ? '2 6' : null})
+      .bindTooltip('#' + l.ordem + ' ' + esc(l.recurso) + ' → ' + esc(l.ocorrencia) + ' (' + esc(l.eta_h) + ' ' + T.h + ')')
+      .bindPopup('<b>#' + l.ordem + ' ' + esc(l.recurso) + ' → ' + esc(l.ocorrencia) + '</b><br>' +
+                 T.col_eta + ': ' + esc(l.eta_h) + ' ' + T.h + '<br>' + T.justificativa + ': ' + esc(l.justificativa))
+      .addTo(mapa);
+  });
+
+  function quadrado(proc, extra) {
+    var e = D.estilo_base[proc] || D.estilo_base.osm;
+    return '<div class="base-q ' + (extra || '') + '" style="background:' + e.cor + ';outline:2px ' + e.borda +
+           ' ' + e.cor + '"></div>';
+  }
+  function fonteHtml(f) {
+    // a fonte pode ter uma URL: vira link (o resto do texto continua escapado)
+    var m = String(f || '').match(/https?:\/\/[^\s;()]+/);
+    if (!m) return esc(f);
+    var i = f.indexOf(m[0]);
+    return esc(f.slice(0, i)) + '<a href="' + esc(m[0]) + '" target="_blank" rel="noopener">' + esc(m[0]) + '</a>' +
+           esc(f.slice(i + m[0].length));
+  }
+  D.bases.forEach(function (b) {
+    var icone = L.divIcon({className: 'base', html: quadrado(b.procedencia, b.recursos.length ? '' : 'vazia'),
+                           iconSize: [14, 14]});
+    L.marker([b.lat, b.lon], {icon: icone})
+      .bindPopup('<b>' + T.mapa_base + ': ' + esc(b.nome) + '</b><br><code>' + esc(b.id) + '</code><br>' +
+                 T.mapa_procedencia + ': <b>' + esc(b.procedencia_nome) + '</b> (' + esc(b.procedencia_desc) + ')<br>' +
+                 T.mapa_fonte + ': ' + (b.fonte ? fonteHtml(b.fonte) : '-') + '<br>' +
+                 T.mapa_recursos_na_base + ': ' + (b.recursos.length ? b.recursos.map(esc).join(', ') : '-'),
+                 {maxWidth: 380})
+      .addTo(mapa);
+    limites.extend([b.lat, b.lon]);
+  });
+
+  D.ocorrencias.forEach(function (o) {
+    var r = 6 + Math.min(10, Math.sqrt(o.n_focos) * 2);
+    if (o.escalada) {
+      L.circleMarker([o.lat, o.lon], {radius: r + 7, color: '#000', weight: 3, dashArray: '4 4', fill: false})
+        .addTo(mapa);
+    }
+    var html = '<b>' + T.mapa_ocorrencia + ' <code>' + esc(o.id) + '</code></b>';
+    if (o.escalada) html += '<div class="esc">' + T.mapa_escalada + '<br>' + T.mapa_motivo + ': ' + esc(o.motivo_escalacao) + '</div>';
+    html += '<br>' + T.col_prioridade + ': ' + esc(o.prioridade) + ' (' + esc(o.faixa_nome) + ')' +
+            '<br>' + T.col_status + ': ' + esc(o.status) +
+            '<br>' + T.col_focos + ': ' + esc(o.n_focos) + ' · ' + T.col_frp + ': ' + esc(o.frp_max) +
+            '<br>' + T.col_pop + ': ' + esc(o.pop_raio) +
+            '<br>' + T.col_localidade + ': ' + esc(o.localidade);
+    if (o.designacoes.length) {
+      o.designacoes.forEach(function (d) {
+        html += '<hr><b>#' + d.ordem + ' ' + esc(d.recurso) + '</b> · ' + T.col_eta + ' ' + esc(d.eta_h) + ' ' + T.h +
+                '<br>' + T.justificativa + ': ' + esc(d.justificativa) +
+                '<br>' + T.evidencias + ': ' + (d.evidencias.length ? d.evidencias.map(esc).join(', ') : '-');
+      });
+    } else {
+      html += '<hr><i>' + T.nao_atendida + '</i>';
+    }
+    L.circleMarker([o.lat, o.lon], {radius: r, color: '#333', weight: 1, fillColor: o.cor, fillOpacity: 0.85})
+      .bindPopup(html, {maxWidth: 360})
+      .addTo(mapa);
+    limites.extend([o.lat, o.lon]);
+  });
+
+  mapa.fitBounds(limites, {padding: [20, 20]});
+
+  var legenda = L.control({position: 'bottomright'});
+  legenda.onAdd = function () {
+    var div = L.DomUtil.create('div', 'legenda');
+    div.innerHTML = '<b>' + T.mapa_legenda + '</b><br>' +
+      ['alta', 'media', 'baixa'].map(function (f) {
+        return '<span class="pt" style="background:' + D.cores[f] + '"></span>' + T.mapa_ocorrencia + ' · ' +
+               T.col_prioridade.toLowerCase() + ' ' + T['faixa_' + f];
+      }).join('<br>') +
+      '<br><span class="pt anel"></span>' + T.mapa_escalada +
+      D.procedencias_presentes.map(function (p) {
+        var e = D.estilo_base[p];
+        return '<br><span class="base-q inl" style="background:' + e.cor + ';outline:2px ' + e.borda + ' ' + e.cor +
+               '"></span>' + T.mapa_base + ' ' + esc(D.procedencias[p]);
+      }).join('') +
+      '<br><span class="ln"></span>' + T.mapa_designacao;
+    return div;
+  };
+  legenda.addTo(mapa);
+})();
+</script>
+</body>
+</html>

@@ -252,6 +252,11 @@ def cmd_run(args) -> int:
     if not resultado.log_path:
         resultado = resultado.model_copy(update={"log_path": caminho_log(log.caminho)})
     progresso(f"Ciclo terminou em {time.monotonic() - t0:.1f}s, {resultado.rodadas} rodada(s)")
+    consultas_zetaris = getattr(repo, "consultas", None)
+    if consultas_zetaris is not None:
+        # evidência exigida pelas regras: as consultas feitas à camada de dados (Zetaris)
+        log.evento("ferramenta", "consulta", {"fonte": "zetaris", "modo_usado": getattr(repo, "modo_usado", None),
+                                              "n_consultas": len(consultas_zetaris), "sql": consultas_zetaris})
 
     pasta = pasta_saida(args, regiao.nome, periodo)
     caminhos = escrever_saidas(resultado, regiao, cenario, pasta, modo=modo, arquivo_cenario=str(arq))

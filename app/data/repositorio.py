@@ -4,7 +4,7 @@
                       dados reais congelados. Decisões e notas vão para data/estado/ (JSONL local).
 - RepositorioZetaris: lê pelas views do Zetaris (REST /sql-editor/sqls/run); se as views falharem, busca as
                       tabelas cruas PELO ZETARIS e calcula em Python. Decisões e notas vão direto ao Postgres.
-                      ** NÃO TESTADO contra um Zetaris real ** (não havia Zetaris rodando no desenvolvimento).
+                      Testado contra um Zetaris 2.4 real em 25/10/2026 (0 falhas; views iguais ao cálculo em Python: 698 ocorrências).
 """
 from __future__ import annotations
 
@@ -192,9 +192,12 @@ class ErroZetaris(RuntimeError):
 def linhas_da_resposta(resp) -> list[dict]:
     """Normaliza a resposta do /sql-editor/sqls/run para lista de dicts.
 
-    NÃO TESTADO contra Zetaris real: aceita {"data": [ {col: val} ]}, {"data": {"columns": [...], "rows": [[...]]}}
-    e variações com "schema"/"fields". Valores chegam como string (dica confirmada nos chats).
+    Formato real do Zetaris 2.4 (conferido em 25/10): {"headers": ["one"], "data": [["1"]], "total": 1, "timeUsed": 88}.
+    Também aceita {"data": [ {col: val} ]} e {"data": {"columns": [...], "rows": [[...]]}}. Valores chegam como string.
     """
+    if isinstance(resp, dict) and isinstance(resp.get("headers"), list) and isinstance(resp.get("data"), list):
+        cols = [c.get("name") if isinstance(c, dict) else c for c in resp["headers"]]
+        return [dict(zip(cols, r)) if isinstance(r, list) else r for r in resp["data"]]
     data = resp.get("data", resp) if isinstance(resp, dict) else resp
     if data is None:
         return []
@@ -220,7 +223,7 @@ def _dt(v) -> datetime:
 
 
 class RepositorioZetaris:
-    """Lê pelo Zetaris (REST) e escreve no Postgres. NÃO TESTADO contra Zetaris real.
+    """Lê pelo Zetaris (REST) e escreve no Postgres. Testado contra um Zetaris 2.4 real em 25/10/2026.
 
     Nomes registrados por scripts/setup_zetaris.py:
       fococerto_pg.focos                  (Postgres, datasource JDBC)

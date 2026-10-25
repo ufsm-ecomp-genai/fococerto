@@ -136,7 +136,8 @@ def test_linhas_da_resposta_zetaris(resp):
     assert linhas_da_resposta(resp) == [{"n": "3"}]
 
 
-def test_setup_zetaris_gera_comandos_sem_ponto_e_virgula():
+def test_setup_zetaris_gera_comandos_sem_ponto_e_virgula(monkeypatch):
+    monkeypatch.delenv("ZETARIS_PG_PORT", raising=False)  # o .env real pode definir a porta interna
     sys.path.insert(0, str(RAIZ / "scripts"))
     import setup_zetaris as sz
     cmds = sz.comandos(["tocantins", "iberia"], "postgresql://u:p@localhost:55432/db", "host.docker.internal", "/x")
@@ -164,3 +165,18 @@ def test_escrita_postgres():
     with psycopg.connect(dsn) as conn:
         assert conn.execute("SELECT count(*) FROM decisoes").fetchone()[0] == antes + 2
         assert conn.execute("SELECT texto FROM notas ORDER BY seq DESC LIMIT 1").fetchone()[0] == "nota de teste"
+
+
+def test_setup_zetaris_porta_interna_do_postgres(monkeypatch):
+    """ZETARIS_PG_PORT: porta vista de dentro da rede do Zetaris, diferente da porta do DSN (túnel)."""
+    monkeypatch.setenv("ZETARIS_PG_PORT", "5432")
+    sys.path.insert(0, str(RAIZ / "scripts"))
+    import setup_zetaris as sz
+    pg = sz.sql_datasource_pg("postgresql://u:p@localhost:55433/postgres", "fococerto-pg")[0][1]
+    assert "jdbc:postgresql://fococerto-pg:5432/postgres" in pg
+
+
+def test_linhas_da_resposta_formato_real_do_zetaris():
+    from app.data.repositorio import linhas_da_resposta
+    real = {"headers": ["one"], "data": [["1"]], "total": 1, "timeUsed": 88}  # resposta real do Zetaris 2.4
+    assert linhas_da_resposta(real) == [{"one": "1"}]
