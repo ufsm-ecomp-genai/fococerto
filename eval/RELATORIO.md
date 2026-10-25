@@ -250,3 +250,25 @@ e ainda queima), não só a comparação com o plano de P-1.
 Observação: neste modo B, C e D escalam (12 ocorrências cada), e na ablação offline de 24/10 B não escalava. O
 código dos agentes mudou depois da ablação (fila de correções do ESTADO, item 1: escalação obrigatória de exposta
 sem recurso). As tabelas acima, de 24 e 25/10, são do código daquela data.
+
+
+## Modo LLM, 2ª rodada depois das correções (25/10, noite)
+
+`eval/resultados/20261025T220912Z_llm/` · 48 execuções (1 repetição) · 137 chamadas, todas válidas, 0 fallbacks ·
+latência média de 25 s. Mudanças desde a 1ª rodada: citações corrigidas antes do Crítico, escalação obrigatória,
+troca de equipe local, bases reais com fonte, fim dos impasses de zona cinzenta.
+
+| Variante | Acerto | ETA ponderado |
+|---|---|---|
+| A | 6/27 (22,2%) | 4,40 h |
+| B | 21/27 (77,8%) | 4,00 h |
+| C | 24/29 (82,8%) | 3,48 h |
+| D | 24/29 (82,8%) | 3,48 h |
+
+- O sistema corrigiu 24 fatos errados escritos pelo Nemotron antes do Crítico (12 distâncias, 6 localidades,
+  6 populações), cada um registrado como `citacao_corrigida`. Nenhum plano final de B, C ou D tem citação falsa
+  (conferido rodando `checar_citacoes` sobre os planos finais).
+- Impasses: de 30 para 6. Os 6 restantes têm regra rígida aberta (`capacidade_excedida`, `eta_acima_limite`) depois de
+  3 rodadas, em `controle_vegetacao_parana_19out` e `excecao_dianopolis_ponte_18out`; escalar para o humano é o
+  comportamento esperado. 8 divergências de zona cinzenta fecharam como `divergencia_zona_cinzenta`.
+- A memória não fez diferença nesta rodada (C e D idênticos).

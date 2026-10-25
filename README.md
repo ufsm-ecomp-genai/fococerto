@@ -393,6 +393,26 @@ What this shows, and what it does not:
   "solicitar apoio externo" guard rail above and Critic changes), and the LLM ablation has **not** been re-run since.
   Details: `eval/RELATORIO.md` ("Sobre-escalação").
 
+#### Second LLM run, after the fixes (25 Oct, evening)
+
+1 repetition × 12 scenarios × 4 variants = 48 runs, 137 Nemotron calls, all valid, 0 offline fallbacks, mean latency
+25 s. Results: `eval/resultados/20261025T220912Z_llm/`. Changes since the first run: citations corrected before the
+Critic, mandatory escalation of exposed occurrences, idle-local-crew swap, real sourced bases, no grey-zone impasses.
+
+| Variant | Checks passed | Exposure-weighted ETA |
+|---|---|---|
+| **A** simple allocator | 6/27 (22.2%) | 4.40 h |
+| **B** Planner + rule checker | 21/27 (77.8%) | 4.00 h |
+| **C** full (Planner ⇄ Critic ⇄ Analyst + H-MEM) | 24/29 (82.8%) | 3.48 h |
+| **D** C without H-MEM | 24/29 (82.8%) | 3.48 h |
+
+- **Model errors, measured honestly:** the system rewrote **24 wrong facts** written by Nemotron before the Critic saw
+  the plan (12 distances, 6 localities, 6 populations), each one logged as a `citacao_corrigida` event. No final plan
+  of B, C or D carries a false citation.
+- **Impasses went from 30 to 6**, and the remaining 6 are legitimate: the model kept violating a hard rule (the same
+  crew assigned twice, or an arrival time above the limit) for three rounds, so the decision goes to the human.
+- **Memory made no difference in this run** (C and D are identical). We report it as measured.
+
 A real trace with Nemotron calls, routed model and signed receipt ids: [`output_examples/nemotron-trace/trace.jsonl`](output_examples/nemotron-trace/trace.jsonl).
 
 
