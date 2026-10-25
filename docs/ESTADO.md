@@ -45,4 +45,4 @@
 
 ## Ablação no modo LLM
 - Disparada em 25/10 ~01h55 UTC (`eval/run_ablacao.py --modo llm --repeticoes 3`), estimativa de 1 a 2 h. O PC da irmã precisa ficar ligado. Os resultados saem em `eval/resultados/<timestamp>_llm/`. Se for interrompida: rodar de novo (são independentes) ou reduzir com `--cenarios`/`--repeticoes 1`.
-- Decisão pendente: o Crítico com LLM aprova planos com ocorrências expostas sem recurso (zona cinzenta, permitido pela especificação); o offline escala todas. Avaliar se a escalação dessas ocorrências deve ser obrigatória.
+- **Decisão do time (25/10):** toda ocorrência com população exposta que ficar sem recurso vira escalação obrigatória ("solicitar apoio externo"), também no modo LLM. Aplicar DEPOIS que a ablação LLM em andamento terminar e rodar a ablação de novo com a regra nova.
