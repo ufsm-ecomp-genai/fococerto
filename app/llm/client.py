@@ -60,8 +60,10 @@ def _cfg() -> dict[str, Any]:
         "backoff_s": float(env("LLM_BACKOFF_S", "2") or 2),
         "max_tokens": int(env("LLM_MAX_TOKENS", "4096") or 4096),
         "temperatura": float(env("LLM_TEMPERATURE", "0.2") or 0.2),
-        # Dica dos chats de help: "/no_think" como primeira mensagem de sistema evita que o modelo gaste
-        # o orçamento de tokens raciocinando antes de responder. Desligue com LLM_NO_THINK=0.
+        # Desliga o raciocínio do Nemotron. Medido no Nightshift real (25/10): só "/no_think" não basta com prompts
+        # grandes (o Planejador gastou os 4096 tokens raciocinando e não escreveu o JSON);
+        # chat_template_kwargs.enable_thinking=false funciona (65 tokens e 1,3 s contra 225 e 5,1 s num teste curto).
+        # Desligue com LLM_NO_THINK=0.
         "no_think": (env("LLM_NO_THINK", "1") or "1") not in ("0", "false", "no"),
     }
 
@@ -197,6 +199,8 @@ def chat(messages: list[dict], papel: str, json_schema: dict | None = None,
                      "sem texto antes ou depois:\n" + json.dumps(json_schema, ensure_ascii=False)})
     corpo = {"model": cfg["modelo"], "messages": msgs, "max_tokens": cfg["max_tokens"],
              "temperature": cfg["temperatura"]}
+    if cfg["no_think"]:
+        corpo["chat_template_kwargs"] = {"enable_thinking": False}
     headers = {"Authorization": f"Bearer {cfg['token']}", "meterless-app": cfg["app"],
                "meterless-scope": cfg["scope"], "Content-Type": "application/json"}
     url = cfg["base_url"] + "/chat/completions"
