@@ -299,6 +299,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--variantes", default="ABCD")
     ap.add_argument("--cenarios", nargs="*", help="ids (padrão: todos)")
     ap.add_argument("--saida", default=str(RAIZ_EVAL / "resultados"))
+    ap.add_argument("--retomar", help="pasta de uma execução interrompida: reaproveita as execuções já salvas "
+                                      "e roda só as que faltam")
     ap.add_argument("--estimar", action="store_true",
                     help="roda 1 repetição offline e estima chamadas LLM e tempo do modo llm (não chama LLM)")
     ap.add_argument("--latencia-s", type=float, default=float(os.environ.get("EVAL_LATENCIA_S", "30")),
@@ -314,14 +316,20 @@ def main(argv: list[str] | None = None) -> int:
     reps = 1 if a.estimar else a.repeticoes
     casos = listar_casos(a.cenarios)
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    pasta = Path(a.saida) / f"{ts}_{modo}{'_estimativa' if a.estimar else ''}"
+    pasta = Path(a.retomar) if a.retomar else Path(a.saida) / f"{ts}_{modo}{'_estimativa' if a.estimar else ''}"
     (pasta / "logs").mkdir(parents=True, exist_ok=True)
     print(f"{len(casos)} cenários × {len(a.variantes)} variantes × {reps} repetições, modo {modo} → {pasta}")
     execs = []
     for caso in casos:
         for var in a.variantes:
             for r in range(1, reps + 1):
-                e = executar(caso, var, r, modo, pasta)
+                nome = f"{caso[0]['meta']['id']}__{var}__r{r}"
+                salvo = pasta / f"{nome}.json"
+                if a.retomar and salvo.exists():
+                    e = json.loads(salvo.read_text(encoding="utf-8"))
+                else:
+                    (pasta / "logs" / f"{nome}.jsonl").unlink(missing_ok=True)  # log parcial de uma execução cortada
+                    e = executar(caso, var, r, modo, pasta)
                 execs.append(e)
                 m = e.get("metricas") or {}
                 print(f"  {e['cenario']:38s} {var} r{r}: " + (f"ERRO {e['erro']}" if e["erro"] else

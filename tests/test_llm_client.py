@@ -103,3 +103,38 @@ def test_extrair_json_tolerante():
     assert client.extrair_json('Claro! {"x": {"y": "}"}} fim') == {"x": {"y": "}"}}
     assert client.extrair_json("<think>{nada}</think>{\"ok\": true}") == {"ok": True}
     assert client.extrair_json("sem json") is None
+
+
+def test_prazo_total_aborta_resposta_que_pinga_bytes():
+    """Regressão: o Nightshift real deixou uma chamada presa 14 h mandando bytes aos poucos (o timeout do httpx
+    é entre pacotes). O _post precisa abortar pelo prazo TOTAL."""
+    import threading
+    import time
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+
+    class Lento(BaseHTTPRequestHandler):
+        def do_POST(self):
+            self.rfile.read(int(self.headers.get("Content-Length", 0)))
+            self.send_response(200)
+            self.send_header("Transfer-Encoding", "chunked")
+            self.end_headers()
+            try:
+                for _ in range(40):  # ~8 s de um byte a cada 0,2 s
+                    self.wfile.write(b"1\r\n \r\n")
+                    self.wfile.flush()
+                    time.sleep(0.2)
+            except (BrokenPipeError, ConnectionResetError):
+                pass
+
+        def log_message(self, *a):
+            pass
+
+    srv = HTTPServer(("127.0.0.1", 0), Lento)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        t = time.monotonic()
+        with pytest.raises(httpx.TimeoutException):
+            client._post(f"http://127.0.0.1:{srv.server_port}/v1/chat/completions", {}, {"x": 1}, timeout_s=1.0)
+        assert time.monotonic() - t < 4
+    finally:
+        srv.shutdown()

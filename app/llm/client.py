@@ -69,9 +69,22 @@ def _cfg() -> dict[str, Any]:
 
 
 def _post(url: str, headers: dict, corpo: dict, timeout_s: float) -> httpx.Response:
-    """Ponto único de I/O de rede (os testes substituem esta função)."""
-    with httpx.Client(timeout=timeout_s) as c:
-        return c.post(url, headers=headers, json=corpo)
+    """Ponto único de I/O de rede (os testes substituem esta função).
+
+    O timeout do httpx vale entre pacotes, não para a chamada inteira: com resposta chunked, um servidor que manda
+    bytes de vez em quando nunca estoura. Aconteceu no Nightshift real (ablação presa 14 h numa chamada). Por isso
+    há um prazo TOTAL: passou dele, a chamada é abortada com ReadTimeout e entra no retry normal."""
+    limite = time.monotonic() + timeout_s
+    with httpx.Client(timeout=httpx.Timeout(timeout_s, connect=15)) as c:
+        with c.stream("POST", url, headers=headers, json=corpo) as r:
+            partes = []
+            for pedaco in r.iter_bytes():
+                partes.append(pedaco)
+                if time.monotonic() > limite:
+                    raise httpx.ReadTimeout(f"prazo total de {timeout_s:.0f} s excedido", request=r.request)
+            cabecalhos = {k: v for k, v in r.headers.items()
+                          if k.lower() not in ("content-encoding", "transfer-encoding", "content-length")}
+            return httpx.Response(r.status_code, headers=cabecalhos, content=b"".join(partes), request=r.request)
 
 
 # ---------------------------------------------------------------- receipt / routed_model
