@@ -46,3 +46,15 @@
 ## Ablação no modo LLM
 - Disparada em 25/10 ~01h55 UTC (`eval/run_ablacao.py --modo llm --repeticoes 3`), estimativa de 1 a 2 h. O PC da irmã precisa ficar ligado. Os resultados saem em `eval/resultados/<timestamp>_llm/`. Se for interrompida: rodar de novo (são independentes) ou reduzir com `--cenarios`/`--repeticoes 1`.
 - **Decisão do time (25/10):** toda ocorrência com população exposta que ficar sem recurso vira escalação obrigatória ("solicitar apoio externo"), também no modo LLM. Aplicar DEPOIS que a ablação LLM em andamento terminar e rodar a ablação de novo com a regra nova.
+
+## Fila de correções de código (revisão do juiz, 25/10; aplicar DEPOIS da ablação LLM em andamento)
+1. Escalação obrigatória de ocorrência exposta sem recurso (decisão do time) + teste.
+2. Crítico: regra de troca "recurso local ocioso × ocorrência exposta não atendida" (ex.: output_examples/tocantins-folgado: cel_-117_-469, 22 mil hab. a 4,6 km de Dianópolis, escalada enquanto dianopolis-t1/t2 vão para longe).
+3. Métrica de sobre-escalação na ablação (os gabaritos favorecem quem escala tudo); reportar também por /27 (as repetições offline são determinísticas).
+4. Reignição em 2 períodos com a memória gerada pelo aprendizado.py (hoje a memória vem escrita no cenário).
+5. Analista no modo LLM recebe `sinais_heuristicos` com a conclusão pronta: medir a divergência ou tirar esse campo.
+6. `app.cli avaliar` quebrado (roda o script por caminho, ModuleNotFoundError; argumentos incompatíveis).
+7. Sample mode com H-MEM real (flag `--hmem`) ou documentar o caminho.
+8. `npm test` regrava conformance-report.txt (versionado).
+9. **Execução real de ponta a ponta** (Zetaris + Nightshift + H-MEM) commitada em output_examples/tocantins-escasso-real/ com trace; é a mudança de maior impacto segundo o juiz.
+10. Antes de submeter: limpar este arquivo de notas internas (ex.: "PC da irmã").
