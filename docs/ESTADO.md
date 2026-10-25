@@ -37,8 +37,12 @@
 
 ## Bloqueios externos (time)
 - [ ] Zetaris rodando na máquina do time + `.env`
-- [ ] Nightshift: roda sem GPU dedicada? Porta 8088 acessível? Onde vêm o `routed_model` e o `receipt`?
+- [x] **Nightshift funcionando (25/10, ~01h UTC)** no PC Windows com NVIDIA da irmã do Enzo (`desktop-tlhi7b9`, Tailscale `100.90.123.23`, porta 8088 repassada só para `100.64.0.0/10`). Token = conteúdo do arquivo `proxy-token` (o da tela dá 401). Modelo: `nvidia/nemotron-3-ultra-550b-a55b`. O raciocínio é desligado com `chat_template_kwargs.enable_thinking=false`. Um período completo no modo LLM leva ~23 s.
 - [ ] Respostas do Help Meterless (seção 19 da especificação)
 
 ## Infraestrutura (24/10, noite)
 - O professor não respondeu. Plano B: servidor pessoal Debian 13 (12 threads, 15 GB, KVM, AMD RX 550, Tailscale 100.70.74.48). Passos: Docker → Zetaris → VM Windows 11 de avaliação para o Nightshift (teste: pode não rodar sem GPU NVIDIA) → opção C (provedor Runtime + Nemotron hospedado; elegível segundo a resposta da Meterless em chat5:1642, mas provavelmente perde o prêmio NVIDIA).
+
+## Ablação no modo LLM
+- Disparada em 25/10 ~01h55 UTC (`eval/run_ablacao.py --modo llm --repeticoes 3`), estimativa de 1 a 2 h. O PC da irmã precisa ficar ligado. Os resultados saem em `eval/resultados/<timestamp>_llm/`. Se for interrompida: rodar de novo (são independentes) ou reduzir com `--cenarios`/`--repeticoes 1`.
+- Decisão pendente: o Crítico com LLM aprova planos com ocorrências expostas sem recurso (zona cinzenta, permitido pela especificação); o offline escala todas. Avaliar se a escalação dessas ocorrências deve ser obrigatória.
