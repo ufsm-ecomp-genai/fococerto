@@ -1,0 +1,432 @@
+{
+ "modo": "offline",
+ "timestamp_utc": "20261025T200648Z",
+ "repeticoes": 3,
+ "cenarios": [
+  "reignicao_conceicao_20out_2p",
+  "reignicao_morros_24out_2p"
+ ],
+ "variantes": {
+  "A": "alocador_simples sozinho",
+  "B": "Planejador + checador (usar_critico_llm=False)",
+  "C": "completo (Crítico + Analista + H-MEM)",
+  "D": "C sem H-MEM (usar_memoria=False)"
+ },
+ "agregado": {
+  "variantes": {
+   "A": {
+    "descricao": "alocador_simples sozinho",
+    "execucoes": 6,
+    "erros": 0,
+    "acerto": "0/12",
+    "acerto_pct": 0.0,
+    "decisao": "0/6",
+    "deteccao": "0/6",
+    "alarmes_falsos_gabarito": 0,
+    "alarme_falso_aplicaveis": 0,
+    "citacoes_falsas": 0,
+    "eta_pond_medio_h": 1.847,
+    "eta_pond_log_medio_h": 4.058,
+    "rodadas_media": 0.0,
+    "status_escala": 0,
+    "escalacoes_media": 0.0,
+    "desvio_acerto_entre_repeticoes": 0.0,
+    "acerto_por_repeticao": {
+     "r1": "0/4",
+     "r2": "0/4",
+     "r3": "0/4"
+    },
+    "acerto_por_execucao_media": 0.0,
+    "acerto_por_execucao_aplicaveis": [
+     4
+    ],
+    "acerto_por_execucao_desvio": 0.0,
+    "acerto_por_execucao_min_max": [
+     0,
+     0
+    ],
+    "escaladas": 0,
+    "sobre_escaladas": 0,
+    "escaladas_sem_exposicao": 0,
+    "escaladas_com_recurso_livre": 0,
+    "escaladas_com_troca": 0,
+    "escaladas_so_com_reserva": 0,
+    "escaladas_e_atendidas": 0,
+    "escalacoes_sem_alvo": 0,
+    "escalacoes_impasse": 0,
+    "credito_escalacao": 0,
+    "execucoes_com_sobre_escalacao": 0,
+    "cenarios_com_planos_diferentes_entre_repeticoes": 0,
+    "agentes": {},
+    "duracao_total_s": 0.94
+   },
+   "B": {
+    "descricao": "Planejador + checador (usar_critico_llm=False)",
+    "execucoes": 6,
+    "erros": 0,
+    "acerto": "0/12",
+    "acerto_pct": 0.0,
+    "decisao": "0/6",
+    "deteccao": "0/6",
+    "alarmes_falsos_gabarito": 0,
+    "alarme_falso_aplicaveis": 0,
+    "citacoes_falsas": 0,
+    "eta_pond_medio_h": 1.847,
+    "eta_pond_log_medio_h": 4.058,
+    "rodadas_media": 1.0,
+    "status_escala": 3,
+    "escalacoes_media": 2.0,
+    "desvio_acerto_entre_repeticoes": 0.0,
+    "acerto_por_repeticao": {
+     "r1": "0/4",
+     "r2": "0/4",
+     "r3": "0/4"
+    },
+    "acerto_por_execucao_media": 0.0,
+    "acerto_por_execucao_aplicaveis": [
+     4
+    ],
+    "acerto_por_execucao_desvio": 0.0,
+    "acerto_por_execucao_min_max": [
+     0,
+     0
+    ],
+    "escaladas": 12,
+    "sobre_escaladas": 0,
+    "escaladas_sem_exposicao": 0,
+    "escaladas_com_recurso_livre": 0,
+    "escaladas_com_troca": 0,
+    "escaladas_so_com_reserva": 0,
+    "escaladas_e_atendidas": 0,
+    "escalacoes_sem_alvo": 0,
+    "escalacoes_impasse": 0,
+    "credito_escalacao": 0,
+    "execucoes_com_sobre_escalacao": 0,
+    "cenarios_com_planos_diferentes_entre_repeticoes": 0,
+    "agentes": {
+     "planejador": 6
+    },
+    "duracao_total_s": 1.47
+   },
+   "C": {
+    "descricao": "completo (Crítico + Analista + H-MEM)",
+    "execucoes": 6,
+    "erros": 0,
+    "acerto": "0/12",
+    "acerto_pct": 0.0,
+    "decisao": "0/6",
+    "deteccao": "0/6",
+    "alarmes_falsos_gabarito": 0,
+    "alarme_falso_aplicaveis": 0,
+    "citacoes_falsas": 0,
+    "eta_pond_medio_h": 1.847,
+    "eta_pond_log_medio_h": 4.058,
+    "rodadas_media": 1.5,
+    "status_escala": 3,
+    "escalacoes_media": 2.0,
+    "desvio_acerto_entre_repeticoes": 0.0,
+    "acerto_por_repeticao": {
+     "r1": "0/4",
+     "r2": "0/4",
+     "r3": "0/4"
+    },
+    "acerto_por_execucao_media": 0.0,
+    "acerto_por_execucao_aplicaveis": [
+     4
+    ],
+    "acerto_por_execucao_desvio": 0.0,
+    "acerto_por_execucao_min_max": [
+     0,
+     0
+    ],
+    "escaladas": 12,
+    "sobre_escaladas": 0,
+    "escaladas_sem_exposicao": 0,
+    "escaladas_com_recurso_livre": 0,
+    "escaladas_com_troca": 0,
+    "escaladas_so_com_reserva": 0,
+    "escaladas_e_atendidas": 0,
+    "escalacoes_sem_alvo": 0,
+    "escalacoes_impasse": 0,
+    "credito_escalacao": 0,
+    "execucoes_com_sobre_escalacao": 0,
+    "cenarios_com_planos_diferentes_entre_repeticoes": 0,
+    "agentes": {
+     "planejador": 9,
+     "critico": 18,
+     "analista": 12
+    },
+    "duracao_total_s": 1.65
+   },
+   "D": {
+    "descricao": "C sem H-MEM (usar_memoria=False)",
+    "execucoes": 6,
+    "erros": 0,
+    "acerto": "0/12",
+    "acerto_pct": 0.0,
+    "decisao": "0/6",
+    "deteccao": "0/6",
+    "alarmes_falsos_gabarito": 0,
+    "alarme_falso_aplicaveis": 0,
+    "citacoes_falsas": 0,
+    "eta_pond_medio_h": 1.847,
+    "eta_pond_log_medio_h": 4.058,
+    "rodadas_media": 1.5,
+    "status_escala": 3,
+    "escalacoes_media": 2.0,
+    "desvio_acerto_entre_repeticoes": 0.0,
+    "acerto_por_repeticao": {
+     "r1": "0/4",
+     "r2": "0/4",
+     "r3": "0/4"
+    },
+    "acerto_por_execucao_media": 0.0,
+    "acerto_por_execucao_aplicaveis": [
+     4
+    ],
+    "acerto_por_execucao_desvio": 0.0,
+    "acerto_por_execucao_min_max": [
+     0,
+     0
+    ],
+    "escaladas": 12,
+    "sobre_escaladas": 0,
+    "escaladas_sem_exposicao": 0,
+    "escaladas_com_recurso_livre": 0,
+    "escaladas_com_troca": 0,
+    "escaladas_so_com_reserva": 0,
+    "escaladas_e_atendidas": 0,
+    "escalacoes_sem_alvo": 0,
+    "escalacoes_impasse": 0,
+    "credito_escalacao": 0,
+    "execucoes_com_sobre_escalacao": 0,
+    "cenarios_com_planos_diferentes_entre_repeticoes": 0,
+    "agentes": {
+     "planejador": 9,
+     "critico": 18,
+     "analista": 12
+    },
+    "duracao_total_s": 1.9
+   }
+  },
+  "por_cenario": {
+   "reignicao_conceicao_20out_2p|A": {
+    "cenario": "reignicao_conceicao_20out_2p",
+    "variante": "A",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 3.114,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c2": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   },
+   "reignicao_conceicao_20out_2p|B": {
+    "cenario": "reignicao_conceicao_20out_2p",
+    "variante": "B",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 3.114,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c2": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   },
+   "reignicao_conceicao_20out_2p|C": {
+    "cenario": "reignicao_conceicao_20out_2p",
+    "variante": "C",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 3.114,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c2": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   },
+   "reignicao_conceicao_20out_2p|D": {
+    "cenario": "reignicao_conceicao_20out_2p",
+    "variante": "D",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 3.114,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c2": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   },
+   "reignicao_morros_24out_2p|A": {
+    "cenario": "reignicao_morros_24out_2p",
+    "variante": "A",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 0.58,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c2": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   },
+   "reignicao_morros_24out_2p|B": {
+    "cenario": "reignicao_morros_24out_2p",
+    "variante": "B",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 0.58,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c2": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   },
+   "reignicao_morros_24out_2p|C": {
+    "cenario": "reignicao_morros_24out_2p",
+    "variante": "C",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 0.58,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c2": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   },
+   "reignicao_morros_24out_2p|D": {
+    "cenario": "reignicao_morros_24out_2p",
+    "variante": "D",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 0.58,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c2": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   }
+  }
+ },
+ "estimativa_llm": {
+  "latencia_s_suposta": 30.0,
+  "repeticoes": 3,
+  "por_variante": {
+   "B": {
+    "chamadas_por_execucao_min": 1.0,
+    "chamadas_por_execucao_max": 2.0,
+    "planejador": 1.0,
+    "critico": 0.0,
+    "analista": 0.0
+   },
+   "C": {
+    "chamadas_por_execucao_min": 6.5,
+    "chamadas_por_execucao_max": 17.0,
+    "planejador": 1.5,
+    "critico": 3.0,
+    "analista": 2.0
+   },
+   "D": {
+    "chamadas_por_execucao_min": 6.5,
+    "chamadas_por_execucao_max": 17.0,
+    "planejador": 1.5,
+    "critico": 3.0,
+    "analista": 2.0
+   }
+  },
+  "chamadas_total_min": 84,
+  "chamadas_total_max": 216,
+  "horas_min": 0.7,
+  "horas_max": 1.8,
+  "teto_teorico_por_execucao": "3 rodadas × (1 Planejador + 2 Crítico + 3 Analistas × 2) × 2 retries = 54",
+  "obs": "Estimativa a partir da trajetória OFFLINE: no modo LLM o número de rodadas e de pareceres pode ser outro. A variante A não chama LLM; a B só chama o Planejador."
+ }
+}

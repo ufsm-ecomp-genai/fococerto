@@ -169,3 +169,84 @@ Leitura honesta:
   todas as variantes.
 - Variação entre repetições: desvio do acerto ≤ 0,018; planos diferentes entre repetições em 2 de 12 cenários.
 - ETA ponderado por exposição: 4,40 h (A) → 3,77 h (C).
+
+### Acerto por execução única (/27 e /29)
+
+Recalculado dos JSONs salvos com `.venv/bin/python -m eval.recalcular <pasta>`, sem rodar o LLM de novo (as
+checagens recalculadas batem com as salvas em todas as 144 execuções de cada pasta). O total acima soma as 3
+repetições: "66/87" não são 87 observações independentes, são 29 checagens (12 cenários) vistas 3 vezes. No
+offline as 3 repetições são idênticas por construção (agentes determinísticos), então o /81 só multiplica por 3
+o mesmo resultado. A amostra real é /27 (A, B) ou /29 (C, D), e uma checagem vale ~3,5 pontos percentuais.
+
+| Variante | LLM: r1 / r2 / r3 | LLM: média (desvio, em checagens) | Offline: cada repetição |
+|---|---|---|---|
+| A | 6/27 · 6/27 · 6/27 | 6,0/27 (0) | 6/27 |
+| B | 18/27 · 18/27 · 17/27 | 17,7/27 (0,47) | 16/27 |
+| C | 22/29 · 22/29 · 22/29 | 22,0/29 (0) | 23/29 |
+| D | 22/29 · 21/29 · 21/29 | 21,3/29 (0,47) | 17/29 |
+
+Leitura: no modo LLM, **C − D é 0,67 checagem por execução** (22,0 contra 21,3), menor que uma checagem, e cabe
+na variação entre repetições de D (21 a 22). Não dá para afirmar, com esta amostra, que a memória melhora o modo
+LLM. No offline, C − D = 6 checagens por execução (23 contra 17).
+
+### Sobre-escalação
+
+Os gabaritos dão crédito a quem escala, e "escalada" inclui citar o id no motivo. Definições em
+`eval/README.md` ("Sobre-escalação"). Somas sobre as 36 execuções de cada variante:
+
+| Modo | Var. | Ocorrências escaladas | Sobre-escaladas | Sem exposição | Com recurso livre viável | Só quebrando a reserva (info) | Citadas no motivo mas atendidas | Escalações sem alvo | Por impasse | Checagens que passaram só por escalar |
+|---|---|---|---|---|---|---|---|---|---|---|
+| LLM | B | 0 | 0 | 0 | 0 | 0 | 0 | 12 | 12 | 0 |
+| LLM | C | 40 | 0 | 0 | 0 | 0 | 30 | 0 | 18 | 0 |
+| LLM | D | 40 | 0 | 0 | 0 | 0 | 26 | 0 | 16 | 0 |
+| offline | B | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| offline | C | 186 | 0 | 0 | 0 | 18 | 0 | 0 | 0 | 6 |
+| offline | D | 180 | 0 | 0 | 0 | 18 | 0 | 0 | 0 | 3 |
+
+(A nunca escala: tudo 0. Fontes: `eval/resultados/20261025T015525Z_llm/` e
+`eval/resultados/20261024T222738Z_offline/`, arquivos `tabela_recalculada.md` e `resumo_recalculado.json`.)
+
+Leitura:
+- **Nenhuma sobre-escalação pela definição estrita**, nos dois modos: nenhuma ocorrência escalada estava sem
+  população, e nenhuma tinha um recurso livre, viável e não bloqueado além da reserva. No offline, 18 escaladas de
+  C e 18 de D seriam alcançáveis por um recurso **da reserva mínima** (informativo; respeitar a reserva é regra).
+- **O crédito de escalação inflou pouco o offline:** sem ele, C cai de 69/87 para 63/87 (6 checagens:
+  `escalar_expostas_22out` c2 e `excecao_mateiros_alagada_23out`, 3 repetições cada) e D de 51/87 para 48/87.
+  C − D sem esse crédito continua +15. No modo LLM, nenhuma checagem passou só por escalar.
+- **No modo LLM, toda escalação é impasse.** As 12 de B, 18 de C e 16 de D começam com "Impasse: 3 rodadas sem
+  aprovação": o sistema escalou porque as rodadas acabaram (quase sempre por citação incorreta que o Planejador não
+  conseguiu corrigir), não porque decidiu pedir apoio. 18 dessas 46 escalações estão nos **cenários de controle**
+  (`controle_taguatinga_liberada_21out` e `controle_vegetacao_parana_19out`, 3 por variante), onde a decisão certa
+  é a óbvia. As checagens de alarme falso desses cenários não olham o status, então isso não aparece no acerto: é um
+  alarme falso que a tabela principal não mostra.
+- **No modo LLM o problema é o contrário: sub-escalação.** As escalações de B não citam nenhuma ocorrência (12 sem
+  alvo), e `escalar_expostas_22out` c2 ("toda exposta sem recurso está nas escalações") falha em B, C e D nas 3
+  repetições. Em C e D, 30 e 26 ids citados nos motivos são de ocorrências que **foram** atendidas (o texto do
+  impasse fala delas): a regra "id no motivo" dos gabaritos pode contar como escalada o que não foi. Neste conjunto,
+  isso não mudou nenhuma checagem.
+
+### Reignição em 2 períodos (memória gerada pelo `aprendizado.py`), só offline
+
+`.venv/bin/python -m eval.run_ablacao --modo offline --repeticoes 3 --dois-periodos` →
+`eval/resultados/20261025T200648Z_offline_2periodos/`. Cenários `eval/cenarios_2periodos/*_2p.yaml`, **escritos
+depois da ablação** (25/10), com a previsão registrada antes de rodar. Mesmos dados, recursos e período P2 dos
+originais, mas sem memória semeada: roda P1, o `aprender_entre_periodos(P1 -> P2)` grava as derivadas, e roda P2.
+
+| Cenário (P1 → P2) | A | B | C | D | Memórias geradas sobre a célula-alvo |
+|---|---|---|---|---|---|
+| `reignicao_conceicao_20out_2p` (19/10 → 20/10) | c1:F c2:F | c1:F c2:F | c1:F c2:F | c1:F c2:F | nenhuma (6 derivadas "recebeu recurso e diminuiu" sobre outras células) |
+| `reignicao_morros_24out_2p` (23/10 → 24/10) | c1:F c2:F | c1:F c2:F | c1:F c2:F | c1:F c2:F | nenhuma (5 derivadas sobre outras células) |
+
+Igual nas 3 repetições. **A previsão se confirmou:** com a memória gerada pelo próprio sistema, os dois casos de
+reignição falham em todas as variantes, enquanto com a memória semeada B, C passavam (offline). O motivo está no
+`comparar()` do `aprendizado.py`: ele só olha células que estavam no plano de P1 (designadas ou em
+`nao_atendidas`). Em Conceição, cel_-120_-470 não tem foco em 19/10 (não existe em P1). Em Morros, cel_-96_-465
+está na posição 99 de 179 em 23/10, fora do top 15, e o fato que importa (13 focos e 482 MW em 22/10) é de P-2.
+Ou seja: **o resultado de reignição da tabela principal depende da memória escrita no cenário**; o aprendizado
+automático atual não a produz. Pedido ao `agentes-llm` (relatado ao líder): uma derivada de reignição a partir do
+`historico_celula` das ocorrências de P (célula que volta depois de dia(s) sem foco, ou que teve FRP alto em P-2..P-k
+e ainda queima), não só a comparação com o plano de P-1.
+
+Observação: neste modo B, C e D escalam (12 ocorrências cada), e na ablação offline de 24/10 B não escalava. O
+código dos agentes mudou depois da ablação (fila de correções do ESTADO, item 1: escalação obrigatória de exposta
+sem recurso). As tabelas acima, de 24 e 25/10, são do código daquela data.

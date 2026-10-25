@@ -123,13 +123,80 @@ Definições usadas nas checagens:
 - **Variância entre repetições:** desvio-padrão do acerto e do ETA ponderado entre as repetições, e se os planos
   (pares recurso → ocorrência) foram idênticos.
 
+### Acerto por execução única (/27 e /29)
+
+O "Acerto" da tabela soma as 3 repetições (81 = 27 checagens × 3 para A e B; 87 = 29 × 3 para C e D, que têm as 2
+checagens de parecer a mais). Como no modo offline as 3 repetições são idênticas, "69/87" é a mesma informação
+que "23/29": **o tamanho real da amostra é 27 (ou 29) checagens em 12 cenários**, e uma checagem a mais ou a menos
+vale ~3,5 pontos percentuais. Por isso também reportamos, por variante, o acerto de cada repetição (`r1 / r2 / r3`,
+cada uma sobre /27 ou /29), a média, o mínimo, o máximo e o desvio-padrão em número de checagens. No modo LLM a
+diferença entre repetições é a variância real do sistema.
+
+### Sobre-escalação
+
+Os gabaritos dão crédito a quem escala (`ocorrencia_atendida_ou_escalada`, `expostas_nao_atendidas_escaladas`),
+e "escalada" inclui citar o id no texto do motivo. Um sistema que escalasse tudo passaria nessas checagens. Para
+medir isso, cada execução tem (somas por variante na tabela "Escalação"):
+
+- **Ocorrências escaladas:** ocorrências do período que contam como escaladas pela regra dos gabaritos e que
+  **não** têm designação no plano final (citar no motivo uma ocorrência atendida não é escalá-la).
+- **Sobre-escaladas** = sem exposição ∪ com recurso livre viável:
+  - **sem exposição:** escalada com `pop_raio == 0`. Escalar é pedir apoio externo, e a regra do time é escalar
+    população exposta sem recurso;
+  - **com recurso livre viável:** existe recurso disponível com capacidade sobrando que chega em até `eta_max_h`
+    (o mesmo ETA de `app.tools.geo`), cuja base não está bloqueada pelas memórias/notas do cenário nem pelas
+    `memorias_usadas` do resultado (lidas por `interpretar_memorias`; rota terrestre bloqueada para a ocorrência
+    também exclui o terrestre), **e** há mais recursos livres do que a reserva mínima do cenário.
+- Informativos (não entram na sobre-escalação): **só quebrando a reserva** (um recurso livre chegaria, mas é a
+  reserva mínima) e **com troca possível** (um recurso que está numa ocorrência sem população chegaria à escalada
+  exposta em até `eta_max_h`; é a troca que o checador chama de `liberaveis`).
+- **Citadas no motivo mas atendidas:** ids que aparecem no texto de uma escalação, mas têm designação. Mostra quanto
+  a regra "id no motivo" do gabarito pode contar como escalada algo que não foi.
+- **Escalações sem alvo:** entradas de `escalacoes` sem `ocorrencia_id` e sem nenhum id no motivo.
+- **Por impasse:** entradas cujo motivo começa com "Impasse" (o grafo escala porque acabaram as rodadas sem
+  aprovação, não porque decidiu pedir apoio).
+- **Checagens que passaram só por escalar:** checagens que passam com o resultado e falham se `escalacoes` for
+  esvaziada (crédito que o gabarito deu à escalação). Subtraindo esse número do acerto, tem-se o acerto sem crédito
+  de escalação.
+
+Limite conhecido: a métrica não pega a troca entre duas ocorrências **expostas** (ex.: mandar a viatura local para
+uma comunidade menor e escalar a maior, que fica a 10 min). Isso é trade-off de prioridade, coberto pelas checagens
+de `prioriza` e pelo ETA ponderado, não por esta métrica.
+
+## Reignição em 2 períodos (`--dois-periodos`)
+
+Nos cenários de reignição originais, a memória derivada vem **escrita no cenário** (`memorias_iniciais`). Para
+testar se o sistema a produz sozinho, o modo `--dois-periodos` usa `eval/cenarios_2periodos/` e
+`eval/gabaritos_2periodos/`:
+
+1. memória vazia (`MemoriaLocal()`), sem `memorias_iniciais`;
+2. roda o período `periodo_anterior` (P1) com a mesma variante e os mesmos recursos;
+3. `app.agents.aprendizado.aprender_entre_periodos(P1 -> P2)` grava as derivadas na memória (o mesmo passo da
+   CLI `run`, CONTRATOS seção 15), com o plano de P1 vindo direto do resultado;
+4. roda P2 (o período original) e confere contra o gabarito.
+
+O JSON de cada execução ganha `periodo_anterior` (pares de P1, `nao_atendidas` e as memórias aprendidas, com
+texto e fonte). Na variante A (sem memória) e na D (`usar_memoria=False`), a memória é gerada mas não é lida.
+
+**Estes cenários e gabaritos foram escritos em 25/10/2026, DEPOIS da ablação original** (offline e LLM), e antes
+de rodar este modo. Os gabaritos copiam sem mudança as checagens dos originais (`reignicao_conceicao_20out`,
+`reignicao_morros_24out`), e cada cenário traz o campo `previsao_antes_de_rodar`.
+
 ## Como rodar
 
 ```
 .venv/bin/python -m eval.run_ablacao --modo offline --repeticoes 3
 .venv/bin/python -m eval.run_ablacao --modo llm --repeticoes 3      # precisa do Nightshift (LLM_PROVIDER=nightshift)
 .venv/bin/python -m eval.run_ablacao --estimar                      # só estima chamadas LLM e tempo
+.venv/bin/python -m eval.run_ablacao --modo offline --dois-periodos # reignição em 2 períodos
+.venv/bin/python -m eval.recalcular eval/resultados/<pasta>         # recalcula tudo dos JSONs salvos, sem rodar nada
 ```
+
+`eval/recalcular.py` lê os `<cenario>__<variante>__r<n>.json` de uma pasta, confere de novo contra os gabaritos,
+recalcula as métricas (inclusive as de sobre-escalação e por execução única) e grava `resumo_recalculado.json` e
+`tabela_recalculada.md` na própria pasta (ou em `--saida`), sem tocar no `resumo.json`/`tabela.md` originais. Avisa
+se alguma checagem recalculada difere da salva. A agregação e a tabela ficam em `eval/agregacao.py`, que não
+importa o código dos agentes.
 
 Saída em `eval/resultados/<timestamp>_<modo>/`: um JSON por execução (`<cenario>__<variante>__r<n>.json`, com o
 resultado, as checagens e o caminho do log JSONL), `resumo.json` e `tabela.md`.

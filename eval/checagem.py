@@ -6,6 +6,7 @@ Trabalha sobre um "resultado" em dict (``ResultadoPeriodo.model_dump(mode="json"
 from __future__ import annotations
 
 import math
+import re
 import statistics
 from pathlib import Path
 
@@ -46,10 +47,11 @@ def carregar_gabarito(caminho: str | Path) -> dict:
     return g
 
 
-def listar_casos(filtro: list[str] | None = None) -> list[tuple[dict, dict]]:
+def listar_casos(filtro: list[str] | None = None, dir_cenarios: Path | None = None,
+                 dir_gabaritos: Path | None = None) -> list[tuple[dict, dict]]:
     """Pares (cenário, gabarito) por id. Todo cenário precisa de gabarito e vice-versa."""
-    cen = {p.stem: p for p in sorted(DIR_CENARIOS.glob("*.yaml"))}
-    gab = {p.stem: p for p in sorted(DIR_GABARITOS.glob("*.yaml"))}
+    cen = {p.stem: p for p in sorted(Path(dir_cenarios or DIR_CENARIOS).glob("*.yaml"))}
+    gab = {p.stem: p for p in sorted(Path(dir_gabaritos or DIR_GABARITOS).glob("*.yaml"))}
     if set(cen) != set(gab):
         raise ValueError(f"cenários sem gabarito: {sorted(set(cen) - set(gab))}; "
                          f"gabaritos sem cenário: {sorted(set(gab) - set(cen))}")
@@ -68,6 +70,9 @@ def _atendidas(res: dict) -> dict[str, float]:
     for d in _designacoes(res):
         out[d["ocorrencia_id"]] = min(out.get(d["ocorrencia_id"], math.inf), float(d["eta_h"]))
     return out
+
+
+CELULA = re.compile(r"cel_-?\d+_-?\d+")
 
 
 def _escalada(res: dict, oid: str) -> bool:
@@ -224,3 +229,110 @@ def resumo_execucao(checagens: list[dict], res: dict, eta_max_h: float) -> dict:
 def desvio(xs: list[float | None]) -> float | None:
     v = [x for x in xs if x is not None]
     return round(statistics.pstdev(v), 4) if len(v) >= 2 else (0.0 if v else None)
+
+
+# ------------------------------------------------------------------ sobre-escalação
+def escaladas(res: dict) -> set[str]:
+    """Ocorrências que o gabarito conta como escaladas: ``ocorrencia_id`` da escalação ou id citado no motivo
+    (mesma regra de ``_escalada``), restritas às ocorrências do período."""
+    ids = {o["id"] for o in res["ocorrencias"]}
+    out: set[str] = set()
+    for e in res.get("escalacoes") or []:
+        if e.get("ocorrencia_id"):
+            out.add(e["ocorrencia_id"])
+        out.update(CELULA.findall(e.get("motivo") or ""))
+    return out & ids
+
+
+def bloqueios_do_cenario(meta: dict, res: dict, regiao: str) -> tuple[set[str], set[str]]:
+    """(bases bloqueadas, ocorrências com rota terrestre bloqueada) segundo as memórias e notas DO CENÁRIO
+    (a verdade do caso, para todas as variantes) mais as ``memorias_usadas`` do resultado (ex.: nota gravada
+    pela CLI), lidas por ``interpretar_memorias``."""
+    from datetime import datetime, timedelta, timezone
+
+    from app.core.models import Base, Memoria, Ocorrencia
+    from app.tools.memorias import interpretar_memorias
+    textos = [(m["texto"], m.get("tipo", "nota")) for m in meta.get("memorias_iniciais") or []]
+    textos += [(t, "nota") for t in meta.get("notas") or []]
+    textos += [(m["texto"], m.get("tipo", "nota")) for m in res.get("memorias_usadas") or []
+               if m.get("texto") and not m.get("substituida_por")]
+    if not textos:
+        return set(), set()
+    t0 = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    mems = [Memoria(id=f"{regiao}:mem-{i}", regiao=regiao, texto=t, tipo=tp if tp in ("derivada", "nota") else "nota",
+                    fonte="cenario", confianca=1.0, supersedes=None, criada_em=t0 + timedelta(minutes=i))
+            for i, (t, tp) in enumerate(textos)]
+    bases = [Base.model_validate(b) for b in res["bases"]]
+    ocs = [Ocorrencia.model_validate(o) for o in res["ocorrencias"]]
+    leit = interpretar_memorias(mems, bases, ocs, regiao)
+    return set(leit.bases_bloqueadas), set(leit.ocorrencias_bloqueadas)
+
+
+def sobre_escalacao(res: dict, regiao_cfg, reserva_minima: int = 0,
+                    bloqueios: tuple[set[str], set[str]] = (set(), set())) -> dict:
+    """Escalações que não precisavam ter acontecido (definição em eval/README.md, "Sobre-escalação").
+
+    Considera só as ocorrências escaladas e SEM designação no plano final (citar no motivo uma ocorrência
+    atendida não é escalá-la). Para cada uma:
+    - ``sem_exposicao``: ``pop_raio == 0`` (não há população exposta que justifique pedir apoio externo);
+    - ``com_recurso_livre``: existe recurso disponível, com capacidade sobrando, que chega em até ``eta_max_h``,
+      não bloqueado pelas memórias/notas do cenário, e há mais recursos livres do que a reserva mínima;
+    - ``so_com_reserva``: (informativo) um recurso livre chegaria, mas usá-lo quebraria a reserva mínima;
+    - ``com_troca``: (informativo) um recurso que está numa ocorrência SEM população chegaria a ela em até
+      ``eta_max_h`` (a troca que o checador chama de ``liberaveis``).
+    ``sobre_escaladas`` = sem_exposicao ∪ com_recurso_livre.
+    """
+    from app.tools.geo import eta_h
+    bases_bloq, ocs_bloq = bloqueios
+    bases = {b["id"]: b for b in res["bases"]}
+    ocs = {o["id"]: o for o in res["ocorrencias"]}
+    atend = _atendidas(res)
+    uso: dict[str, int] = {}
+    onde: dict[str, list[str]] = {}
+    for d in _designacoes(res):
+        uso[d["recurso_id"]] = uso.get(d["recurso_id"], 0) + 1
+        onde.setdefault(d["recurso_id"], []).append(d["ocorrencia_id"])
+    livres = [r for r in res["recursos"] if r.get("disponivel", True) and uso.get(r["id"], 0) < r.get("capacidade", 1)
+              and r["base_id"] not in bases_bloq]
+
+    def chega(r: dict, o: dict) -> bool:
+        b = bases.get(r["base_id"])
+        if b is None or (r["tipo"] == "terrestre" and o["id"] in ocs_bloq):
+            return False
+        return eta_h(b["lat"], b["lon"], o["lat"], o["lon"], regiao_cfg, r["tipo"]) <= regiao_cfg.eta_max_h
+
+    esc = sorted(o for o in escaladas(res) if o not in atend)
+    sem_expo = [o for o in esc if (ocs[o].get("pop_raio") or 0) <= 0]
+    alcancam = [o for o in esc if any(chega(r, ocs[o]) for r in livres)]
+    com_livre = [o for o in alcancam if len(livres) > reserva_minima]
+    so_reserva = [o for o in alcancam if o not in com_livre]
+    ocupados_sem_pop = [r for r in res["recursos"] if r["base_id"] not in bases_bloq and onde.get(r["id"])
+                        and all((ocs.get(x, {}).get("pop_raio") or 0) <= 0 for x in onde[r["id"]])]
+    com_troca = [o for o in esc if (ocs[o].get("pop_raio") or 0) > 0 and o not in com_livre
+                 and any(chega(r, ocs[o]) for r in ocupados_sem_pop)]
+    sem_alvo = sum(1 for e in res.get("escalacoes") or []
+                   if not e.get("ocorrencia_id") and not CELULA.search(e.get("motivo") or ""))
+    impasse = sum(1 for e in res.get("escalacoes") or [] if (e.get("motivo") or "").lower().startswith("impasse"))
+    return {"escaladas": len(esc), "sobre_escaladas": len(set(sem_expo) | set(com_livre)),
+            "escaladas_sem_exposicao": len(sem_expo), "escaladas_com_recurso_livre": len(com_livre),
+            "escaladas_com_troca": len(com_troca), "escaladas_so_com_reserva": len(so_reserva), "escaladas_e_atendidas": len(escaladas(res) & set(atend)),
+            "escalacoes_sem_alvo": sem_alvo, "escalacoes_impasse": impasse,
+            "ids_sobre_escaladas": sorted(set(sem_expo) | set(com_livre))}
+
+
+def credito_de_escalacao(gabarito: dict, res: dict) -> int:
+    """Checagens que passam, mas falhariam se o plano não tivesse nenhuma escalação (o crédito que o
+    gabarito dá a quem escala: ``ocorrencia_atendida_ou_escalada`` e ``expostas_nao_atendidas_escaladas``)."""
+    sem = {**res, "escalacoes": []}
+    n = 0
+    for c in gabarito["checagens"]:
+        if checar(c, res)["resultado"] == "passou" and checar(c, sem)["resultado"] == "falhou":
+            n += 1
+    return n
+
+
+def metricas_escalacao(meta: dict, gabarito: dict, res: dict, regiao_cfg) -> dict:
+    out = sobre_escalacao(res, regiao_cfg, int(meta.get("reserva") or 0),
+                          bloqueios_do_cenario(meta, res, regiao_cfg.nome))
+    out["credito_escalacao"] = credito_de_escalacao(gabarito, res)
+    return out

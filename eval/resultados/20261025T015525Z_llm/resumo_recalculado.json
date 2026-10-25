@@ -1,0 +1,1418 @@
+{
+ "origem": "eval/resultados/20261025T015525Z_llm",
+ "modo": "llm",
+ "recalculado_por": "eval/recalcular.py",
+ "variantes": {
+  "A": "alocador_simples sozinho",
+  "B": "Planejador + checador (usar_critico_llm=False)",
+  "C": "completo (Crítico + Analista + H-MEM)",
+  "D": "C sem H-MEM (usar_memoria=False)"
+ },
+ "execucoes": 144,
+ "avisos": [],
+ "agregado": {
+  "variantes": {
+   "A": {
+    "descricao": "alocador_simples sozinho",
+    "execucoes": 36,
+    "erros": 0,
+    "acerto": "18/81",
+    "acerto_pct": 22.2,
+    "decisao": "15/51",
+    "deteccao": "0/27",
+    "alarmes_falsos_gabarito": 0,
+    "alarme_falso_aplicaveis": 3,
+    "citacoes_falsas": 0,
+    "eta_pond_medio_h": 4.399,
+    "eta_pond_log_medio_h": 6.213,
+    "rodadas_media": 0.0,
+    "status_escala": 0,
+    "escalacoes_media": 0.0,
+    "desvio_acerto_entre_repeticoes": 0.0,
+    "acerto_por_repeticao": {
+     "r1": "6/27",
+     "r2": "6/27",
+     "r3": "6/27"
+    },
+    "acerto_por_execucao_media": 6.0,
+    "acerto_por_execucao_aplicaveis": [
+     27
+    ],
+    "acerto_por_execucao_desvio": 0.0,
+    "acerto_por_execucao_min_max": [
+     6,
+     6
+    ],
+    "escaladas": 0,
+    "sobre_escaladas": 0,
+    "escaladas_sem_exposicao": 0,
+    "escaladas_com_recurso_livre": 0,
+    "escaladas_com_troca": 0,
+    "escaladas_so_com_reserva": 0,
+    "escaladas_e_atendidas": 0,
+    "escalacoes_sem_alvo": 0,
+    "escalacoes_impasse": 0,
+    "credito_escalacao": 0,
+    "execucoes_com_sobre_escalacao": 0,
+    "cenarios_com_planos_diferentes_entre_repeticoes": 0,
+    "agentes": {},
+    "duracao_total_s": 3.79
+   },
+   "B": {
+    "descricao": "Planejador + checador (usar_critico_llm=False)",
+    "execucoes": 36,
+    "erros": 0,
+    "acerto": "53/81",
+    "acerto_pct": 65.4,
+    "decisao": "32/51",
+    "deteccao": "18/27",
+    "alarmes_falsos_gabarito": 0,
+    "alarme_falso_aplicaveis": 3,
+    "citacoes_falsas": 56,
+    "eta_pond_medio_h": 3.898,
+    "eta_pond_log_medio_h": 6.005,
+    "rodadas_media": 2.167,
+    "status_escala": 12,
+    "escalacoes_media": 0.333,
+    "desvio_acerto_entre_repeticoes": 0.0175,
+    "acerto_por_repeticao": {
+     "r1": "18/27",
+     "r2": "18/27",
+     "r3": "17/27"
+    },
+    "acerto_por_execucao_media": 17.667,
+    "acerto_por_execucao_aplicaveis": [
+     27
+    ],
+    "acerto_por_execucao_desvio": 0.4714,
+    "acerto_por_execucao_min_max": [
+     17,
+     18
+    ],
+    "escaladas": 0,
+    "sobre_escaladas": 0,
+    "escaladas_sem_exposicao": 0,
+    "escaladas_com_recurso_livre": 0,
+    "escaladas_com_troca": 0,
+    "escaladas_so_com_reserva": 0,
+    "escaladas_e_atendidas": 0,
+    "escalacoes_sem_alvo": 12,
+    "escalacoes_impasse": 12,
+    "credito_escalacao": 0,
+    "execucoes_com_sobre_escalacao": 0,
+    "cenarios_com_planos_diferentes_entre_repeticoes": 2,
+    "agentes": {
+     "llm_calls": 79,
+     "planejador": 78
+    },
+    "duracao_total_s": 2119.55
+   },
+   "C": {
+    "descricao": "completo (Crítico + Analista + H-MEM)",
+    "execucoes": 36,
+    "erros": 0,
+    "acerto": "66/87",
+    "acerto_pct": 75.9,
+    "decisao": "36/51",
+    "deteccao": "24/30",
+    "alarmes_falsos_gabarito": 0,
+    "alarme_falso_aplicaveis": 6,
+    "citacoes_falsas": 54,
+    "eta_pond_medio_h": 3.771,
+    "eta_pond_log_medio_h": 5.96,
+    "rodadas_media": 2.611,
+    "status_escala": 18,
+    "escalacoes_media": 0.5,
+    "desvio_acerto_entre_repeticoes": 0.0,
+    "acerto_por_repeticao": {
+     "r1": "22/29",
+     "r2": "22/29",
+     "r3": "22/29"
+    },
+    "acerto_por_execucao_media": 22.0,
+    "acerto_por_execucao_aplicaveis": [
+     29
+    ],
+    "acerto_por_execucao_desvio": 0.0,
+    "acerto_por_execucao_min_max": [
+     22,
+     22
+    ],
+    "escaladas": 40,
+    "sobre_escaladas": 0,
+    "escaladas_sem_exposicao": 0,
+    "escaladas_com_recurso_livre": 0,
+    "escaladas_com_troca": 0,
+    "escaladas_so_com_reserva": 0,
+    "escaladas_e_atendidas": 30,
+    "escalacoes_sem_alvo": 0,
+    "escalacoes_impasse": 18,
+    "credito_escalacao": 0,
+    "execucoes_com_sobre_escalacao": 0,
+    "cenarios_com_planos_diferentes_entre_repeticoes": 2,
+    "agentes": {
+     "llm_calls": 188,
+     "planejador": 94,
+     "critico": 94
+    },
+    "duracao_total_s": 5694.66
+   },
+   "D": {
+    "descricao": "C sem H-MEM (usar_memoria=False)",
+    "execucoes": 36,
+    "erros": 0,
+    "acerto": "64/87",
+    "acerto_pct": 73.6,
+    "decisao": "37/51",
+    "deteccao": "21/30",
+    "alarmes_falsos_gabarito": 0,
+    "alarme_falso_aplicaveis": 6,
+    "citacoes_falsas": 47,
+    "eta_pond_medio_h": 3.762,
+    "eta_pond_log_medio_h": 5.877,
+    "rodadas_media": 2.528,
+    "status_escala": 16,
+    "escalacoes_media": 0.444,
+    "desvio_acerto_entre_repeticoes": 0.0163,
+    "acerto_por_repeticao": {
+     "r1": "22/29",
+     "r2": "21/29",
+     "r3": "21/29"
+    },
+    "acerto_por_execucao_media": 21.333,
+    "acerto_por_execucao_aplicaveis": [
+     29
+    ],
+    "acerto_por_execucao_desvio": 0.4714,
+    "acerto_por_execucao_min_max": [
+     21,
+     22
+    ],
+    "escaladas": 40,
+    "sobre_escaladas": 0,
+    "escaladas_sem_exposicao": 0,
+    "escaladas_com_recurso_livre": 0,
+    "escaladas_com_troca": 0,
+    "escaladas_so_com_reserva": 0,
+    "escaladas_e_atendidas": 26,
+    "escalacoes_sem_alvo": 0,
+    "escalacoes_impasse": 16,
+    "credito_escalacao": 0,
+    "execucoes_com_sobre_escalacao": 0,
+    "cenarios_com_planos_diferentes_entre_repeticoes": 2,
+    "agentes": {
+     "llm_calls": 182,
+     "planejador": 91,
+     "critico": 91
+    },
+    "duracao_total_s": 5258.3
+   }
+  },
+  "por_cenario": {
+   "agricola_recorrente_parana_24out|A": {
+    "cenario": "agricola_recorrente_parana_24out",
+    "variante": "A",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 1.2,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c2": [
+      "nao_se_aplica",
+      "nao_se_aplica",
+      "nao_se_aplica"
+     ]
+    }
+   },
+   "agricola_recorrente_parana_24out|B": {
+    "cenario": "agricola_recorrente_parana_24out",
+    "variante": "B",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 1.2,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c2": [
+      "nao_se_aplica",
+      "nao_se_aplica",
+      "nao_se_aplica"
+     ]
+    }
+   },
+   "agricola_recorrente_parana_24out|C": {
+    "cenario": "agricola_recorrente_parana_24out",
+    "variante": "C",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.5,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 1.207,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c2": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   },
+   "agricola_recorrente_parana_24out|D": {
+    "cenario": "agricola_recorrente_parana_24out",
+    "variante": "D",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.5,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 1.207,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c2": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   },
+   "controle_taguatinga_liberada_21out|A": {
+    "cenario": "controle_taguatinga_liberada_21out",
+    "variante": "A",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 1.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 5.493,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c2": [
+      "passou",
+      "passou",
+      "passou"
+     ]
+    }
+   },
+   "controle_taguatinga_liberada_21out|B": {
+    "cenario": "controle_taguatinga_liberada_21out",
+    "variante": "B",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 1.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 5.493,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c2": [
+      "passou",
+      "passou",
+      "passou"
+     ]
+    }
+   },
+   "controle_taguatinga_liberada_21out|C": {
+    "cenario": "controle_taguatinga_liberada_21out",
+    "variante": "C",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 1.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 5.469,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c2": [
+      "passou",
+      "passou",
+      "passou"
+     ]
+    }
+   },
+   "controle_taguatinga_liberada_21out|D": {
+    "cenario": "controle_taguatinga_liberada_21out",
+    "variante": "D",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 1.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 5.469,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c2": [
+      "passou",
+      "passou",
+      "passou"
+     ]
+    }
+   },
+   "controle_vegetacao_parana_19out|A": {
+    "cenario": "controle_vegetacao_parana_19out",
+    "variante": "A",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 1.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 1.772,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "nao_se_aplica",
+      "nao_se_aplica",
+      "nao_se_aplica"
+     ],
+     "c2": [
+      "passou",
+      "passou",
+      "passou"
+     ]
+    }
+   },
+   "controle_vegetacao_parana_19out|B": {
+    "cenario": "controle_vegetacao_parana_19out",
+    "variante": "B",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.667,
+    "acerto_desvio": 0.4714,
+    "eta_pond_medio": 1.712,
+    "eta_pond_desvio": 0.0849,
+    "planos_identicos": false,
+    "checagens": {
+     "c1": [
+      "nao_se_aplica",
+      "nao_se_aplica",
+      "nao_se_aplica"
+     ],
+     "c2": [
+      "passou",
+      "passou",
+      "falhou"
+     ]
+    }
+   },
+   "controle_vegetacao_parana_19out|C": {
+    "cenario": "controle_vegetacao_parana_19out",
+    "variante": "C",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.5,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 1.406,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c2": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   },
+   "controle_vegetacao_parana_19out|D": {
+    "cenario": "controle_vegetacao_parana_19out",
+    "variante": "D",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.5,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 1.298,
+    "eta_pond_desvio": 0.2079,
+    "planos_identicos": false,
+    "checagens": {
+     "c1": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c2": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   },
+   "escalar_expostas_22out|A": {
+    "cenario": "escalar_expostas_22out",
+    "variante": "A",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 4.429,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c2": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   },
+   "escalar_expostas_22out|B": {
+    "cenario": "escalar_expostas_22out",
+    "variante": "B",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.5,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 4.672,
+    "eta_pond_desvio": 0.0561,
+    "planos_identicos": false,
+    "checagens": {
+     "c1": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c2": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   },
+   "escalar_expostas_22out|C": {
+    "cenario": "escalar_expostas_22out",
+    "variante": "C",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.5,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 4.672,
+    "eta_pond_desvio": 0.0561,
+    "planos_identicos": false,
+    "checagens": {
+     "c1": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c2": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   },
+   "escalar_expostas_22out|D": {
+    "cenario": "escalar_expostas_22out",
+    "variante": "D",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.167,
+    "acerto_desvio": 0.2357,
+    "eta_pond_medio": 4.806,
+    "eta_pond_desvio": 0.2225,
+    "planos_identicos": false,
+    "checagens": {
+     "c1": [
+      "passou",
+      "falhou",
+      "falhou"
+     ],
+     "c2": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   },
+   "excecao_dianopolis_ponte_18out|A": {
+    "cenario": "excecao_dianopolis_ponte_18out",
+    "variante": "A",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.5,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 4.687,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c2": [
+      "passou",
+      "passou",
+      "passou"
+     ]
+    }
+   },
+   "excecao_dianopolis_ponte_18out|B": {
+    "cenario": "excecao_dianopolis_ponte_18out",
+    "variante": "B",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.5,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 3.925,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c2": [
+      "passou",
+      "passou",
+      "passou"
+     ]
+    }
+   },
+   "excecao_dianopolis_ponte_18out|C": {
+    "cenario": "excecao_dianopolis_ponte_18out",
+    "variante": "C",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 1.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 4.567,
+    "eta_pond_desvio": 0.0481,
+    "planos_identicos": false,
+    "checagens": {
+     "c1": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c2": [
+      "passou",
+      "passou",
+      "passou"
+     ]
+    }
+   },
+   "excecao_dianopolis_ponte_18out|D": {
+    "cenario": "excecao_dianopolis_ponte_18out",
+    "variante": "D",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 1.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 4.533,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c2": [
+      "passou",
+      "passou",
+      "passou"
+     ]
+    }
+   },
+   "excecao_mateiros_alagada_23out|A": {
+    "cenario": "excecao_mateiros_alagada_23out",
+    "variante": "A",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.5,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 8.39,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c2": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c3": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c4": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   },
+   "excecao_mateiros_alagada_23out|B": {
+    "cenario": "excecao_mateiros_alagada_23out",
+    "variante": "B",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.5,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 8.491,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c2": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c3": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c4": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   },
+   "excecao_mateiros_alagada_23out|C": {
+    "cenario": "excecao_mateiros_alagada_23out",
+    "variante": "C",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.5,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 8.491,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c2": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c3": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c4": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   },
+   "excecao_mateiros_alagada_23out|D": {
+    "cenario": "excecao_mateiros_alagada_23out",
+    "variante": "D",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.5,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 8.39,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c2": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c3": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c4": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   },
+   "fato_errado_localidade_23out|A": {
+    "cenario": "fato_errado_localidade_23out",
+    "variante": "A",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 5.547,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c2": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c3": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   },
+   "fato_errado_localidade_23out|B": {
+    "cenario": "fato_errado_localidade_23out",
+    "variante": "B",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 1.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 3.088,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c2": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c3": [
+      "passou",
+      "passou",
+      "passou"
+     ]
+    }
+   },
+   "fato_errado_localidade_23out|C": {
+    "cenario": "fato_errado_localidade_23out",
+    "variante": "C",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 1.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 2.167,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c2": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c3": [
+      "passou",
+      "passou",
+      "passou"
+     ]
+    }
+   },
+   "fato_errado_localidade_23out|D": {
+    "cenario": "fato_errado_localidade_23out",
+    "variante": "D",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 1.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 2.167,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c2": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c3": [
+      "passou",
+      "passou",
+      "passou"
+     ]
+    }
+   },
+   "fato_errado_populacao_23out|A": {
+    "cenario": "fato_errado_populacao_23out",
+    "variante": "A",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 5.547,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c2": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c3": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   },
+   "fato_errado_populacao_23out|B": {
+    "cenario": "fato_errado_populacao_23out",
+    "variante": "B",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 1.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 2.167,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c2": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c3": [
+      "passou",
+      "passou",
+      "passou"
+     ]
+    }
+   },
+   "fato_errado_populacao_23out|C": {
+    "cenario": "fato_errado_populacao_23out",
+    "variante": "C",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 1.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 2.167,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c2": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c3": [
+      "passou",
+      "passou",
+      "passou"
+     ]
+    }
+   },
+   "fato_errado_populacao_23out|D": {
+    "cenario": "fato_errado_populacao_23out",
+    "variante": "D",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 1.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 2.167,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c2": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c3": [
+      "passou",
+      "passou",
+      "passou"
+     ]
+    }
+   },
+   "fato_errado_tendencia_23out|A": {
+    "cenario": "fato_errado_tendencia_23out",
+    "variante": "A",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 5.547,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c2": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c3": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   },
+   "fato_errado_tendencia_23out|B": {
+    "cenario": "fato_errado_tendencia_23out",
+    "variante": "B",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 3.088,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c2": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c3": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   },
+   "fato_errado_tendencia_23out|C": {
+    "cenario": "fato_errado_tendencia_23out",
+    "variante": "C",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 1.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 2.167,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c2": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c3": [
+      "passou",
+      "passou",
+      "passou"
+     ]
+    }
+   },
+   "fato_errado_tendencia_23out|D": {
+    "cenario": "fato_errado_tendencia_23out",
+    "variante": "D",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 1.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 2.167,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c2": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c3": [
+      "passou",
+      "passou",
+      "passou"
+     ]
+    }
+   },
+   "reignicao_conceicao_20out|A": {
+    "cenario": "reignicao_conceicao_20out",
+    "variante": "A",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 3.114,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c2": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   },
+   "reignicao_conceicao_20out|B": {
+    "cenario": "reignicao_conceicao_20out",
+    "variante": "B",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 5.987,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c2": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   },
+   "reignicao_conceicao_20out|C": {
+    "cenario": "reignicao_conceicao_20out",
+    "variante": "C",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 5.987,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c2": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   },
+   "reignicao_conceicao_20out|D": {
+    "cenario": "reignicao_conceicao_20out",
+    "variante": "D",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 5.987,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c2": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   },
+   "reignicao_morros_24out|A": {
+    "cenario": "reignicao_morros_24out",
+    "variante": "A",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 0.58,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c2": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   },
+   "reignicao_morros_24out|B": {
+    "cenario": "reignicao_morros_24out",
+    "variante": "B",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 1.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 0.58,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c2": [
+      "passou",
+      "passou",
+      "passou"
+     ]
+    }
+   },
+   "reignicao_morros_24out|C": {
+    "cenario": "reignicao_morros_24out",
+    "variante": "C",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 1.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 0.58,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c2": [
+      "passou",
+      "passou",
+      "passou"
+     ]
+    }
+   },
+   "reignicao_morros_24out|D": {
+    "cenario": "reignicao_morros_24out",
+    "variante": "D",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 1.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 0.58,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c2": [
+      "passou",
+      "passou",
+      "passou"
+     ]
+    }
+   },
+   "tradeoff_noite_gurupi_20out|A": {
+    "cenario": "tradeoff_noite_gurupi_20out",
+    "variante": "A",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 0.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 6.486,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c2": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ],
+     "c3": [
+      "falhou",
+      "falhou",
+      "falhou"
+     ]
+    }
+   },
+   "tradeoff_noite_gurupi_20out|B": {
+    "cenario": "tradeoff_noite_gurupi_20out",
+    "variante": "B",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 1.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 6.367,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c2": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c3": [
+      "passou",
+      "passou",
+      "passou"
+     ]
+    }
+   },
+   "tradeoff_noite_gurupi_20out|C": {
+    "cenario": "tradeoff_noite_gurupi_20out",
+    "variante": "C",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 1.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 6.367,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c2": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c3": [
+      "passou",
+      "passou",
+      "passou"
+     ]
+    }
+   },
+   "tradeoff_noite_gurupi_20out|D": {
+    "cenario": "tradeoff_noite_gurupi_20out",
+    "variante": "D",
+    "n": 3,
+    "erros": 0,
+    "acerto_medio": 1.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 6.367,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c2": [
+      "passou",
+      "passou",
+      "passou"
+     ],
+     "c3": [
+      "passou",
+      "passou",
+      "passou"
+     ]
+    }
+   }
+  }
+ }
+}

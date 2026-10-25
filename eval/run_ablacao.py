@@ -27,14 +27,9 @@ from app.data.repositorio import RepositorioCache
 from app.memory_client import MemoriaLocal
 from app.tools.alocador import alocador_simples
 from app.tools.monitor import monitor
-from eval.checagem import RAIZ_EVAL, avaliar, desvio, listar_casos, resumo_execucao
+from eval.agregacao import VARIANTES, agregar, estimar, metricas_completas, tabela_md  # noqa: F401
+from eval.checagem import RAIZ_EVAL, avaliar, listar_casos
 
-VARIANTES = {
-    "A": "alocador_simples sozinho",
-    "B": "Planejador + checador (usar_critico_llm=False)",
-    "C": "completo (Crítico + Analista + H-MEM)",
-    "D": "C sem H-MEM (usar_memoria=False)",
-}
 
 
 # ------------------------------------------------------------------ memória e injeção
@@ -120,11 +115,14 @@ def executar(caso: tuple[dict, dict], variante: str, rep: int, modo: str, pasta:
     inj = meta.get("injecao")
     t0 = time.perf_counter()
     erro = None
+    p1: dict | None = None
     try:
+        memoria = carregar_memorias(meta, cen.regiao)
+        if meta.get("periodo_anterior"):
+            p1 = rodar_periodo_anterior(meta, cfg, cen, variante, rep, modo, pasta, memoria, repo, log)
         if variante == "A":
             res = rodar_A(cfg, cen, repo, log, inj, registro)
         else:
-            memoria = carregar_memorias(meta, cen.regiao)
             with injecao_no_planejador(inj, registro):
                 res = grafo.executar_periodo(cfg, cen, repo, memoria, log, modo=modo,
                                              usar_critico_llm=(variante != "B"), usar_memoria=(variante != "D"))
@@ -134,6 +132,8 @@ def executar(caso: tuple[dict, dict], variante: str, rep: int, modo: str, pasta:
     dur = round(time.perf_counter() - t0, 3)
     saida = {"cenario": meta["id"], "tipo": meta["tipo"], "variante": variante, "repeticao": rep, "modo": modo,
              "duracao_s": dur, "log_path": str(log.caminho), "erro": erro}
+    if p1 is not None:
+        saida["periodo_anterior"] = p1
     if res is not None:
         rd = res.model_dump(mode="json")
         rd["variante"] = variante
@@ -144,12 +144,35 @@ def executar(caso: tuple[dict, dict], variante: str, rep: int, modo: str, pasta:
             if pref in ("aprova", "escala"):
                 rd["status"], rd["status_lido_do_resumo"] = pref, True
         chks = avaliar(gab, rd)
-        saida.update(checagens=chks, metricas=resumo_execucao(chks, rd, cfg.eta_max_h),
+        saida.update(checagens=chks, metricas=metricas_completas(meta, gab, chks, rd, cfg),
                      contagem_agentes=contar_agentes(log.caminho), memorias_usadas=[m["id"] for m in rd["memorias_usadas"]],
                      injecao_aplicada=registro or None, resultado=rd)
     (pasta / f"{meta['id']}__{variante}__r{rep}.json").write_text(
         json.dumps(saida, ensure_ascii=False, indent=1, default=str), encoding="utf-8")
     return saida
+
+
+def rodar_periodo_anterior(meta: dict, cfg, cen, variante: str, rep: int, modo: str, pasta: Path, memoria,
+                           repo, log: LogExecucao) -> dict:
+    """Modo de 2 períodos (``periodo_anterior`` no cenário): roda P1 com a mesma variante e os mesmos recursos,
+    depois ``aprendizado.aprender_entre_periodos(P1 -> P2)`` grava as derivadas na ``memoria`` que P2 vai usar.
+    Igual à CLI ``run`` (CONTRATOS, seção 15), mas com o plano de P1 vindo direto do resultado, sem disco.
+    Na variante A (sem memória) e na D (``usar_memoria=False``) a memória é gerada mas não é lida em P2."""
+    from app.agents.aprendizado import aprender_entre_periodos
+    cen1 = cen.model_copy(update={"periodo": meta["periodo_anterior"]})
+    log1 = LogExecucao(cen.regiao, cen1.periodo, execucao=f"{meta['id']}__{variante}__r{rep}__p1", pasta=pasta / "logs")
+    repo1 = RepositorioCache()
+    if variante == "A":
+        res1 = rodar_A(cfg, cen1, repo1, log1, None, {})
+    else:
+        res1 = grafo.executar_periodo(cfg, cen1, repo1, memoria, log1, modo=modo,
+                                      usar_critico_llm=(variante != "B"), usar_memoria=(variante != "D"))
+    gravadas = aprender_entre_periodos(cen.regiao, cen.periodo, res1.plano, repo, memoria, log)
+    return {"periodo": cen1.periodo, "log_path": str(log1.caminho), "status": res1.status,
+            "pares": sorted(f"{d.recurso_id}->{d.ocorrencia_id}" for d in res1.plano.designacoes),
+            "nao_atendidas": list(res1.plano.nao_atendidas),
+            "memorias_aprendidas": [{"id": m.id, "texto": m.texto, "fonte": m.fonte, "confianca": m.confianca}
+                                    for m in gravadas]}
 
 
 def contar_agentes(caminho: Path) -> dict:
@@ -169,126 +192,6 @@ def contar_agentes(caminho: Path) -> dict:
     return dict(c)
 
 
-# ------------------------------------------------------------------ agregação
-def agregar(execs: list[dict]) -> dict:
-    por = defaultdict(list)
-    for e in execs:
-        por[(e["cenario"], e["variante"])].append(e)
-    linhas = {}
-    for (cid, var), es in sorted(por.items()):
-        ok = [e for e in es if not e["erro"]]
-        ms = [e["metricas"] for e in ok]
-        linhas[f"{cid}|{var}"] = {
-            "cenario": cid, "variante": var, "n": len(es), "erros": len(es) - len(ok),
-            "acerto_medio": _media([m["acerto"] for m in ms]), "acerto_desvio": desvio([m["acerto"] for m in ms]),
-            "eta_pond_medio": _media([m["eta_ponderado_h"] for m in ms]),
-            "eta_pond_desvio": desvio([m["eta_ponderado_h"] for m in ms]),
-            "planos_identicos": len({tuple(m["pares"]) for m in ms}) <= 1,
-            "checagens": {c["id"]: [x["resultado"] for e in ok for x in e["checagens"] if x["id"] == c["id"]]
-                          for c in (ok[0]["checagens"] if ok else [])},
-        }
-    variantes = {}
-    for var in VARIANTES:
-        es = [e for e in execs if e["variante"] == var and not e["erro"]]
-        if not es:
-            continue
-        ms = [e["metricas"] for e in es]
-        soma = lambda cat, k: sum(m["por_categoria"][cat][k] for m in ms)  # noqa: E731
-        reps = defaultdict(list)
-        for e in es:
-            reps[e["repeticao"]].append(e["metricas"])
-        acerto_por_rep = [sum(m["passou"] for m in v) / max(1, sum(m["aplicaveis"] for m in v)) for v in reps.values()]
-        variantes[var] = {
-            "descricao": VARIANTES[var], "execucoes": len(es),
-            "erros": sum(1 for e in execs if e["variante"] == var and e["erro"]),
-            "acerto": f"{sum(m['passou'] for m in ms)}/{sum(m['aplicaveis'] for m in ms)}",
-            "acerto_pct": round(100 * sum(m["passou"] for m in ms) / max(1, sum(m["aplicaveis"] for m in ms)), 1),
-            "decisao": f"{soma('decisao', 'passou')}/{soma('decisao', 'aplicaveis')}",
-            "deteccao": f"{soma('deteccao', 'passou')}/{soma('deteccao', 'aplicaveis')}",
-            "alarmes_falsos_gabarito": sum(m["alarmes_falsos_gabarito"] for m in ms),
-            "alarme_falso_aplicaveis": soma("alarme_falso", "aplicaveis"),
-            "citacoes_falsas": sum(m["citacoes_falsas"] for m in ms),
-            "eta_pond_medio_h": _media([m["eta_ponderado_h"] for m in ms]),
-            "eta_pond_log_medio_h": _media([m["eta_ponderado_log_h"] for m in ms]),
-            "rodadas_media": _media([m["rodadas"] for m in ms]),
-            "status_escala": sum(1 for m in ms if m["status"] == "escala"),
-            "escalacoes_media": _media([m["escalacoes"] for m in ms]),
-            "desvio_acerto_entre_repeticoes": desvio(acerto_por_rep),
-            "cenarios_com_planos_diferentes_entre_repeticoes": sum(
-                1 for k, l in linhas.items() if l["variante"] == var and not l["planos_identicos"]),
-            "agentes": dict(sum((Counter(e["contagem_agentes"]) for e in es), Counter())),
-            "duracao_total_s": round(sum(e["duracao_s"] for e in es), 2),
-        }
-    return {"variantes": variantes, "por_cenario": linhas}
-
-
-def _media(xs):
-    v = [x for x in xs if x is not None]
-    return round(sum(v) / len(v), 3) if v else None
-
-
-# ------------------------------------------------------------------ estimativa do modo LLM
-def estimar(agregado: dict, n_cenarios: int, repeticoes: int, latencia_s: float) -> dict:
-    """A partir dos pontos de decisão observados no offline (planejador, crítico, analista por execução)."""
-    out = {"latencia_s_suposta": latencia_s, "repeticoes": repeticoes, "por_variante": {}}
-    tot_min = tot_max = 0.0
-    for var, v in agregado["variantes"].items():
-        ag, n = v["agentes"], v["execucoes"]
-        if var == "A":
-            continue
-        plan = ag.get("planejador", 0) / n
-        crit = ag.get("critico", 0) / n if var != "B" else 0.0  # B não chama o Crítico LLM
-        anal = ag.get("analista", 0) / n
-        base = plan + crit + anal  # 1 chamada por ponto de decisão, sem retry
-        pior = 2 * (plan + crit) + 4 * anal  # retry de JSON em tudo; Analista pede mais_consultas (2 chamadas)
-        out["por_variante"][var] = {"chamadas_por_execucao_min": round(base, 2), "chamadas_por_execucao_max": round(pior, 2),
-                                    "planejador": round(plan, 2), "critico": round(crit, 2), "analista": round(anal, 2)}
-        tot_min += base * n_cenarios * repeticoes
-        tot_max += pior * n_cenarios * repeticoes
-    out["chamadas_total_min"], out["chamadas_total_max"] = round(tot_min), round(tot_max)
-    out["horas_min"], out["horas_max"] = round(tot_min * latencia_s / 3600, 2), round(tot_max * latencia_s / 3600, 2)
-    out["teto_teorico_por_execucao"] = "3 rodadas × (1 Planejador + 2 Crítico + 3 Analistas × 2) × 2 retries = 54"
-    out["obs"] = ("Estimativa a partir da trajetória OFFLINE: no modo LLM o número de rodadas e de pareceres pode ser "
-                  "outro. A variante A não chama LLM; a B só chama o Planejador.")
-    return out
-
-
-# ------------------------------------------------------------------ tabela
-def tabela_md(agregado: dict, modo: str) -> str:
-    vs = agregado["variantes"]
-    linhas = [f"Modo: **{modo}**" + (" (agentes offline determinísticos: validação do pipeline, não o resultado final)"
-                                     if modo == "offline" else ""), "",
-              "| Variante | Acerto | Decisão | Detecção | Alarmes falsos (gabarito) | Citações falsas | "
-              "ETA pond. (h) | ETA pond. log (h) | Rodadas | Status escala | Escalações | Desvio acerto entre rep. | "
-              "Cenários com planos ≠ entre rep. |",
-              "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
-    for var, v in vs.items():
-        linhas.append(f"| **{var}** | {v['acerto']} ({v['acerto_pct']}%) | {v['decisao']} | {v['deteccao']} | "
-                      f"{v['alarmes_falsos_gabarito']}/{v['alarme_falso_aplicaveis']} | {v['citacoes_falsas']} | "
-                      f"{v['eta_pond_medio_h']} | {v['eta_pond_log_medio_h']} | {v['rodadas_media']} | "
-                      f"{v['status_escala']}/{v['execucoes']} | {v['escalacoes_media']} | "
-                      f"{v['desvio_acerto_entre_repeticoes']} | {v['cenarios_com_planos_diferentes_entre_repeticoes']} |")
-    linhas += ["", "Por cenário (checagens; P = passou, F = falhou, – = não se aplica, ! = inválido; "
-                   "uma letra por repetição quando diferem):", "",
-               "| Cenário | " + " | ".join(vs) + " |", "|---|" + "---|" * len(vs)]
-    sigla = {"passou": "P", "falhou": "F", "nao_se_aplica": "–", "invalido": "!"}
-    cenarios = sorted({l["cenario"] for l in agregado["por_cenario"].values()})
-    for cid in cenarios:
-        cel = []
-        for var in vs:
-            l = agregado["por_cenario"].get(f"{cid}|{var}")
-            if l is None:
-                cel.append("")
-                continue
-            partes = []
-            for chk, rs in l["checagens"].items():
-                s = {sigla[r] for r in rs}
-                partes.append(f"{chk}:{''.join(sigla[r] for r in rs) if len(s) > 1 else next(iter(s), '?')}")
-            cel.append(" ".join(partes) + (f" (ETA {l['eta_pond_medio']})" if l["eta_pond_medio"] is not None else ""))
-        linhas.append(f"| {cid} | " + " | ".join(cel) + " |")
-    return "\n".join(linhas) + "\n"
-
-
 # ------------------------------------------------------------------ main
 def main(argv: list[str] | None = None) -> int:
     from app.core.config import carregar_env
@@ -299,6 +202,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--variantes", default="ABCD")
     ap.add_argument("--cenarios", nargs="*", help="ids (padrão: todos)")
     ap.add_argument("--saida", default=str(RAIZ_EVAL / "resultados"))
+    ap.add_argument("--dois-periodos", action="store_true",
+                    help="usa eval/cenarios_2periodos/ (reignição em 2 períodos: a memória derivada vem do "
+                         "aprendizado.py rodando o período anterior, não do cenário)")
     ap.add_argument("--retomar", help="pasta de uma execução interrompida: reaproveita as execuções já salvas "
                                       "e roda só as que faltam")
     ap.add_argument("--estimar", action="store_true",
@@ -314,9 +220,12 @@ def main(argv: list[str] | None = None) -> int:
         print("Modo llm exige LLM_PROVIDER=nightshift (e METERLESS_BASE_URL/METERLESS_RUNTIME_TOKEN).", file=sys.stderr)
         return 2
     reps = 1 if a.estimar else a.repeticoes
-    casos = listar_casos(a.cenarios)
+    if a.dois_periodos:
+        casos = listar_casos(a.cenarios, RAIZ_EVAL / "cenarios_2periodos", RAIZ_EVAL / "gabaritos_2periodos")
+    else:
+        casos = listar_casos(a.cenarios)
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    pasta = Path(a.retomar) if a.retomar else Path(a.saida) / f"{ts}_{modo}{'_estimativa' if a.estimar else ''}"
+    pasta = Path(a.retomar) if a.retomar else Path(a.saida) / f"{ts}_{modo}{'_2periodos' if a.dois_periodos else ''}{'_estimativa' if a.estimar else ''}"
     (pasta / "logs").mkdir(parents=True, exist_ok=True)
     print(f"{len(casos)} cenários × {len(a.variantes)} variantes × {reps} repetições, modo {modo} → {pasta}")
     execs = []
@@ -335,6 +244,11 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"  {e['cenario']:38s} {var} r{r}: " + (f"ERRO {e['erro']}" if e["erro"] else
                       f"{m['passou']}/{m['aplicaveis']} checagens, ETA pond. {m['eta_ponderado_h']} h, "
                       f"status {m['status']}, rodadas {m['rodadas']} ({e['duracao_s']} s)"))
+                if e.get("periodo_anterior"):
+                    p1 = e["periodo_anterior"]
+                    print(f"      P1 {p1['periodo']}: {len(p1['pares'])} designações, "
+                          f"{len(p1['memorias_aprendidas'])} memória(s) aprendida(s): "
+                          + "; ".join(x["texto"] for x in p1["memorias_aprendidas"]))
     ag = agregar(execs)
     resumo = {"modo": modo, "timestamp_utc": ts, "repeticoes": reps, "cenarios": [c[0]["meta"]["id"] for c in casos],
               "variantes": VARIANTES, "agregado": ag,

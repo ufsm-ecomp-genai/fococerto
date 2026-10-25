@@ -1,0 +1,93 @@
+# Cenário de 2 períodos derivado de 'reignicao_conceicao_20out' (ESCRITO DEPOIS da ablação de 24-25/10, em 25/10/2026).
+# Mesmos dados reais, recursos e bases simulados do original; a diferença é que a memória derivada NÃO é
+# semeada: ela tem que vir do app/agents/aprendizado.py, rodando o período anterior antes.
+id: reignicao_conceicao_20out_2p
+tipo: reignicao_2periodos
+derivado_de: eval/cenarios/reignicao_conceicao_20out.yaml
+titulo: Reignição que o monitor vê como foco novo (2 períodos, memória gerada pelo aprendizado)
+escrito_em: '2026-10-25'
+escrito_depois_da_ablacao: true
+situacao_nos_dados: 'Mesmo período real de reignicao_conceicao_20out (20/10), mas sem memória semeada: o sistema roda
+  19/10 (P1) com os mesmos recursos, o aprendizado.py compara o plano de P1 com os dados de 20/10 e grava as derivadas,
+  e só então roda 20/10 (P2). No cache: cel_-120_-470 tem 6 focos em 17/10, 5 em 18/10, 0 em 19/10 e 14 em 20/10.'
+previsao_antes_de_rodar: 'Previsão escrita antes de rodar: o aprendizado.py NÃO deve gerar a memória. Em 19/10 a célula
+  cel_-120_-470 não tem foco (não existe como ocorrência em P1), então não está nem nas designações nem em nao_atendidas
+  do plano de 19/10, e o comparar() só olha células do plano de P1. Esperamos as checagens c1/c2 falharem em B, C e D
+  (como D falha no offline com a memória semeada ausente).'
+como_verificamos: Contagem de focos e posição por prioridade no cache (RepositorioCache.ocorrencias). Nenhuma variante
+  foi rodada neste modo antes deste arquivo.
+periodo_anterior: '2026-10-19'
+injecao: null
+memorias_iniciais: []
+regiao: tocantins
+periodo: '2026-10-20'
+simulado: true
+reserva: 0
+notas: []
+bases:
+- id: sim_conceicao
+  nome: Conceição do Tocantins (simulada)
+  lat: -12.21861
+  lon: -47.29833
+  fonte: GeoNames 3465741
+  simulada: true
+- id: sim_gurupi
+  nome: Gurupi (simulada)
+  lat: -11.72917
+  lon: -49.06861
+  fonte: GeoNames 3461724
+  simulada: true
+- id: sim_paraiso
+  nome: Paraíso do Tocantins (simulada)
+  lat: -10.17611
+  lon: -48.86667
+  fonte: GeoNames 3479329
+  simulada: true
+- id: sim_porto_nacional
+  nome: Porto Nacional (simulada)
+  lat: -10.70806
+  lon: -48.41722
+  fonte: GeoNames 3452711
+  simulada: true
+- id: sim_taguatinga
+  nome: Taguatinga (simulada)
+  lat: -12.40389
+  lon: -46.43611
+  fonte: GeoNames 3447075
+  simulada: true
+recursos:
+- id: taguatinga-t1
+  base_id: sim_taguatinga
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: portonac-t1
+  base_id: sim_porto_nacional
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: paraiso-t1
+  base_id: sim_paraiso
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: gurupi-t1
+  base_id: sim_gurupi
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: palmas-t1
+  base_id: osm_n5067657890
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: conceicao-t1
+  base_id: sim_conceicao
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: conceicao-t2
+  base_id: sim_conceicao
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true

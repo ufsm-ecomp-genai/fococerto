@@ -16,3 +16,5 @@ eval/resultados/*/*
 !eval/resultados/*/tabela.md
 eval/__pycache__/
 docs/INFRA-local.md
+!eval/resultados/*/tabela_recalculada.md
+!eval/resultados/*/resumo_recalculado.json

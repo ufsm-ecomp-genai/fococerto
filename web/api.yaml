@@ -1,0 +1,14 @@
+# Configuração do servidor da API (app/api.py). Caminhos relativos à raiz do projeto.
+# Variáveis de ambiente sobrescrevem: FOCOCERTO_EXEMPLOS, FOCOCERTO_PASTAS_CENARIOS (separadas por vírgula).
+
+# Pasta com planos já gerados (um subdiretório por exemplo, cada um com plano.json e, opcional, trace.jsonl),
+# servidos em GET /api/exemplos para o front começar sem rodar nada. São gerados por scripts/gerar_exemplos.sh.
+exemplos: output_examples
+
+# Pastas de onde o POST /api/run aceita o arquivo de recursos (cenário). As duas primeiras aparecem em
+# GET /api/cenarios.
+pastas_cenarios:
+  - cenarios
+  - input_examples
+  - eval/cenarios
+  - eval/cenarios_2periodos

@@ -1,0 +1,28 @@
+# Gabarito de 'reignicao_morros_24out_2p': as mesmas checagens de eval/gabaritos/reignicao_morros_24out.yaml, aplicadas ao período P2.
+# Escrito em 25/10/2026, DEPOIS da ablação original e ANTES de rodar o modo --dois-periodos.
+id: reignicao_morros_24out_2p
+cenario: eval/cenarios_2periodos/reignicao_morros_24out_2p.yaml
+escrito_em: '2026-10-25'
+autor: time FocoCerto (agente de avaliação), depois da ablação original e antes de rodar o modo de 2 períodos
+decisao_certa: morros-t1 vai para cel_-96_-465 (0,7 h), não para cel_-82_-461 (5,0 h).
+por_que: Hoje cel_-96_-465 parece pequena (3 focos, 8 MW), mas a memória derivada lembra que em 22/10 ela teve 13 focos
+  e 482 MW, a segunda maior soma de FRP da semana na região, e continua acesa. cel_-82_-461 tem 6 focos e 17 MW em dois
+  dias e fica no limite do ETA. Sem população em nenhuma das duas, o risco de o fogo grande crescer de novo pesa mais,
+  e a equipe chega 4 h antes.
+ressalvas: 'Não é uma reignição estrita (não houve dia sem foco). É o caso ''só a memória derivada enxerga'': a prioridade
+  do dia não usa o histórico de FRP. Período 24/10 é parcial. Gabarito copiado sem mudança do original (mesma decisão
+  certa em P2); escrito depois da ablação original, antes de rodar este modo.'
+checagens:
+- id: c1
+  tipo: ocorrencia_atendida
+  categoria: deteccao
+  descricao: cel_-96_-465 recebe recurso
+  params:
+    ocorrencia: cel_-96_-465
+- id: c2
+  tipo: prioriza
+  categoria: decisao
+  descricao: se só uma das duas for atendida, é cel_-96_-465
+  params:
+    ocorrencia: cel_-96_-465
+    sobre: cel_-82_-461

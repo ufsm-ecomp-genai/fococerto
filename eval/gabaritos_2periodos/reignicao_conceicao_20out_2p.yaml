@@ -1,0 +1,28 @@
+# Gabarito de 'reignicao_conceicao_20out_2p': as mesmas checagens de eval/gabaritos/reignicao_conceicao_20out.yaml, aplicadas ao período P2.
+# Escrito em 25/10/2026, DEPOIS da ablação original e ANTES de rodar o modo --dois-periodos.
+id: reignicao_conceicao_20out_2p
+cenario: eval/cenarios_2periodos/reignicao_conceicao_20out_2p.yaml
+escrito_em: '2026-10-25'
+autor: time FocoCerto (agente de avaliação), depois da ablação original e antes de rodar o modo de 2 períodos
+decisao_certa: Um dos recursos de Conceição vai para cel_-120_-470, que é a mesma célula que queimou em 17 e 18/10. Ela
+  vem antes de cel_-124_-479.
+por_que: 'A célula voltou depois de um dia sem foco, e maior (14 focos contra 5 a 6). O monitor só olha o dia anterior
+  e a trata como nova, com persistência zero. A memória derivada dos dados mostra que é o mesmo fogo reacendendo: o fogo
+  de 17 e 18/10 não foi extinto. Contra cel_-124_-479 (9 focos, 78 MW, primeiro dia), a reignição maior deve vir antes.'
+ressalvas: 'Ambiguidade conhecida: o padrão ''queimou, parou, voltou'' também pode ser lido como manejo recorrente. Nosso
+  critério: voltou maior (14 focos, 121 MW) depois de parar, então tratamos como reignição. Gabarito copiado sem mudança
+  do original (mesma decisão certa em P2); escrito depois da ablação original, antes de rodar este modo.'
+checagens:
+- id: c1
+  tipo: ocorrencia_atendida
+  categoria: deteccao
+  descricao: cel_-120_-470 recebe recurso
+  params:
+    ocorrencia: cel_-120_-470
+- id: c2
+  tipo: prioriza
+  categoria: decisao
+  descricao: se só uma das duas for atendida, é cel_-120_-470
+  params:
+    ocorrencia: cel_-120_-470
+    sobre: cel_-124_-479

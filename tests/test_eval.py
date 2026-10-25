@@ -108,3 +108,122 @@ def test_injetar_no_alvo_e_fallback():
     reg2: dict = {}
     injetar(p, {"ocorrencia": "o9", "texto": "Falso."}, reg2)
     assert reg2["ocorrencia"] == "o1" and not reg2["no_alvo"]
+
+
+# ------------------------------------------------------------------ sobre-escalação, /27 e recálculo
+def _res_geo(designacoes, ocorrencias, recursos, escalacoes=(), variante="C"):
+    """Resultado com coordenadas (para o ETA). ocorrencias: (id, pop, lat, lon); recursos: (id, base, tipo)."""
+    return {"variante": variante, "status": "escala" if escalacoes else "aprova", "rodadas": 1,
+            "plano": {"designacoes": [{"recurso_id": r, "ocorrencia_id": o, "eta_h": 1.0, "justificativa": ""}
+                                      for r, o in designacoes], "resumo": ""},
+            "ocorrencias": [{"id": i, "pop_raio": p, "lat": la, "lon": lo, "localidades": []}
+                            for i, p, la, lo in ocorrencias],
+            "bases": [{"id": "perto", "nome": "Perto", "lat": -10.0, "lon": -48.0},
+                      {"id": "longe", "nome": "Longe", "lat": -5.0, "lon": -40.0}],
+            "recursos": [{"id": r, "base_id": b, "tipo": t, "capacidade": 1, "disponivel": True} for r, b, t in recursos],
+            "escalacoes": list(escalacoes), "historico": [], "pareceres": [], "injecao_aplicada": None,
+            "memorias_usadas": []}
+
+
+def test_sobre_escalacao_sem_exposicao_e_recurso_livre():
+    from app.core.config import regiao
+    cfg = regiao("tocantins")
+    ocs = [("cel_-100_-480", 0, -10.0, -48.01), ("cel_-101_-480", 500, -10.01, -48.0), ("cel_-50_-400", 800, -5.0, -40.0)]
+    esc = [{"ocorrencia_id": "cel_-100_-480", "motivo": "x"}, {"ocorrencia_id": None,
+                                                            "motivo": "faltam recursos para cel_-101_-480"}]
+    # r1 livre e perto: as duas escaladas (uma sem população) são sobre-escalação
+    res = _res_geo([], ocs, [("r1", "perto", "terrestre")], esc)
+    m = ck.sobre_escalacao(res, cfg)
+    assert m["escaladas"] == 2 and m["escaladas_sem_exposicao"] == 1 and m["escaladas_com_recurso_livre"] == 2
+    assert m["sobre_escaladas"] == 2 and m["ids_sobre_escaladas"] == ["cel_-100_-480", "cel_-101_-480"]
+    # com reserva mínima 1, o único livre é a reserva: não conta como sobre-escalação (só informativo)
+    m = ck.sobre_escalacao(res, cfg, reserva_minima=1)
+    assert m["escaladas_com_recurso_livre"] == 0 and m["escaladas_so_com_reserva"] == 2
+    # base bloqueada por nota: o recurso livre não conta
+    m = ck.sobre_escalacao(res, cfg, bloqueios=({"perto"}, set()))
+    assert m["escaladas_com_recurso_livre"] == 0
+    # recurso longe (fora do eta_max_h) e ocupado: escalar a exposta é legítimo
+    res2 = _res_geo([("r1", "cel_-50_-400")], ocs, [("r1", "longe", "terrestre")],
+                    [{"ocorrencia_id": "cel_-101_-480", "motivo": "sem recurso"}])
+    m2 = ck.sobre_escalacao(res2, cfg)
+    assert m2["sobre_escaladas"] == 0 and m2["escaladas"] == 1
+
+
+def test_citada_no_motivo_mas_atendida_nao_e_escalada_e_impasse():
+    from app.core.config import regiao
+    ocs = [("cel_-100_-480", 300, -10.0, -48.01)]
+    res = _res_geo([("r1", "cel_-100_-480")], ocs, [("r1", "perto", "terrestre")],
+                   [{"ocorrencia_id": None, "motivo": "Impasse: 3 rodadas. r1 em cel_-100_-480 cita ETA errado"},
+                    {"ocorrencia_id": None, "motivo": "Impasse: sem alvo"}])
+    m = ck.sobre_escalacao(res, regiao("tocantins"))
+    assert m["escaladas"] == 0 and m["escaladas_e_atendidas"] == 1
+    assert m["escalacoes_impasse"] == 2 and m["escalacoes_sem_alvo"] == 1
+
+
+def test_credito_de_escalacao():
+    gab = {"checagens": [{"id": "c1", "tipo": "ocorrencia_atendida_ou_escalada", "categoria": "decisao",
+                          "params": {"ocorrencia": "o3"}},
+                         {"id": "c2", "tipo": "status", "categoria": "decisao", "params": {"valor": "escala"}}]}
+    res = _res([], [("o3", 50)], status="escala", escalacoes=[{"ocorrencia_id": "o3", "motivo": ""}])
+    assert ck.credito_de_escalacao(gab, res) == 1  # c1 passa só por escalar; status não depende da lista
+
+
+def test_agregar_por_execucao_unica():
+    from eval.agregacao import agregar, tabela_md
+    def ex(rep, passou):
+        return {"cenario": "x", "variante": "B", "repeticao": rep, "erro": None, "duracao_s": 0.1,
+                "contagem_agentes": {}, "checagens": [{"id": "c1", "resultado": "passou"}],
+                "metricas": {"passou": passou, "aplicaveis": 2, "acerto": passou / 2, "eta_ponderado_h": 1.0,
+                             "eta_ponderado_log_h": 1.0, "rodadas": 1, "status": "aprova", "escalacoes": 0,
+                             "citacoes_falsas": 0, "alarmes_falsos_gabarito": 0, "pares": [], "sobre_escaladas": 0,
+                             "por_categoria": {c: {"passou": 0, "aplicaveis": 0}
+                                               for c in ("decisao", "deteccao", "alarme_falso")}}}
+    ag = agregar([ex(1, 2), ex(2, 1), ex(3, 2)])
+    v = ag["variantes"]["B"]
+    assert v["acerto"] == "5/6" and v["acerto_por_repeticao"] == {"r1": "2/2", "r2": "1/2", "r3": "2/2"}
+    assert v["acerto_por_execucao_aplicaveis"] == [2] and v["acerto_por_execucao_min_max"] == [1, 2]
+    assert "Por execução única" in tabela_md(ag, "offline")
+
+
+def test_recalcular_reproduz_checagens_salvas(tmp_path):
+    """Recalcula a partir de um JSON salvo (sintético, mas com o formato do run_ablacao)."""
+    import json
+    from eval.recalcular import recalcular
+    cen, gab = ck.listar_casos(["escalar_expostas_22out"])[0]
+    res = _res_geo([], [("cel_-103_-476", 3610, -10.3, -47.6)], [], variante="C",
+                   escalacoes=[{"ocorrencia_id": "cel_-103_-476", "motivo": "x"}])
+    res["status"] = "escala"
+    salvo = {"cenario": "escalar_expostas_22out", "tipo": "x", "variante": "C", "repeticao": 1, "modo": "offline",
+             "duracao_s": 0.1, "log_path": "", "erro": None, "contagem_agentes": {},
+             "checagens": ck.avaliar(gab, res), "resultado": res}
+    (tmp_path / "escalar_expostas_22out__C__r1.json").write_text(json.dumps(salvo), encoding="utf-8")
+    ag, execs, avisos = recalcular(tmp_path)
+    assert not avisos
+    v = ag["variantes"]["C"]
+    assert v["acerto"] == "2/2" and v["escaladas"] == 1 and v["credito_escalacao"] == 1
+
+
+def test_cenarios_de_dois_periodos_carregam():
+    casos = ck.listar_casos(dir_cenarios=ck.RAIZ_EVAL / "cenarios_2periodos",
+                            dir_gabaritos=ck.RAIZ_EVAL / "gabaritos_2periodos")
+    assert len(casos) == 2
+    for cen, gab in casos:
+        m = cen["meta"]
+        assert m["escrito_depois_da_ablacao"] is True and m["memorias_iniciais"] == []
+        assert m["periodo_anterior"] < m["periodo"] and cen["cenario"].simulado
+
+
+def test_modo_dois_periodos_offline_gera_memoria_pelo_aprendizado(tmp_path, monkeypatch):
+    """Roda P1 -> aprendizado -> P2 offline num caso de 2 períodos (sem LLM, sem rede)."""
+    monkeypatch.setenv("LLM_PROVIDER", "offline")
+    from eval.run_ablacao import executar
+    caso = ck.listar_casos(["reignicao_morros_24out_2p"], ck.RAIZ_EVAL / "cenarios_2periodos",
+                           ck.RAIZ_EVAL / "gabaritos_2periodos")[0]
+    (tmp_path / "logs").mkdir()
+    e = executar(caso, "C", 1, "offline", tmp_path)
+    assert e["erro"] is None
+    p1 = e["periodo_anterior"]
+    assert p1["periodo"] == "2026-10-23" and p1["pares"]
+    assert all(m["fonte"] == "aprendizado:2026-10-23->2026-10-24" for m in p1["memorias_aprendidas"])
+    assert e["resultado"]["plano"]["periodo"] == "2026-10-24"
+    assert "sobre_escaladas" in e["metricas"]

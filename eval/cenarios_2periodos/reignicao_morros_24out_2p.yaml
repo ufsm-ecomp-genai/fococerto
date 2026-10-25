@@ -1,0 +1,99 @@
+# Cenário de 2 períodos derivado de 'reignicao_morros_24out' (ESCRITO DEPOIS da ablação de 24-25/10, em 25/10/2026).
+# Mesmos dados reais, recursos e bases simulados do original; a diferença é que a memória derivada NÃO é
+# semeada: ela tem que vir do app/agents/aprendizado.py, rodando o período anterior antes.
+id: reignicao_morros_24out_2p
+tipo: reignicao_2periodos
+derivado_de: eval/cenarios/reignicao_morros_24out.yaml
+titulo: Fogo grande de 2 dias atrás que hoje parece pequeno (2 períodos, memória gerada pelo aprendizado)
+escrito_em: '2026-10-25'
+escrito_depois_da_ablacao: true
+situacao_nos_dados: 'Mesmo período real de reignicao_morros_24out (24/10, parcial), sem memória semeada: roda 23/10 (P1)
+  com os mesmos recursos, aprende 23/10 -> 24/10 e roda 24/10 (P2). No cache: cel_-96_-465 tem 13 focos em 22/10 (posição
+  48), 2 em 23/10 (posição 99 de 179) e 3 em 24/10 (posição 9 de 21).'
+previsao_antes_de_rodar: 'Previsão escrita antes de rodar: o aprendizado.py provavelmente NÃO gera a memória. Em 23/10
+  cel_-96_-465 tem 2 focos e está na posição 99 de 179 por prioridade (fora do top 15), então não deve aparecer em nao_atendidas
+  do plano de 23/10. Se aparecesse, 2 -> 3 focos em 24/10 bateria o critério ''cresceu'' (n1 > n0 e n1 >= 3) e a derivada
+  de reforço seria gravada. O fato que o gabarito usa (13 focos e 482 MW em 22/10) não está ao alcance de uma comparação
+  P-1 -> P.'
+como_verificamos: Contagem de focos e posição por prioridade no cache (RepositorioCache.ocorrencias). Nenhuma variante
+  foi rodada neste modo antes deste arquivo.
+periodo_anterior: '2026-10-23'
+injecao: null
+memorias_iniciais: []
+regiao: tocantins
+periodo: '2026-10-24'
+simulado: true
+reserva: 0
+notas: []
+bases:
+- id: sim_guarai
+  nome: Guaraí (simulada)
+  lat: -8.83417
+  lon: -48.51028
+  fonte: GeoNames 3398573
+  simulada: true
+- id: sim_gurupi
+  nome: Gurupi (simulada)
+  lat: -11.72917
+  lon: -49.06861
+  fonte: GeoNames 3461724
+  simulada: true
+- id: sim_miracema
+  nome: Miracema do Tocantins (simulada)
+  lat: -9.56722
+  lon: -48.39167
+  fonte: GeoNames 3394817
+  simulada: true
+- id: sim_morros
+  nome: Morros (simulada)
+  lat: -9.44667
+  lon: -46.30028
+  fonte: GeoNames 3394372
+  simulada: true
+- id: sim_paraiso
+  nome: Paraíso do Tocantins (simulada)
+  lat: -10.17611
+  lon: -48.86667
+  fonte: GeoNames 3479329
+  simulada: true
+recursos:
+- id: paraiso-t1
+  base_id: sim_paraiso
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: miracema-t1
+  base_id: sim_miracema
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: guarai-t1
+  base_id: sim_guarai
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: guarai-t2
+  base_id: sim_guarai
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: guarai-t3
+  base_id: sim_guarai
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: guarai-t4
+  base_id: sim_guarai
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: gurupi-t1
+  base_id: sim_gurupi
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
+- id: morros-t1
+  base_id: sim_morros
+  tipo: terrestre
+  capacidade: 1
+  disponivel: true
