@@ -37,14 +37,14 @@
 
 ## Bloqueios externos (time)
 - [ ] Zetaris rodando na máquina do time + `.env`
-- [x] **Nightshift funcionando (25/10, ~01h UTC)** no PC Windows com NVIDIA da irmã do Enzo (`desktop-tlhi7b9`, Tailscale `100.90.123.23`, porta 8088 repassada só para `100.64.0.0/10`). Token = conteúdo do arquivo `proxy-token` (o da tela dá 401). Modelo: `nvidia/nemotron-3-ultra-550b-a55b`. O raciocínio é desligado com `chat_template_kwargs.enable_thinking=false`. Um período completo no modo LLM leva ~23 s.
+- [x] **Nightshift funcionando (25/10, ~01h UTC)** numa máquina Windows do time com GPU NVIDIA, via Tailscale. Detalhes de acesso: `docs/INFRA-local.md` (fora do git). Token = arquivo `proxy-token`; modelo `nvidia/nemotron-3-ultra-550b-a55b`; raciocínio desligado com `enable_thinking=false`.
 - [ ] Respostas do Help Meterless (seção 19 da especificação)
 
 ## Infraestrutura (24/10, noite)
-- O professor não respondeu. Plano B: servidor pessoal Debian 13 (12 threads, 15 GB, KVM, AMD RX 550, Tailscale 100.70.74.48). Passos: Docker → Zetaris → VM Windows 11 de avaliação para o Nightshift (teste: pode não rodar sem GPU NVIDIA) → opção C (provedor Runtime + Nemotron hospedado; elegível segundo a resposta da Meterless em chat5:1642, mas provavelmente perde o prêmio NVIDIA).
+- Zetaris: no servidor Debian do time (detalhes em `docs/INFRA-local.md`, fora do git). Bloqueio atual: acesso ao registro de imagens da Zetaris ainda não ativado.
 
 ## Ablação no modo LLM
-- Disparada em 25/10 ~01h55 UTC (`eval/run_ablacao.py --modo llm --repeticoes 3`), estimativa de 1 a 2 h. O PC da irmã precisa ficar ligado. Os resultados saem em `eval/resultados/<timestamp>_llm/`. Se for interrompida: rodar de novo (são independentes) ou reduzir com `--cenarios`/`--repeticoes 1`.
+- Disparada em 25/10 ~01h55 UTC (`eval/run_ablacao.py --modo llm --repeticoes 3`), estimativa de 1 a 2 h. A máquina do Nightshift precisa ficar ligada. Os resultados saem em `eval/resultados/<timestamp>_llm/`. Se for interrompida: rodar de novo (são independentes) ou reduzir com `--cenarios`/`--repeticoes 1`.
 - **Decisão do time (25/10):** toda ocorrência com população exposta que ficar sem recurso vira escalação obrigatória ("solicitar apoio externo"), também no modo LLM. Aplicar DEPOIS que a ablação LLM em andamento terminar e rodar a ablação de novo com a regra nova.
 
 ## Fila de correções de código (revisão do juiz, 25/10; aplicar DEPOIS da ablação LLM em andamento)
@@ -57,6 +57,6 @@
 7. Sample mode com H-MEM real (flag `--hmem`) ou documentar o caminho.
 8. `npm test` regrava conformance-report.txt (versionado).
 9. **Execução real de ponta a ponta** (Zetaris + Nightshift + H-MEM) commitada em output_examples/tocantins-escasso-real/ com trace; é a mudança de maior impacto segundo o juiz.
-10. Antes de submeter: limpar este arquivo de notas internas (ex.: "PC da irmã").
+10. Antes de submeter: revisar este arquivo (notas internas).
 11. **README: seção "AI and Model Usage"** (exigida em rules/ai-usage-policy.md §6): modelos pelo Nightshift e o papel de cada um, frameworks, integração com os patrocinadores, **a ferramenta de IA usada para programar (Claude Code)**, bibliotecas, fontes de dados e o que é simulado, código adaptado, limitações, sample mode.
 12. **`SAMPLE_MODE=true` por variável de ambiente** (rules/submission-requirements.md §3.3); hoje só existe `--sample`.
