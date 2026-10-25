@@ -58,3 +58,5 @@
 8. `npm test` regrava conformance-report.txt (versionado).
 9. **Execução real de ponta a ponta** (Zetaris + Nightshift + H-MEM) commitada em output_examples/tocantins-escasso-real/ com trace; é a mudança de maior impacto segundo o juiz.
 10. Antes de submeter: limpar este arquivo de notas internas (ex.: "PC da irmã").
+11. **README: seção "AI and Model Usage"** (exigida em rules/ai-usage-policy.md §6): modelos pelo Nightshift e o papel de cada um, frameworks, integração com os patrocinadores, **a ferramenta de IA usada para programar (Claude Code)**, bibliotecas, fontes de dados e o que é simulado, código adaptado, limitações, sample mode.
+12. **`SAMPLE_MODE=true` por variável de ambiente** (rules/submission-requirements.md §3.3); hoje só existe `--sample`.
