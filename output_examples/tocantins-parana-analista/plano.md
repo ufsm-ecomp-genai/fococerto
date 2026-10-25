@@ -92,12 +92,12 @@ _Prioridade calculada pelos dados (maior = mais urgente). Faixas relativas a est
 | Base | Procedência | Fonte | Recursos |
 |---|---|---|---|
 | Guaraí (simulada) (`sim_guarai`) | **declarada**: declarada pelo coordenador no cenário | GeoNames 3398573 | `guarai-t1` |
-| Gurupi (simulada) (`sim_gurupi`) | **declarada**: declarada pelo coordenador no cenário | GeoNames 3461724 | `gurupi-t1` |
+| Gurupi (simulada) (`sim_gurupi`) | **declarada**: declarada pelo coordenador no cenário | GeoNames 3461724; fundida com cbmto_gurupi (lista oficial: CBMTO — https://conexaoto.com.br/2023/07/09/praias-de-palmas-e-do-interior-recebem-apoio-com-presenca-de-bombeiros-militares (2023); coordenada: sede do município (GeoNames); endereço do quartel não georreferenciado) | `gurupi-t1` |
 | Miracema do Tocantins (simulada) (`sim_miracema`) | **declarada**: declarada pelo coordenador no cenário | GeoNames 3394817 | `miracema-t1` |
-| Paraíso do Tocantins (simulada) (`sim_paraiso`) | **declarada**: declarada pelo coordenador no cenário | GeoNames 3479329 | `paraiso-t1` |
+| Paraíso do Tocantins (simulada) (`sim_paraiso`) | **declarada**: declarada pelo coordenador no cenário | GeoNames 3479329; fundida com cbmto_paraiso (lista oficial: CBMTO — https://conexaoto.com.br/2023/01/27/companhia-de-bombeiros-em-paraiso-tem-novo-comandante-que-vai-atuar-frente-a-uma-das-cidades-mais-movimentadas-do-estado (2023); coordenada: sede do município (GeoNames); endereço do quartel não georreferenciado) | `paraiso-t1` |
 | Paranã (simulada) (`sim_parana`) | **declarada**: declarada pelo coordenador no cenário | GeoNames 3455079 | `parana-t1` |
 
-Outras 16 base(s) conhecidas na região, sem recurso neste cenário: CBMTO 1º BBM Palmas (oficial); CBMTO 3ª Cia do 1º BBM Paraíso do Tocantins (oficial); CBMTO 5ª Cia do 1º BBM Porto Nacional (oficial); CBMTO 3º BBM Gurupi (oficial); CBMTO Companhia de Dianópolis (oficial); CBMTO Companhia de Colinas do Tocantins (oficial); Brigada Prevfogo/Ibama São Félix do Tocantins (oficial); Brigada Prevfogo/Ibama Santa Tereza do Tocantins (oficial); Brigada Prevfogo/Ibama Itacajá (oficial); Brigada Prevfogo/Ibama Goiatins (oficial); Brigada Prevfogo/Ibama Arraias (oficial); ICMBio Esec Serra Geral do Tocantins em Rio da Conceição (oficial); Bombeiros (perto de Porangatu, 1 km) (OSM); SCI (Palmas) (OSM); Corpo de Bombeiros Militar (OSM); Bombeiros (perto de Barreiras, 1 km) (OSM).
+Outras 14 base(s) conhecidas na região, sem recurso neste cenário: CBMTO 1º BBM Palmas (oficial); CBMTO 5ª Cia do 1º BBM Porto Nacional (oficial); CBMTO Companhia de Dianópolis (oficial); CBMTO Companhia de Colinas do Tocantins (oficial); Brigada Prevfogo/Ibama São Félix do Tocantins (oficial); Brigada Prevfogo/Ibama Santa Tereza do Tocantins (oficial); Brigada Prevfogo/Ibama Itacajá (oficial); Brigada Prevfogo/Ibama Goiatins (oficial); Brigada Prevfogo/Ibama Arraias (oficial); ICMBio Esec Serra Geral do Tocantins em Rio da Conceição (oficial); Bombeiros (perto de Porangatu, 1 km) (OSM); SCI (Palmas) (OSM); Corpo de Bombeiros Militar (OSM); Bombeiros (perto de Barreiras, 1 km) (OSM).
 
 ## Pareceres do Analista
 
@@ -129,4 +129,4 @@ Nenhuma memória foi usada neste período.
 
 [Log completo da execução](trace.jsonl)
 
-_Gerado em 2026-10-25 20:13 UTC_
+_Gerado em 2026-10-25 22:01 UTC_

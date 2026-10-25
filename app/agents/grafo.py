@@ -53,7 +53,10 @@ class ClienteMemoria(Protocol):  # docs/CONTRATOS.md, seção 11
 class Estado(TypedDict, total=False):
     rodada: int
     plano: Plano
-    violacoes: list[Violacao]
+    violacoes: list[Violacao]            # todas as da rodada (inclui citacao_incorreta já corrigida)
+    violacoes_critico: list[Violacao]    # as do plano depois da correção de citações (o que o Crítico julga)
+    citacoes_corrigidas: list[Violacao]
+    divergencia: dict
     veredicto: VeredictoCritico | None
     analista_na_rodada: bool
     status: str
@@ -300,16 +303,45 @@ def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, mem
         log.evento("planejador", "proposta", {"rodada": rodada, "modo": rotulo_modo, "plano": resumo_plano(plano)})
         return {"rodada": rodada, "plano": plano, "veredicto": None, "analista_na_rodada": False}
 
-    def no_checar(s: Estado) -> dict:
-        plano = s["plano"]
+    def checar(plano: Plano) -> list[Violacao]:
         vs = checar_regras(plano, ocorrencias, recursos, bases, regiao, ctx.memorias, reserva_minima=cenario.reserva)
-        vs += checar_citacoes(plano, ocorrencias, bases, recursos=recursos, regiao_cfg=regiao)
+        return vs + checar_citacoes(plano, ocorrencias, bases, recursos=recursos, regiao_cfg=regiao)
+
+    def no_checar(s: Estado) -> dict:
+        """Regras + citações. Citação errada é corrigida aqui, de forma determinística, ANTES do Crítico: a
+        justificativa é reescrita a partir dos dados (a alocação não muda) e o evento ``citacao_corrigida``
+        registra o que o agente errou e o valor real. As violações ``citacao_incorreta`` continuam no estado e no
+        histórico (métrica da ablação), mas o Crítico só recebe as restantes: citação nunca causa rejeição."""
+        plano, rodada = s["plano"], s["rodada"]
+        vs = checar(plano)
         for v in vs:
-            log.evento("ferramenta", "violacao", {"rodada": s["rodada"], **v.model_dump()})
-        return {"violacoes": vs}
+            log.evento("ferramenta", "violacao", {"rodada": rodada, **v.model_dump()})
+        cit = [v for v in vs if v.regra == "citacao_incorreta"]
+        if not cit:
+            return {"violacoes": vs, "violacoes_critico": vs, "citacoes_corrigidas": []}
+        corrigido = reescrever_citacoes(ctx, plano, cit)
+        antes = {(d.recurso_id, d.ocorrencia_id): d for d in plano.designacoes}
+        depois = {(d.recurso_id, d.ocorrencia_id): d for d in corrigido.designacoes}
+        restantes = checar(corrigido)
+        log.evento("ferramenta", "citacao_corrigida", {
+            "rodada": rodada, "agente_que_errou": "planejador",
+            "obs": "o agente citou fato que não confere com os dados; o sistema reescreveu a justificativa a partir "
+                   "dos dados antes do Crítico (a alocação não muda)",
+            "correcoes": [{"recurso_id": v.recurso_id, "ocorrencia_id": v.ocorrencia_id,
+                           "campo": v.evidencia.get("campo"), "citado": v.evidencia.get("citado"),
+                           "real": v.evidencia.get("real"),
+                           "justificativa_antes": antes[(v.recurso_id, v.ocorrencia_id)].justificativa
+                           if (v.recurso_id, v.ocorrencia_id) in antes else None,
+                           "justificativa_depois": depois[(v.recurso_id, v.ocorrencia_id)].justificativa
+                           if (v.recurso_id, v.ocorrencia_id) in depois else None} for v in cit],
+            "citacoes_restantes": sum(v.regra == "citacao_incorreta" for v in restantes)})
+        # o histórico guarda TODAS as violações da rodada (inclusive as citações corrigidas); o Crítico, as do
+        # plano corrigido
+        return {"plano": corrigido, "violacoes": vs, "violacoes_critico": restantes, "citacoes_corrigidas": cit}
 
     def no_criticar(s: Estado) -> dict:
-        plano, vs, rodada = s["plano"], s["violacoes"], s["rodada"]
+        plano, rodada = s["plano"], s["rodada"]
+        vs = s.get("violacoes_critico", s["violacoes"])
         if not usar_critico_llm:
             v = critico.decidir_regras(ctx, plano, vs, rodada)
             origem = "checador"
@@ -337,7 +369,8 @@ def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, mem
                                        "contra_proposta": resumo_plano(v.contra_proposta) if v.contra_proposta else None})
         if not v.pedir_analista:
             s["historico"].append({"rodada": rodada, "plano": plano.model_dump(mode="json"),
-                                   "violacoes": [x.model_dump() for x in vs],
+                                   "violacoes": [x.model_dump() for x in s["violacoes"]],
+                                   "citacoes_corrigidas": [x.model_dump() for x in s.get("citacoes_corrigidas", [])],
                                    "veredicto": v.model_dump(mode="json"), "origem_critico": origem})
         return {"veredicto": v, "historico": s["historico"]}
 
@@ -362,9 +395,38 @@ def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, mem
         v, rodada, plano = s.get("veredicto"), s["rodada"], s["plano"]
         esc = list(s.get("escalacoes", []))
         status = v.decisao if v else "escala"
-        if v is not None and v.decisao == "rejeita":  # só chega aqui por impasse
+        vs_final = s.get("violacoes_critico", s.get("violacoes", []))
+        rig_abertas = [x for x in vs_final if x.rigida and x.regra not in INSOLUVEIS]
+        impasse = v is not None and v.decisao == "rejeita" and bool(rig_abertas)
+        divergencia = None
+        if v is not None and v.decisao == "rejeita" and not rig_abertas:
+            # Última rodada rejeitada só por zona cinzenta (trade-off, exceção não rígida): não é impasse. Fica o
+            # melhor plano disponível (contra-proposta do Crítico, se não violar regra rígida; senão a última
+            # proposta) e os motivos do Crítico vão visíveis ao coordenador. Escalação só pelo guarda-corpo.
+            escolhido = "ultima_proposta"
+            cp = v.contra_proposta
+            if cp is not None:
+                rig_cp = [x for x in checar(cp) if x.rigida and x.regra not in INSOLUVEIS
+                          and x.regra != "citacao_incorreta"]   # citação: corrigida abaixo, pelo guarda-corpo
+                if not rig_cp:
+                    plano, escolhido = cp.model_copy(update={"rodada": rodada}), "contra_proposta_critico"
+            status = "aprova"
+            divergencia = {"motivo": "divergencia_zona_cinzenta", "plano_escolhido": escolhido,
+                           "motivos_critico": list(v.motivos)}
+            plano = plano.model_copy(update={"resumo": (
+                f"Divergência do Crítico em zona cinzenta após {rodada} rodada(s) (não bloqueia; plano adotado: "
+                f"{'contra-proposta do Crítico' if escolhido == 'contra_proposta_critico' else 'última proposta do Planejador'}). "
+                f"Motivos do Crítico: {' | '.join(v.motivos)[:800]} || {plano.resumo}")})
+            for oid in sorted({x.ocorrencia_id for x in checar(plano) if x.regra in INSOLUVEIS}):
+                esc.append({"ocorrencia_id": oid, "motivo": "Obrigatória: população exposta sem recurso viável "
+                                                            "dentro do ETA máximo."})
+            log.evento("sistema", "aprova", {"rodada": rodada, **divergencia,
+                                             "obs": "rejeição do Crítico sem violação rígida aberta na última "
+                                                    "rodada: não é impasse"})
+        elif impasse:
             status = "escala"
-            esc.append({"ocorrencia_id": None, "motivo": f"Impasse: {MAX_RODADAS} rodadas sem aprovação. "
+            esc.append({"ocorrencia_id": None, "motivo": f"Impasse: {MAX_RODADAS} rodadas sem aprovação, com regra "
+                                                         f"rígida aberta ({', '.join(sorted({x.regra for x in rig_abertas}))}). "
                                                          f"Último parecer: {' | '.join(v.motivos)[:600]}"})
         elif status == "escala":
             if v is not None and v.contra_proposta is not None:
@@ -379,7 +441,7 @@ def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, mem
                 esc.append({"ocorrencia_id": oid, "motivo": " ".join(m for m in outros if oid is None or oid in m)[:600]})
             if not esc:
                 esc.append({"ocorrencia_id": None, "motivo": " ".join(v.motivos if v else [])[:600]})
-        if v is not None and v.decisao == "rejeita":
+        if impasse:
             log.evento("sistema", "escala", {"rodada": rodada, "motivo": "impasse", "escalacoes": esc})
         # guarda-corpo (decisão do time, 25/10): toda ocorrência com população exposta que termina sem recurso no
         # plano final vira escalação com sugestão de apoio externo, mesmo que o Crítico (LLM ou não) tenha aprovado.
@@ -396,7 +458,7 @@ def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, mem
             plano = reescrever_citacoes(ctx, plano, cit)
             log.evento("sistema", "violacao", {"rodada": rodada, "acao": "justificativa_reescrita_no_plano_final",
                                                "violacoes": [x.model_dump() for x in cit]})
-        return {"status": status, "escalacoes": esc, "plano": plano}
+        return {"status": status, "escalacoes": esc, "plano": plano, "divergencia": divergencia}
 
     # ------------------------------------------------------------ arestas
     def depois_critico(s: Estado) -> str:
@@ -427,7 +489,8 @@ def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, mem
     plano = plano.model_copy(update={"resumo": f"[{final['status']}] {plano.resumo}"})
     log.evento("sistema", "fim", {"status": final["status"], "rodadas": final["rodada"],
                                   "designacoes": len(plano.designacoes), "escalacoes": final["escalacoes"],
-                                  "pareceres": sorted(pareceres), "modo": rotulo_modo})
+                                  "pareceres": sorted(pareceres), "modo": rotulo_modo,
+                                  "divergencia": final.get("divergencia")})
     return ResultadoPeriodo(plano=plano, status=final["status"], ocorrencias=ocorrencias, bases=bases, recursos=recursos,
                             escalacoes=final["escalacoes"], pareceres=list(pareceres.values()),
                             memorias_usadas=memorias, historico=final["historico"], rodadas=final["rodada"],

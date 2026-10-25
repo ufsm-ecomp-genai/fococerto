@@ -182,10 +182,27 @@ class DesignacaoLLM(BaseModel):
     evidencias: list[str] = Field(default_factory=list)
 
 
+class RespostaCritico(BaseModel):
+    ponto: str                      # o motivo do Crítico a que se responde
+    acao: str = "adotado"           # "adotado" | "recusado" | texto livre curto
+    justificativa: str = ""
+
+
 class SaidaPlano(BaseModel):
     designacoes: list[DesignacaoLLM]
     resumo: str
     desvios: list[str] = Field(default_factory=list)
+    respostas_ao_critico: list[RespostaCritico | str] = Field(default_factory=list)  # Planejador, rodada >= 2
+
+
+def texto_respostas(respostas: list) -> str:
+    partes = []
+    for r in respostas or []:
+        if isinstance(r, str):
+            partes.append(r)
+        else:
+            partes.append(f"{r.ponto} -> {r.acao}" + (f" ({r.justificativa})" if r.justificativa else ""))
+    return " | ".join(p.strip() for p in partes if p and p.strip())
 
 
 def validar_ids(saida: SaidaPlano | None, ctx: Contexto) -> list[str]:
@@ -213,6 +230,9 @@ def plano_de_saida(saida: SaidaPlano, ctx: Contexto, rodada: int) -> Plano:
                                                      ctx.regiao), 2),
                              justificativa=d.justificativa, evidencias=ev))
     resumo = saida.resumo + ((" Desvios do baseline: " + " | ".join(saida.desvios)) if saida.desvios else "")
+    resp = texto_respostas(saida.respostas_ao_critico)
+    if resp:
+        resumo += " Respostas ao Crítico: " + resp
     p = Plano(periodo=ctx.periodo, regiao=ctx.regiao.nome, designacoes=ds, resumo=resumo, rodada=rodada)
     return completar_plano(p, ctx.ocorrencias, ctx.recursos)
 

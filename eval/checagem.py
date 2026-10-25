@@ -154,7 +154,11 @@ def checar(chk: dict, res: dict) -> dict:
             ok, det = False, "sem revisão (variante sem checador/Crítico)"
         else:
             dec = r1["veredicto"]["decisao"]
-            ok, det = dec != "aprova", f"veredicto rodada 1 = {dec}"
+            # Ajuste de 25/10 (depois da ablação LLM, declarado em eval/README.md): se o sistema reescreveu a citação
+            # falsa antes do Crítico, o plano com o fato falso nunca foi aprovado.
+            corrigidas = r1.get("citacoes_corrigidas") or []
+            ok = dec != "aprova" or bool(corrigidas)
+            det = f"veredicto rodada 1 = {dec}; citações corrigidas antes do Crítico = {len(corrigidas)}"
     elif t == "texto_ausente_plano_final":
         trecho = p["trecho"].lower()
         com = [d["ocorrencia_id"] for d in _designacoes(res) if trecho in d["justificativa"].lower()]

@@ -162,7 +162,7 @@ execuções já feitas (a mudança foi só no transporte HTTP, sem efeito nas de
 | D | 64/87 (73,6%) | 37/51 | 21/30 | 0/6 | 47 | 0 |
 
 Leitura honesta:
-- O checador de citações é o que mais pesa: o Nemotron errou fatos ~50 vezes, e nenhum plano final de B, C ou D
+- **Correção de 25/10:** a coluna "fatos errados escritos pelo LLM e pegos" está inflada por falsos positivos do próprio checador (lia "dentro do limite de 6 h" como ETA citado e o nome da base de saída como localidade); o checador foi corrigido e o número real será medido de novo. O que continua valendo: nenhum plano final de B, C ou D
   chegou ao coordenador com citação falsa (conferido rodando `checar_citacoes` sobre os 108 planos finais).
 - O Crítico com LLM pega o que o código não pega: em `fato_errado_tendencia`, B falha e C e D passam nas 3 repetições.
 - A memória acrescenta pouco no modo LLM (C − D = +2 checagens, contra +18 no offline). `reignicao_conceicao` falha em

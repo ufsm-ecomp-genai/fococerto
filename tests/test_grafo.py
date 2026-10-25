@@ -151,14 +151,49 @@ def test_reserva_pedida_em_memoria(tmp_path):
     assert len(res.plano.reserva) == 1 and ("t1", "cel_a") in _pares(res)
 
 
-def test_impasse_apos_3_rodadas(tmp_path, monkeypatch):
+def test_rejeicao_so_zona_cinzenta_na_ultima_rodada_nao_e_impasse(tmp_path, monkeypatch):
+    """3 rejeições sem violação rígida: fica a contra-proposta do Crítico, motivo divergencia_zona_cinzenta, os
+    motivos do Crítico no resumo; sem escalação genérica de impasse (a exposta está atendida)."""
+    def rejeita(ctx, plano, vs, rodada):
+        return VeredictoCritico(decisao="rejeita", motivos=["discordo do trade-off"],
+                                contra_proposta=plano.model_copy(update={"resumo": "cp do crítico"}))
+    monkeypatch.setattr(critico, "decidir_offline", rejeita)
+    occs = [oc("cel_a", -10.1, -47.0, 0.8, pop=500)]
+    res, ev, _, _ = _rodar(tmp_path, occs, [rec("t1", "bn")])
+    assert res.rodadas == 3 and len(res.historico) == 3
+    assert res.status == "aprova" and res.escalacoes == []
+    assert not any((e.get("motivo") or "").startswith("Impasse") for e in res.escalacoes)
+    assert "discordo do trade-off" in res.plano.resumo and "cp do crítico" in res.plano.resumo
+    div = [e for e in ev if e["agente"] == "sistema" and e["dados"].get("motivo") == "divergencia_zona_cinzenta"]
+    assert div and div[0]["dados"]["plano_escolhido"] == "contra_proposta_critico"
+    assert not any(e["dados"].get("motivo") == "impasse" for e in ev if e["agente"] == "sistema")
+    assert sum(1 for e in ev if e["agente"] == "planejador" and e["evento"] == "proposta") == 3
+
+
+def test_divergencia_mantem_guarda_corpo_das_expostas(tmp_path, monkeypatch):
+    monkeypatch.setattr(critico, "decidir_offline",
+                        lambda *a, **k: VeredictoCritico(decisao="rejeita", motivos=["discordo"]))
+    occs = [oc("cel_a", -10.1, -47.0, 0.8, pop=500), oc("cel_b", -10.15, -47.0, 0.7, pop=300)]
+    res, _, _, _ = _rodar(tmp_path, occs, [rec("t1", "bn")])
+    assert res.status == "escala"
+    assert [e["ocorrencia_id"] for e in res.escalacoes] == ["cel_b"]
+    assert res.escalacoes[0]["sugestao"] == "solicitar apoio externo"
+
+
+def test_impasse_so_com_violacao_rigida_aberta(tmp_path, monkeypatch):
+    from app.agents import grafo
+    from app.core.models import Violacao
+    rig = Violacao(regra="capacidade_excedida", ocorrencia_id="cel_a", recurso_id="t1", evidencia={},
+                   sugestao="x", rigida=True)
+    monkeypatch.setattr(grafo, "checar_regras", lambda *a, **k: [rig])
     monkeypatch.setattr(critico, "decidir_offline",
                         lambda *a, **k: VeredictoCritico(decisao="rejeita", motivos=["discordo"]))
     occs = [oc("cel_a", -10.1, -47.0, 0.8, pop=500)]
     res, ev, _, _ = _rodar(tmp_path, occs, [rec("t1", "bn")])
-    assert res.rodadas == 3 and len(res.historico) == 3
+    assert res.rodadas == 3 and res.status == "escala"
     assert res.escalacoes[0]["ocorrencia_id"] is None and "Impasse" in res.escalacoes[0]["motivo"]
-    assert sum(1 for e in ev if e["agente"] == "planejador" and e["evento"] == "proposta") == 3
+    assert "capacidade_excedida" in res.escalacoes[0]["motivo"]
+    assert any(e["dados"].get("motivo") == "impasse" for e in ev if e["agente"] == "sistema")
 
 
 def test_modo_llm_sem_nightshift_cai_no_offline_e_loga(tmp_path):
@@ -190,9 +225,13 @@ def test_modo_llm_ciclo_com_citacao_errada_corrigida(tmp_path, monkeypatch):
                     json.dumps({"decisao": "aprova", "motivos": ["ok"], "pedir_analista": []})],
     }
 
+    pedidos_planejador = []
+
     def post(url, headers, corpo, timeout_s):
         sistema = " ".join(m["content"] for m in corpo["messages"] if m["role"] == "system")
         papel = "planejador" if "Você é o **Planejador**" in sistema else "critico"
+        if papel == "planejador":
+            pedidos_planejador.append(" ".join(m["content"] for m in corpo["messages"] if m["role"] == "user"))
         return httpx.Response(200, request=httpx.Request("POST", url), json={
             "model": "meterless/auto", "choices": [{"message": {"content": respostas[papel].pop(0)}}],
             "usage": {"total_tokens": 10}, "meterless": {"receipt": {"id": f"r-{papel}", "routed_model": "nvidia/fake"}}})
@@ -201,8 +240,17 @@ def test_modo_llm_ciclo_com_citacao_errada_corrigida(tmp_path, monkeypatch):
     res, ev, _, _ = _rodar(tmp_path, occs, [rec("t1", "bn")], modo="llm")
     assert res.rodadas == 2 and res.escalacoes == []
     assert res.historico[0]["veredicto"]["decisao"] == "rejeita"
+    # a citação errada continua no histórico (métrica), mas foi corrigida antes do Crítico
     assert any(v["regra"] == "citacao_incorreta" for v in res.historico[0]["violacoes"])
+    assert res.historico[0]["citacoes_corrigidas"] and "5000" not in res.historico[0]["plano"]["designacoes"][0][
+        "justificativa"]
+    cc = [e for e in ev if e["evento"] == "citacao_corrigida"]
+    assert cc and cc[0]["agente"] == "ferramenta" and cc[0]["dados"]["correcoes"][0]["citado"] in ("5000", 5000.0)
+    assert cc[0]["dados"]["correcoes"][0]["real"] == 500
     assert res.historico[1]["violacoes"] == []
+    # rodada 2: o Planejador recebeu os pontos do Crítico para responder
+    assert "pontos_do_critico_a_responder" in pedidos_planejador[1] and "população citada errada" in \
+        pedidos_planejador[1]
     chamadas = [e for e in ev if e["evento"] == "llm_call"]
     assert any(e["dados"]["status"] == "json_invalido" for e in chamadas)  # retry de JSON do Crítico
     assert all(e["routed_model"] == "nvidia/fake" for e in chamadas if e["dados"]["status"] == "ok")

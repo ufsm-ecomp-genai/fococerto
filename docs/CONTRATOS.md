@@ -196,3 +196,10 @@ Uma base é a localização de uma unidade de combate. A quantidade de equipes e
 - CLI: `avaliar [--modo offline|llm] [--repeticoes N] [--variantes ABCD] [--cenarios ID…] [--saida DIR] [--sample]` chama `eval.run_ablacao.main` por import (`--regiao` é aceito e ignorado). `SAMPLE_MODE=true` (ou 1/yes/sim/on) equivale a `--sample` em todos os subcomandos.
 - Nova regra não rígida `troca_recurso_local`: ocorrência exposta sem recurso X e um recurso r designado a outra exposta Y; dispara se r chega a X dentro de `eta_max_h` (sem bloqueio por memória), chega a X ≥ 0,5 h antes do que chega a Y, e pop(Y) ≤ 1,1 × pop(X). A evidência traz os candidatos.
 - Guarda-corpo no grafo: toda ocorrência com `pop_raio > 0` sem designação no plano final vira escalação (`sugestao: "solicitar apoio externo"`), mesmo com o Crítico aprovando; o status vira `escala`. `ResultadoPeriodo.escalacoes[]` ganha a chave opcional `sugestao`.
+
+## 18. Ciclo no modo LLM (25/10)
+- Citação incorreta é corrigida pelo sistema ANTES do Crítico (`base.reescrever_citacoes` no nó de checagem). Novo evento `ferramenta/citacao_corrigida` (`rodada`, `agente_que_errou`, `correcoes[]` com campo, citado, real, justificativa antes/depois) e `historico[].citacoes_corrigidas`. O Crítico recebe só as violações do plano corrigido; `historico[].violacoes` mantém todas.
+- `checar_citacoes` aceita prefixo inequívoco de localidade, "ETA ≤/limite de N h" quando N = `eta_max_h`, e o nome da base de saída em `loc:`/`dist:`.
+- Planejador: `SaidaPlano.respostas_ao_critico` (opcional); na rodada ≥ 2 recebe os pontos do Crítico e a contra-proposta.
+- Última rodada rejeitada sem violação rígida aberta → `divergencia_zona_cinzenta`: status `aprova` (salvo o guarda-corpo das expostas), com a contra-proposta do Crítico se ela não violar regra rígida. Impasse só com regra rígida aberta.
+- Aprendizado também grava derivada de reignição a partir do `historico_celula` (queima atual ≤ 2 dias, depois de ≥ 1 dia sem foco, com ≥ 3 focos antes na janela de 7 dias).

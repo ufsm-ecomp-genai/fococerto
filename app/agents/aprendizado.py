@@ -13,6 +13,10 @@ muda). Passos:
      palavras). O ``interpretar_memorias`` lê isso como reforço (+0,15 de prioridade) e o grafo puxa a célula
      para a lista do período mesmo fora do top 15;
    - com recurso em P-1 e diminuiu ou sumiu em P: grava uma derivada informativa (confiança menor, sem reforço).
+   - reignição (independe do plano de P-1): para as ocorrências de P (top 15 + as citadas pelo id numa derivada
+     ativa de reforço, as que o grafo puxa), ``historico_celula`` mostra focos em P depois de pelo menos um dia
+     sem foco, e a célula já tinha queimado nos 7 dias anteriores (pelo menos ``REIGNICAO_MIN_FOCOS_ANTES``
+     focos). Grava derivada de reforço com "reignição", o id da célula e a localidade.
    Idempotente: não grava de novo a mesma célula com a mesma ``fonte`` (``aprendizado:<P-1>-><P>``).
 
 Os limiares são declarados aqui (não dependem de cenário nem de célula).
@@ -25,6 +29,7 @@ from pathlib import Path
 from typing import Any
 
 from app.core.models import Designacao, Memoria, Ocorrencia, Plano
+from app.tools.memorias import REFORCO
 from app.tools.texto import contem_termo, norm
 
 TOP_TODAS = 5000          # todas as ocorrências do dia (dia típico do Tocantins: ~200)
@@ -33,6 +38,10 @@ FORTE_MIN_FOCOS = 5       # persistiu forte = pelo menos 5 focos em P e não cai
 FORTE_FRACAO = 0.7
 CONFIANCA_REFORCO = 0.8   # dado observado (FIRMS), mas a causa (falta de recurso) é inferida
 CONFIANCA_ATENDIDA = 0.6
+TOP_PERIODO = 15                # o que o grafo põe na lista do período (grafo.TOP)
+JANELA_REIGNICAO_DIAS = 7       # dias antes de P olhados no historico_celula
+REIGNICAO_MIN_FOCOS_ANTES = 3   # foco isolado não é "fogo que voltou"
+REIGNICAO_MAX_DIAS_ATIVA = 2    # a queima atual começou há no máximo 2 dias (P-1 ou P), depois do intervalo
 
 
 def periodo_anterior(periodo: str) -> str | None:
@@ -125,8 +134,67 @@ def comparar(plano: Plano, ant: dict[str, Ocorrencia], atu: dict[str, Ocorrencia
     return achados
 
 
+def detectar_reignicao(hist: list[dict], periodo: str) -> dict | None:
+    """Série diária (do mais antigo a P) -> achado de reignição ou None.
+
+    Reignição: a queima atual (dias seguidos com foco terminando em P, no máximo ``REIGNICAO_MAX_DIAS_ATIVA``)
+    vem depois de pelo menos um dia sem foco, e antes desse intervalo a célula teve pelo menos
+    ``REIGNICAO_MIN_FOCOS_ANTES`` focos na janela."""
+    if not hist or hist[-1].get("dia") != periodo[:10] or not hist[-1].get("n_focos"):
+        return None
+    i = len(hist) - 1
+    while i >= 0 and hist[i].get("n_focos", 0) > 0:
+        i -= 1
+    ativa = hist[i + 1:]
+    if i < 0 or len(ativa) > REIGNICAO_MAX_DIAS_ATIVA:
+        return None
+    j = i
+    while j >= 0 and hist[j].get("n_focos", 0) == 0:
+        j -= 1
+    antes = [h for h in hist[:j + 1] if h.get("n_focos", 0) > 0]
+    n_antes = sum(h["n_focos"] for h in antes)
+    if not antes or n_antes < REIGNICAO_MIN_FOCOS_ANTES:
+        return None
+    return {"tipo": "reignicao", "n_antes": n_antes, "n_depois": int(hist[-1]["n_focos"]),
+            "dias_antes": [h["dia"] for h in antes], "dias_sem_foco": i - j,
+            "n_atual": sum(h["n_focos"] for h in ativa)}
+
+
+def _celulas_reforco(memoria: Any, regiao: str) -> set[str]:
+    """Células citadas pelo id numa derivada de reforço ainda ativa (as que o grafo puxa para a lista)."""
+    import re
+    todas = [m for m in memoria.listar(regiao) if m.regiao == regiao]
+    por = getattr(memoria, "substituida_por", None)
+    subst = {m.supersedes for m in todas if m.supersedes} | (
+        {m.id for m in todas if por(m.id)} if callable(por) else set())
+    return {c.rstrip("._") for m in todas if m.tipo == "derivada" and m.id not in subst
+            and REFORCO.search(norm(m.texto)) for c in re.findall(r"cel_[-\d_.]+", m.texto)}
+
+
+def reignicoes(regiao: str, periodo: str, atu: dict[str, Ocorrencia], repo: Any, memoria: Any) -> list[dict]:
+    """Achados de reignição nas ocorrências de P (top 15 + puxadas por memória). O repositório precisa ter
+    consultado P por último (fim do ``historico_celula``)."""
+    top = sorted(atu.values(), key=lambda o: -o.prioridade)[:TOP_PERIODO]
+    ids = list(dict.fromkeys([o.id for o in top] + sorted(c for c in _celulas_reforco(memoria, regiao) if c in atu)))
+    achados = []
+    for oid in ids:
+        try:
+            hist = repo.historico_celula(oid, JANELA_REIGNICAO_DIAS + 1)
+        except Exception:  # noqa: BLE001 - sem histórico, sem achado
+            continue
+        a = detectar_reignicao(hist, periodo)
+        if a is not None:
+            achados.append({"celula": oid, **a})
+    return achados
+
+
 def texto_memoria(a: dict, localidade: str, p_ant: str, p_atu: str) -> str:
     cel, n0, n1 = a["celula"], a["n_antes"], a["n_depois"]
+    if a["tipo"] == "reignicao":
+        dias = ", ".join(d[8:10] + "/" + d[5:7] for d in a["dias_antes"])
+        return (f"{cel} ({localidade}) teve reignição em {p_atu}: voltou a queimar com {n1} focos depois de "
+                f"{a['dias_sem_foco']} dia(s) sem foco; antes tinha {n0} focos ({dias}). O fogo anterior não foi "
+                f"extinto: tratar como reignição, não como foco novo")
     if a["tipo"] == "cresceu":
         return f"{cel} ({localidade}) ficou sem recurso em {p_ant} e cresceu de {n0} para {n1} focos em {p_atu}"
     if a["tipo"] == "persistiu":
@@ -144,6 +212,8 @@ def aprender_entre_periodos(regiao: str, periodo: str, plano: Plano, repo: Any, 
     ant = {o.id: o for o in repo.ocorrencias(regiao, p_ant, top=TOP_TODAS)}
     atu = {o.id: o for o in repo.ocorrencias(regiao, periodo, top=TOP_TODAS)}
     achados = comparar(plano, ant, atu)
+    vistos = {a["celula"] for a in achados}
+    achados += [a for a in reignicoes(regiao, periodo, atu, repo, memoria) if a["celula"] not in vistos]
     ja = _textos_da_fonte(memoria, regiao, fonte)
     gravadas, puladas = [], []
     for a in achados:

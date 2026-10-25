@@ -10,11 +10,26 @@ import re
 
 from app.core.models import Base, Designacao, Ocorrencia, Plano, Recurso, RegiaoCfg, Violacao
 from app.tools.geo import eta_recurso, haversine_km
-from app.tools.texto import contem_termo, norm
+from app.tools.texto import contem_termo, norm, sem_sufixo_simulada
 
 RE_POP = re.compile(r"(\d{1,3}(?:\.\d{3})+|\d+)\s*(?:hab\w*|pessoas|moradores|residentes)")
 RE_ETA = re.compile(r"\b(?:eta|cheg\w*)\D{0,20}?(\d+(?:[.,]\d+)?)\s*(?:h\b|hora)")
 RE_KM = re.compile(r"(\d+(?:[.,]\d+)?)\s*km\b")
+# "ETA ≤ 6 h", "chega em ≤6h", "ETA máximo 6 h": o número é o limite da região, não o ETA citado
+RE_LIMITE = re.compile(r"[≤<>≥]|\bate\b|limite|maxim|\bmax\b|acima|abaixo|dentro|exced|ultrapass")
+
+
+def resolver_localidade(nome: str, locs: dict[str, list[dict]]) -> list[dict] | None:
+    """Localidades (homônimas) desta ocorrência que ``nome`` cita: nome exato (sem acento/caixa) ou prefixo
+    inequívoco por palavras inteiras ("Divinopolis" -> "Divinópolis do Tocantins"). None se não casa ou se o
+    prefixo é ambíguo entre duas localidades diferentes da ocorrência."""
+    n = norm(nome).strip()
+    if n in locs:
+        return locs[n]
+    if len(n) < 4:
+        return None
+    cands = [k for k in locs if re.match(re.escape(n) + r"(?![a-z0-9])", k)]
+    return locs[cands[0]] if len(cands) == 1 else None
 
 
 def _num(s: str) -> float:
@@ -94,7 +109,16 @@ def checar_citacoes(plano: Plano, ocorrencias: list[Ocorrencia], bases: list[Bas
                         vs.append(_v(d, "ti_uc", valor, o.dist_ti_uc_km, "conferir a distância até TI/UC"))
                 elif chave in ("loc", "dist"):
                     nome, _, km = valor.partition(":")
-                    homonimas = locs.get(norm(nome))
+                    homonimas = resolver_localidade(nome, locs)
+                    if not homonimas and base is not None and norm(nome).strip() in (
+                            norm(base.nome), sem_sufixo_simulada(base.nome)):
+                        # a base de saída citada como lugar ("dist:Paranã:42"): confere a distância até a base
+                        d_base = haversine_km(base.lat, base.lon, o.lat, o.lon)
+                        reais_b = [d_base] + ([d_base * regiao_cfg.fator_tortuosidade] if regiao_cfg else [])
+                        if chave == "dist" and km and not any(_perto(float(km), x, 0.15, 1) for x in reais_b):
+                            vs.append(_v(d, "dist", f"{nome}:{km}", round(d_base, 1),
+                                         f"a base {base.nome} fica a {d_base:.1f} km em linha reta"))
+                        continue
                     if not homonimas:
                         vs.append(_v(d, "localidade", nome, sorted(locs), "citar só localidades no raio desta ocorrência"))
                     elif chave == "dist" and km and not any(
@@ -114,8 +138,11 @@ def checar_citacoes(plano: Plano, ocorrencias: list[Ocorrencia], bases: list[Bas
         ids_recurso = {norm(d.recurso_id)} | {norm(r.id) for r in (recursos or [])}
         for nb in sorted(nomes_base | ids_recurso, key=len, reverse=True):
             t = t.replace(nb, " ")
+        citadas_aqui = [k for k in locs if contem_termo(t, k)]
         for nome in todas_locs:
             n = norm(nome)
+            if any(contem_termo(k, n) for k in citadas_aqui):
+                continue  # "Divinópolis" de outra ocorrência dentro de "Divinópolis do Tocantins", que é daqui
             if len(n) >= 4 and n not in locs and n not in nomes_base and contem_termo(t, nome):
                 vs.append(_v(d, "localidade", nome, sorted(l["nome"] for l in o.localidades),
                              f"{nome} não está no raio desta ocorrência"))
@@ -125,6 +152,9 @@ def checar_citacoes(plano: Plano, ocorrencias: list[Ocorrencia], bases: list[Bas
                 vs.append(_v(d, "pop_texto", val, o.pop_raio, f"população no raio = {o.pop_raio}"))
         for m in RE_ETA.finditer(t):
             val = _num(m.group(1))
+            if (regiao_cfg is not None and abs(val - regiao_cfg.eta_max_h) < 0.01
+                    and RE_LIMITE.search(t[max(0, m.start(1) - 25):m.start(1)])):
+                continue  # cita o limite da região ("ETA ≤ 6 h"), não um ETA
             if not _perto(val, eta_ref, 0.15, 0.25):
                 vs.append(_v(d, "eta_texto", val, round(eta_ref, 2), f"ETA ≈ {eta_ref:.1f} h"))
         dists_validas = [float(l.get("dist_km")) for l in o.localidades if l.get("dist_km") is not None]

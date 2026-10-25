@@ -61,6 +61,11 @@ def decidir(ctx: Contexto, rodada: int, log: LogExecucao | None, veredicto: Vere
         dados["veredicto_critico"] = {
             "decisao": veredicto.decisao, "motivos": veredicto.motivos,
             "contra_proposta": resumo_plano(veredicto.contra_proposta) if veredicto.contra_proposta else None}
+        # rodada >= 2: cada ponto do Crítico tem de ser adotado ou recusado com motivo (respostas_ao_critico)
+        dados["pontos_do_critico_a_responder"] = [m for m in veredicto.motivos if m and m.strip()]
+        if veredicto.contra_proposta is not None:
+            dados["pares_da_contra_proposta"] = [f"{d.recurso_id}->{d.ocorrencia_id}"
+                                                 for d in veredicto.contra_proposta.designacoes]
     if violacoes:
         dados["violacoes"] = [v.model_dump() for v in violacoes]
     try:

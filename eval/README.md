@@ -200,3 +200,6 @@ importa o código dos agentes.
 
 Saída em `eval/resultados/<timestamp>_<modo>/`: um JSON por execução (`<cenario>__<variante>__r<n>.json`, com o
 resultado, as checagens e o caminho do log JSONL), `resumo.json` e `tabela.md`.
+
+
+**Ajuste de métrica depois dos resultados (25/10):** `rodada1_nao_aprovada` passa a contar como "não aprovada" a rodada 1 em que o sistema reescreveu a citação falsa antes do Crítico (`historico[0].citacoes_corrigidas`). Motivo: com a correção automática de citações, o plano com o fato falso nunca chega a ser aprovado. A mudança foi feita depois de ver os resultados e está declarada aqui.

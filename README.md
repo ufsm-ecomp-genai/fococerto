@@ -358,7 +358,7 @@ Same 12 scenarios × 4 variants × 3 repetitions, with every agent decision made
 through a real Meterless Nightshift (25 Oct 2026): **144 runs, 450 LLM calls, 449 valid on the first try, 1 invalid JSON
 recovered by the retry, 0 fallbacks to offline**, mean latency 29 s per call. Results: `eval/resultados/20261025T015525Z_llm/`.
 
-| Variant | Checks passed | Decision | Detection | False alarms | Wrong facts written by the LLM and caught | False citations in final plan |
+| Variant | Checks passed | Decision | Detection | False alarms | Citation flags raised (see note) | False citations in final plan |
 |---|---|---|---|---|---|---|
 | **A** simple allocator | 18/81 (22.2%) | 15/51 | 0/27 | 0/3 | n/a | 6 (injected; A has no checker) |
 | **B** Planner + rule checker | 53/81 (65.4%) | 32/51 | 18/27 | 0/3 | 56 | **0** |
@@ -367,8 +367,11 @@ recovered by the retry, 0 fallbacks to offline**, mean latency 29 s per call. Re
 
 What this shows, and what it does not:
 
-- **The checks matter most.** Nemotron wrote a wrong fact (town, distance, population or ETA) about 50 times across the
-  run; `checar_citacoes` caught every one and no final plan of B, C or D carries a false citation.
+- **No false citation reaches a final plan** of B, C or D (verified by re-running `checar_citacoes` on all 108 final
+  plans). **Correction (25 Oct):** the "citation flags" column overstates the model's errors. A later review of the traces
+  found that part of the flags were false positives of our own checker (it read "within the 6 h limit" as a cited ETA,
+  and the departure base name as a cited locality). The checker was fixed; the true number of model errors will be
+  re-measured in the next LLM run.
 - **The LLM Critic catches what code cannot.** In `fato_errado_tendencia` (a false trend claim no tool checks) B fails and
   C and D pass in all repetitions; in `tradeoff_noite_gurupi` the LLM variants pass where the offline agents failed.
 - **Memory adds little in LLM mode:** C − D is +2 checks (it was +18 offline). With Nemotron, the variant without memory
