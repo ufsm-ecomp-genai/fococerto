@@ -291,6 +291,8 @@ def tabela_md(agregado: dict, modo: str) -> str:
 
 # ------------------------------------------------------------------ main
 def main(argv: list[str] | None = None) -> int:
+    from app.core.config import carregar_env
+    carregar_env()  # mesmo .env da CLI (sem sobrescrever o ambiente)
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--modo", choices=["offline", "llm"], default="offline")
     ap.add_argument("--repeticoes", type=int, default=3)
