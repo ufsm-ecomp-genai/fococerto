@@ -357,7 +357,7 @@ def montar_parser() -> argparse.ArgumentParser:
     n.add_argument("--regiao", required=True)
     n.add_argument("--periodo", help="YYYY-MM-DD (padrão: hoje)")
     n.add_argument("--autor", help="padrão: usuário do sistema")
-    n.add_argument("texto", nargs="+", help='ex.: "estrada para Mateiros alagada"')
+    n.add_argument("texto", nargs="+", help='ex.: "estrada para São Félix alagada"')
     n.set_defaults(func=cmd_nota)
 
     a = sub.add_parser("aprovar", parents=[comum], help="grava as decisões do último plano salvo do período")

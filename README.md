@@ -4,7 +4,7 @@
 
 Open Agent Hackathon 2026 · **Track 3: Reasoning Architecture** · Team UFSM (Universidade Federal de Santa Maria, Brazil)
 
-FocoCerto crosses NASA FIRMS heat detections with weather, nearby communities, fire stations and the resources the coordinator declares. A **Planner** proposes a resource order, a **Critic** challenges it (trade-offs, exceptions from memory, when to escalate) and can call an **Analyst** to answer an open question with stated uncertainty. The output is a **priority list plus a resource order**, where every assignment carries its evidence. Nothing is dispatched without human approval.
+FocoCerto crosses NASA FIRMS heat detections with weather, nearby communities, real fire stations (each with its source) and the resources the coordinator declares. A **Planner** proposes a resource order, a **Critic** challenges it (trade-offs, exceptions from memory, when to escalate) and can call an **Analyst** to answer an open question with stated uncertainty. The output is a **priority list plus a resource order**, where every assignment carries its evidence. Nothing is dispatched without human approval.
 
 > **Status, stated plainly:** the full pipeline runs end to end in **sample mode** (real cached FIRMS data, offline deterministic agents). **Meterless Nightshift works against the real service** since 25 Oct 2026 (~01:00 UTC): Nightshift for Windows on a team machine with an NVIDIA GPU, reached over Tailscale, serving `nvidia/nemotron-3-ultra-550b-a55b`; every call returns a signed receipt that the app logs. A full LLM-mode period (scarce scenario) took ~23 s with 2 calls (Planner and Critic). The **ablation in LLM mode is complete**: 144 runs, 450 Nemotron calls, 0 offline fallbacks; the full system passes 75.9% of the answer-key checks against 22.2% for a simple allocator, and no final plan carries a false citation (see [Evaluation](#evaluation)). The **Zetaris** integration is implemented but **not yet tested on a real Zetaris instance** (views validated only in a local Spark SQL). See [Sponsor technology](#sponsor-technology) and [Limitations](#limitations).
 
@@ -16,14 +16,15 @@ FocoCerto crosses NASA FIRMS heat detections with weather, nearby communities, f
 3. [Agent roles and the reasoning loop](#agent-roles-and-the-reasoning-loop)
 4. [Dependencies](#dependencies)
 5. [Setup](#setup)
-6. [Usage](#usage)
+6. [Usage](#usage) (CLI and HTTP API)
 7. [Examples](#examples)
 8. [Logs and traces](#logs-and-traces)
 9. [Tests](#tests)
 10. [Evaluation](#evaluation)
 11. [Sponsor technology](#sponsor-technology)
-12. [Limitations](#limitations)
-13. [Credits and third-party components](#credits-and-third-party-components)
+12. [AI and Model Usage](#ai-and-model-usage)
+13. [Limitations](#limitations)
+14. [Credits and third-party components](#credits-and-third-party-components)
 
 ---
 
@@ -33,7 +34,7 @@ FocoCerto crosses NASA FIRMS heat detections with weather, nearby communities, f
 
 **Problem:** public dashboards (FIRMS, GWIS/EFFIS, Painel do Fogo/BDQueimadas) show *where* the fire is and *how dangerous* conditions are. Dispatch systems record requests. We did not find an open tool that proposes *which incident to attend first and with whom*, with a critic that reviews trade-offs and exceptions and leaves an auditable justification. FocoCerto is positioned as a complement, not a replacement.
 
-**Scale in our demo data (real FIRMS VIIRS/Suomi-NPP, Tocantins/Jalapão, Brazil, 23 Oct 2026):** 514 detections grouped into **179 occurrences** (~0.1° cells), **52** of them with a locality within 15 km. The demo scenario has **6 resources** (simulated). Priorities follow the public incident-command doctrine: life → incident stabilization → property and environment.
+**Scale in our demo data (real FIRMS VIIRS/Suomi-NPP, Tocantins/Jalapão, Brazil, 23 Oct 2026):** 514 detections grouped into **179 occurrences** (~0.1° cells), **52** of them with a locality within 15 km. The demo scenario has **6 crews** at real, sourced stations (state fire brigade CBMTO and federal Prevfogo/Ibama brigades); how many crews each station has is **simulated**. Priorities follow the public incident-command doctrine: life → incident stabilization → property and environment.
 
 The code is region-agnostic (a YAML file with a bounding box and declared assumptions). `config/regioes/` has Tocantins (demo, with cached data) and Iberia (configuration only; no cached data, not run).
 
@@ -47,6 +48,7 @@ flowchart LR
     FIRMS[NASA FIRMS VIIRS CSV] -->|scripts/ingest_firms.py| PG[(PostgreSQL<br/>focos, decisoes, notas)]
     GEO[GeoNames cities1000 CSV] --> FS[Zetaris file store CSV]
     OSM[OSM fire stations CSV] --> FS
+    OFI[Official station list CSV<br/>CBMTO, Prevfogo/Ibama, ICMBio] --> FS
     OM[Open-Meteo REST<br/>fixed 0.5° grid] --> REST[Zetaris REST table<br/>+ CACHE TABLE]
   end
   PG --> Z{{Zetaris<br/>views: ocorrencias,<br/>ocorrencias_localidades,<br/>ocorrencias_contexto,<br/>ocorrencias_prioridade}}
@@ -67,7 +69,7 @@ Text version:
 
 ```
 FIRMS -> Postgres ─┐
-GeoNames, OSM CSV -> Zetaris file store ─┼─> Zetaris views (occurrences + context + priority) ─> Repository
+GeoNames, OSM, official stations CSV -> Zetaris file store ─┼─> Zetaris views (occurrences + context + priority) ─> Repository
 Open-Meteo -> Zetaris REST table + CACHE ┘                                                       │
                                      (sample mode: data/cache/ instead of Zetaris) ──────────────┤
                                                                                                   ▼
@@ -83,20 +85,23 @@ Open-Meteo -> Zetaris REST table + CACHE ┘                                    
 - **Priority formula** (transparent, declared starting weights; `app/data/ocorrencias.py` and the same logic in `sql/zetaris_views.sql`):
   `0.35·exposure + 0.25·intensity (FRP) + 0.20·weather (VPD × wind, a surface simplification of Hot-Dry-Windy) + 0.10·persistence + 0.10·growth`.
 - **ETA** = haversine distance × tortuosity factor ÷ declared speed (`config/regioes/tocantins.yaml`: 40 km/h, factor 1.4, max ETA 6 h; aircraft 180 km/h straight line).
+- **Fire stations in layers, with provenance** (`app/data/bases.py`). A station is where a crew leaves from. Four layers, from most to least trusted: (1) `declarada`, declared by the coordinator in the scenario; (2) `oficial`, an official regional list with a source URL and year per station (`config/regioes/<region>_bases_oficiais.csv`, also registered in Zetaris as `fococerto_arq.bases_oficiais`); (3) `osm`, OpenStreetMap `amenity=fire_station`; (4) `estimada`, a municipal seat with 20,000+ inhabitants, used only when layers 2–3 have nothing inside the region (unverified). Stations closer than 3 km are merged and the most trusted record wins. Every plan labels each resource's station (`base oficial`, `base OSM`, …), lists the stations with their source in "Bases e procedência", and the map colours each station by layer. **Tocantins** has 12 official stations: the state fire brigade CBMTO (Palmas, Paraíso, Porto Nacional, Gurupi, Dianópolis, Colinas), federal Prevfogo/Ibama brigades from Ibama Portaria nº 114/2024 (São Félix do Tocantins, Santa Tereza do Tocantins, Itacajá, Goiatins, Arraias) and the ICMBio brigade of the Serra Geral do Tocantins ecological station (Rio da Conceição). Coordinates are the municipal seat from GeoNames (station addresses are not georeferenced), except Palmas, which uses the OSM point. **How many crews each station has is still simulated** (the scenario says so). In a real deployment, layer 2 would be the agency's own system (e.g. Sisfogo) federated through Zetaris instead of a CSV.
 
 | Folder | What it holds |
 |---|---|
 | `app/core/` | shared types (pydantic), config, JSONL logger |
-| `app/data/` | repository: `RepositorioZetaris` (Zetaris REST + Postgres writes) and `RepositorioCache` (sample mode) |
+| `app/data/` | repository: `RepositorioZetaris` (Zetaris REST + Postgres writes) and `RepositorioCache` (sample mode); `bases.py` merges the station layers |
 | `app/tools/` | deterministic tools: `monitor`, `checar_regras`, `checar_citacoes`, `alocador_simples`, `consultar`, `eta_h`, memory interpretation |
 | `app/agents/` | Planner, Critic, Analyst, prompts, LangGraph graph |
 | `app/llm/` | LLM client (Nightshift or offline) |
 | `app/memory_client.py` | `ClienteHMEM` (HTTP) and `MemoriaLocal` (Python port, persistent, for sample mode) |
 | `app/output/` | Markdown/JSON plan and Leaflet map |
+| `app/api.py`, `web/` | HTTP API for a front end (FastAPI) and its contract (`web/README.md`) |
 | `services/hmem/` | Meterless H-MEM reference engine as an HTTP service (TypeScript) |
 | `sql/` | Postgres DDL, Zetaris views, Spark validation script |
 | `scripts/` | ingestion, `setup_zetaris.py`, `check_submissao.py`, `check_clean_clone.sh`, `gerar_exemplos.sh` |
-| `cenarios/` | coordinator scenarios (resources, declared bases, reserve, notes); all marked `simulado: true` |
+| `cenarios/` | coordinator scenarios (resources at sourced stations, reserve, notes); crew counts marked `simulado: true` |
+| `config/regioes/` | region YAML (bbox, speeds, assumptions) and the official station list with sources |
 | `eval/` | ablation scenarios, answer keys written before running, runner and report |
 
 ---
@@ -108,7 +113,7 @@ Open-Meteo -> Zetaris REST table + CACHE ┘                                    
 |---|---|
 | `monitor` | compares with the previous day: `nova`, `crescendo`, `estavel`, `diminuindo` |
 | `alocador_simples` | greedy baseline: highest priority gets the nearest feasible resource |
-| `checar_regras` | hard rules (capacity, duplicate resource, ETA over the limit, unavailable resource, reserve not kept, exposed population left unattended while an unexposed occurrence got a resource, exposed occurrence with no feasible resource) plus soft "grey zone" flags (`exposta_nao_atendida`, `restricao_memoria`) |
+| `checar_regras` | hard rules (capacity, duplicate resource, ETA over the limit, unavailable resource, reserve not kept, exposed population left unattended while an unexposed occurrence got a resource, exposed occurrence with no feasible resource) plus soft "grey zone" flags (`exposta_nao_atendida`, `restricao_memoria`, and `troca_recurso_local`: an exposed occurrence has no resource while a crew that would reach it at least 0.5 h sooner went to another occurrence with similar or smaller exposure) |
 | `checar_citacoes` | checks that every fact cited in a justification (locality, distance, population, ETA) matches the data |
 | `consultar` | parameterized queries for the Analyst: 7-day cell history, day/night pattern, FRP pattern, persistence, protected-area proximity, weather |
 | `interpretar_memorias` | reads H-MEM memories and notes for candidate facts (blocked base or route, reinforcement, minimum reserve). The Critic decides whether an exception applies |
@@ -117,7 +122,7 @@ Open-Meteo -> Zetaris REST table + CACHE ┘                                    
 | Agent | Decision that belongs to it |
 |---|---|
 | **Planner** (`planejador`) | builds the resource order starting from `alocador_simples`; may deviate, but must explain why; uses H-MEM memories |
-| **Critic** (`critico`) | receives the rule and citation checker output and judges the grey zone: (1) trade-offs, (2) exceptions coming from memory (e.g. "road to Mateiros flooded" overrides the nearest-base choice), (3) whether to escalate when no hard rule forces it. Writes a counter-proposal |
+| **Critic** (`critico`) | receives the rule and citation checker output and judges the grey zone: (1) trade-offs, (2) exceptions coming from memory (e.g. "road to São Félix flooded" overrides the nearest-station choice), (3) whether to escalate when no hard rule forces it. Writes a counter-proposal, e.g. moving a local crew onto the exposed occurrence it reaches first (`troca_recurso_local`) |
 | **Analyst** (`analista`) | called **by the Critic** when a decision depends on an open question: *"is this occurrence likely recurrent agricultural/management burning, or a native-vegetation fire?"* Runs several queries and returns a conclusion with confidence (`baixa`/`media`/`alta`) |
 
 ### The loop is not linear
@@ -135,12 +140,12 @@ flowchart TD
 ```
 
 - Maximum 3 Planner→Critic rounds; at most one Analyst call per round.
-- **Mandatory escalation** when an occurrence with exposed population is left without a resource (whether no resource can reach it in time or the feasible ones are committed elsewhere), or on deadlock after 3 rounds. The Critic **may** also escalate grey-zone cases, explaining why. *(The "left without a resource" rule is a team decision being enforced in the code after the current LLM-mode ablation; the numbers in this README were measured before it.)*
-- **Guard rails in the graph:** an approval with a solvable hard-rule violation is turned into a rejection; an approval with an unsolvable exposure violation becomes an escalation (`app/agents/grafo.py`).
+- **Mandatory escalation** when an occurrence with exposed population is left without a resource (whether no resource can reach it in time or the feasible ones are committed elsewhere), or on deadlock after 3 rounds. The Critic **may** also escalate grey-zone cases, explaining why.
+- **Guard rails in the graph** (`app/agents/grafo.py`): an approval with a solvable hard-rule violation is turned into a rejection; an approval with an unsolvable exposure violation becomes an escalation; and **every occurrence with exposed population that ends the final plan without a resource is escalated with the suggestion "solicitar apoio externo" (request external support), even if the Critic approved**, so the plan status becomes `escala`. *(This last guard rail was added on 25 Oct, after the ablations; the evaluation numbers below were measured before it.)*
 - If the LLM output is invalid or Nightshift is unreachable, the agent falls back to its deterministic logic and logs `llm_call` with `status: fallback_offline`.
 
 ### Sample mode (offline deterministic agents)
-`--sample` runs **without Zetaris, Nightshift or any key**: data comes from `data/cache/` (real FIRMS, GeoNames, OSM and Open-Meteo data for 17–24 Oct 2026, frozen at 18:25 UTC on 24 Oct), memory is `MemoriaLocal`, and each agent uses its own `decidir_offline()` logic. Tools, rules and orchestration run for real on any input; there are no recorded answers (tests check that the code has no demo literals and that different inputs give different plans). In offline mode **the Planner is essentially the greedy baseline**; the Critic is the checker plus exception/trade-off/escalation rules; the Analyst is a persistence and day/night heuristic. The gains we expect from the LLM agents can only show up in LLM mode.
+`--sample` (or the environment variable `SAMPLE_MODE=true`, which works for every subcommand) runs **without Zetaris, Nightshift or any key**: data comes from `data/cache/` (real FIRMS, GeoNames, OSM and Open-Meteo data for 17–24 Oct 2026, frozen at 18:25 UTC on 24 Oct), memory is `MemoriaLocal`, and each agent uses its own `decidir_offline()` logic. Tools, rules and orchestration run for real on any input; there are no recorded answers (tests check that the code has no demo literals and that different inputs give different plans). In offline mode **the Planner is essentially the greedy baseline**; the Critic is the checker plus exception/trade-off/escalation rules; the Analyst is a persistence and day/night heuristic. The gains we expect from the LLM agents can only show up in LLM mode.
 
 ---
 
@@ -148,7 +153,7 @@ flowchart TD
 
 | Needed for | What |
 |---|---|
-| Everything | Python 3.12, packages pinned in `requirements.txt` (pydantic, PyYAML, httpx, langgraph, psycopg; pytest) |
+| Everything | Python 3.12, packages pinned in `requirements.txt` (pydantic, PyYAML, httpx, langgraph, psycopg, fastapi, uvicorn; pytest) |
 | H-MEM service and its conformance suite | Node 24 (`services/hmem`, only dev dependency: `tsx`) |
 | Real mode, data layer | **Zetaris** (Docker) + PostgreSQL |
 | Real mode, AI | **Meterless Nightshift** (OpenAI-compatible endpoint), routing to **NVIDIA Nemotron** |
@@ -200,7 +205,7 @@ npm start     # http://127.0.0.1:7070  (set HMEM_URL=http://127.0.0.1:7070 in .e
 cd services/hmem && npm ci && npm start          # terminal 1, port 7070
 # terminal 2, from the repository root:
 export LLM_PROVIDER=offline HMEM_URL=http://127.0.0.1:7070 ZETARIS_API_KEY=
-.venv/bin/python -m app.cli nota --regiao tocantins --periodo 2026-10-23 "estrada para Mateiros alagada"
+.venv/bin/python -m app.cli nota --regiao tocantins --periodo 2026-10-23 "estrada para São Félix alagada"
 .venv/bin/python -m app.cli run  --regiao tocantins --recursos cenarios/tocantins-escasso.yaml
 ```
 The CLI prints `Memória: H-MEM em http://127.0.0.1:7070` (instead of `MemoriaLocal`) and `Dados: cache local (data/cache/) [ZETARIS_API_KEY ausente]`. The empty `ZETARIS_API_KEY=` matters if your `.env` has a Zetaris key: with a key set, the CLI tries the real Zetaris. The service keeps its memories in `services/hmem/data/`.
@@ -243,44 +248,51 @@ source .venv/bin/activate
 python -m app.cli run --regiao tocantins --recursos cenarios/tocantins-escasso.yaml [--periodo 2026-10-23] [--sample]
 
 # Coordinator note: Postgres (or local state in sample mode) + H-MEM
-python -m app.cli nota --regiao tocantins [--periodo P] [--autor A] "estrada para Mateiros alagada"
+python -m app.cli nota --regiao tocantins [--periodo P] [--autor A] "estrada para São Félix alagada"
 
 # Approve the last saved plan of a period (writes the decisions)
 python -m app.cli aprovar --regiao tocantins --periodo 2026-10-23
 
 # Run the ablation: 12 scenarios x 4 variants x 3 repetitions (writes eval/resultados/<timestamp>_<mode>/)
-python -m eval.run_ablacao --modo offline            # --modo llm needs Nightshift; --estimar prints the expected cost first
+python -m app.cli avaliar [--modo offline|llm] [--repeticoes N] [--variantes ABCD] [--cenarios ID ...] [--sample]
+#   same as: python -m eval.run_ablacao --modo offline   (--modo llm needs Nightshift; --estimar prints the expected cost first)
 ```
-Every subcommand (`run`, `nota`, `aprovar`) accepts `--sample`. Plan text follows the region's language (`idioma: pt-BR` for Tocantins).
+Every subcommand (`run`, `nota`, `aprovar`, `avaliar`) accepts `--sample`; setting `SAMPLE_MODE=true` in the environment (or in `.env`) does the same for all of them (for `avaliar` it means `--modo offline`). Plan text follows the region's language (`idioma: pt-BR` for Tocantins).
 
-**Memory demo you can reproduce in sample mode** (state is kept in `data/estado/`, git-ignored; delete it to start fresh):
+**Memory demo you can reproduce in sample mode** (state is kept in `data/estado/`, git-ignored; delete it to start fresh). The note is about the Prevfogo/Ibama brigade station of São Félix do Tocantins:
 ```bash
-python -m app.cli nota --sample --regiao tocantins --periodo 2026-10-23 "estrada para Mateiros alagada"
+python -m app.cli nota --sample --regiao tocantins --periodo 2026-10-23 "estrada para São Félix alagada"
 python -m app.cli run  --sample --regiao tocantins --recursos cenarios/tocantins-escasso.yaml
-#   -> mateiros-t1 is held in reserve, cel_-96_-468 (Lizarda) is escalated: 5 assignments, 10 escalations
-python -m app.cli nota --sample --regiao tocantins --periodo 2026-10-24 "estrada para Mateiros liberada"
+#   -> saofelix-t1 is held in reserve, cel_-96_-468 (Lizarda) is escalated: 5 assignments, 10 escalations
+python -m app.cli nota --sample --regiao tocantins --periodo 2026-10-24 "estrada para São Félix liberada"
 #   -> "Substitui a memória tocantins:mem-1." (H-MEM supersedes)
 python -m app.cli run  --sample --regiao tocantins --recursos cenarios/tocantins-escasso.yaml
-#   -> mateiros-t1 goes back to cel_-96_-468: 6 assignments, 9 escalations
+#   -> saofelix-t1 goes back to cel_-96_-468: 6 assignments, 9 escalations
 ```
+
+### HTTP API (for a front end)
+```bash
+.venv/bin/uvicorn app.api:app --port 8000      # OpenAPI at http://localhost:8000/docs
+```
+`app/api.py` is a thin FastAPI wrapper over the CLI: it decides nothing on its own. It reads the plans the CLI writes (`out/<region>/<period>/plano.json`), runs the same period loop as a background job, and writes notes and approvals through the same code paths. Endpoints: `GET /api/saude`, `/api/regioes`, `/api/periodos`, `/api/cenarios`, `/api/plano/{regiao}/{periodo}`, `/api/exemplos[/{nome}[/trace]]`, `/api/jobs[/{id}]`; `POST /api/run` (send `"sample": true` to run without any service), `/api/nota`, `/api/aprovar`. CORS is open to localhost only (`FOCOCERTO_CORS_ORIGENS` to change it); if `web/dist/` exists, the API also serves it at `/`. The full contract for the front end, with real request and response bodies, is in [`web/README.md`](web/README.md).
 
 ---
 
 ## Examples
 
-All examples are produced by real `--sample` runs (`scripts/gerar_exemplos.sh`) on real FIRMS data for **23 Oct 2026** (the Analyst example: 24 Oct); resources are **simulated**. The app never reads these folders.
+All examples are produced by real `--sample` runs (`scripts/gerar_exemplos.sh`) on real FIRMS data for **23 Oct 2026** (the Analyst example: 24 Oct); the stations are real (official layer, with source) and the **number of crews per station is simulated**. The app never reads these folders.
 
 | Input (`input_examples/`) | Resources | Output (`output_examples/`) | Result |
 |---|---|---|---|
 | `tocantins-escasso.yaml` | 6, reserve 0 | `tocantins-escasso/` | 6 assignments, 9 escalations |
 | `tocantins-medio.yaml` | 10, reserve 1 | `tocantins-medio/` | 8 assignments, 7 escalations, 1 in reserve |
-| `tocantins-folgado.yaml` | 16, reserve 2 | `tocantins-folgado/` | 14 assignments, 1 escalation, 2 in reserve |
-| `tocantins-escasso.yaml` + note *"estrada para Mateiros alagada, sem acesso"* | 6 | `tocantins-escasso-com-nota/` | 5 assignments, 10 escalations: the Critic accepts the memory exception, `mateiros-t1` no longer goes by road to `cel_-96_-468` (Lizarda) and that occurrence is escalated |
+| `tocantins-folgado.yaml` | 16, reserve 2 | `tocantins-folgado/` | 13 assignments, 2 escalations, 3 in reserve (`palmas-t2`, `palmas-t3`, `paraiso-t1`) |
+| `tocantins-escasso.yaml` + note *"estrada para São Félix alagada, sem acesso"* | 6 | `tocantins-escasso-com-nota/` | 5 assignments, 10 escalations: the Critic accepts the memory exception, `saofelix-t1` (Prevfogo/Ibama, São Félix do Tocantins) no longer goes by road to `cel_-96_-468` (Lizarda), stays in reserve, and that occurrence is escalated |
 | `tocantins-parana-analista.yaml` (copy of the eval scenario `agricola_recorrente_parana_24out`, period 24 Oct) | 5, reserve 0 | `tocantins-parana-analista/` | 5 assignments, 3 escalations. The Critic calls the Analyst about `cel_-124_-479` (no population nearby); after 7 queries it answers **`indeterminado`, confidence `baixa`** (low FRP and far from protected areas, but the occurrence is growing), so the assignment is kept as a precaution. The scarce scenario above never calls the Analyst |
 
 Each output folder has `plano.md` (human-readable plan: escalations, resource order, priority list, justifications with evidence ids, memories used, review cycle, limitations), `plano.json` (the same as data, read by `aprovar`), `mapa.html` (Leaflet) and `trace.jsonl` (the full event log).
 
-Bases: OpenStreetMap has only **2 fire stations inside Tocantins, both in Palmas**. The other bases are declared by the coordinator in the scenario, in real GeoNames towns, and marked `simulada: true`.
+Stations: the four Tocantins scenarios above use only stations from the official layer (CBMTO and Prevfogo/Ibama, each with a source URL in `config/regioes/tocantins_bases_oficiais.csv`); each `plano.md` has a "Bases e procedência" table and the banner "Bases: localização real com fonte; quantidade de equipes simulada (cenário)". The Analyst example is a copy of an evaluation scenario written before the layered stations existed, so it still uses 5 stations **declared** by the coordinator in real GeoNames towns (unverified units), and its plan says so.
 
 ---
 
@@ -300,7 +312,7 @@ In LLM mode each `llm_call` line records `modelo`, `routed_model` and `receipt` 
 
 ```bash
 (cd services/hmem && npm ci)                        # first: without it the H-MEM HTTP tests below are skipped
-.venv/bin/python -m pytest -q                       # 176 passed, 1 skipped (needs a throwaway Postgres: POSTGRES_DSN_TESTE)
+.venv/bin/python -m pytest -q                       # 221 passed, 1 skipped on 25 Oct (the skip needs a throwaway Postgres: POSTGRES_DSN_TESTE)
 (cd services/hmem && npm test)                      # H-MEM conformance: 13/13 checks passed (rewrites conformance-report.txt)
 .venv/bin/python scripts/check_submissao.py         # secrets, .env, examples, README sections, repo size, dates
 scripts/check_clean_clone.sh                        # fresh clone -> venv -> pytest -> run --sample -> npm ci && npm test
@@ -320,15 +332,15 @@ The Track 3 question: **do the agents and the memory make better decisions?** We
 | **C** | B + Critic + Analyst + H-MEM (full system) |
 | **D** | C without H-MEM |
 
-**12 scenarios** on real FIRMS data (`eval/cenarios/`, answer keys in `eval/gabaritos/`): legitimate exceptions coming from memory (Mateiros road flooded, Dianópolis bridge) with a control case (road reopened); recurrent agricultural burning with a native-vegetation control; exposure-vs-ETA trade-offs and escalation; justifications with an injected wrong fact (population, locality, and an invented trend that `checar_citacoes` does not cover); reignitions visible only through data-derived memory. Control cases measure false alarms.
+**12 scenarios** on real FIRMS data (`eval/cenarios/`, answer keys in `eval/gabaritos/`): legitimate exceptions coming from memory (a flooded road out of a station, scenario `excecao_mateiros_alagada_23out`, and a Dianópolis bridge) with a control case (road reopened); recurrent agricultural burning with a native-vegetation control; exposure-vs-ETA trade-offs and escalation; justifications with an injected wrong fact (population, locality, and an invented trend that `checar_citacoes` does not cover); reignitions visible only through data-derived memory. Control cases measure false alarms. The evaluation scenarios were frozen with the answer keys on 24 Oct, before the layered stations existed, so they use stations **declared** by the coordinator in real GeoNames towns (unverified units, marked simulated); we did not change them afterwards.
 
 **Metrics:** answer-key accuracy (split into decision, detection and false alarm), false citations, exposure-weighted ETA (how long, on average, exposed population waits for a resource), rounds to approval, escalations, and variance over **3 runs per scenario and variant**.
 
 **Honesty notes:** the answer keys were written by the team, there is no field ground truth, and the reservations for each case are in the key itself. The agents' code already existed when the keys were committed (commit `e06ec8d`, 28 minutes before `1d722b5`), and after the first offline runs we fixed **7 bugs** that we found because checks failed (commit `39e42d2`). The fixes are general behaviour fixes with regression tests, each one documented with how to reproduce it in `eval/RELATORIO.md`, but they were made after seeing the results, and the "before" table is kept there. In offline mode every run is deterministic and A and B tend to coincide, so offline results only validate the pipeline; **the comparison that matters is in LLM mode**. Details: `eval/README.md` and `eval/RELATORIO.md`.
 
-**Ablation results: offline deterministic agents — LLM-mode results pending.** These numbers validate the
-evaluation pipeline (12 scenarios × 4 variants × 3 repetitions, `python -m eval.run_ablacao --modo offline --repeticoes 3`);
-they are not the final comparison. Offline runs are deterministic, so the variance between repetitions is zero.
+**Offline mode (deterministic agents).** These numbers validate the evaluation pipeline (12 scenarios × 4 variants ×
+3 repetitions, `python -m eval.run_ablacao --modo offline --repeticoes 3`, code of 24 Oct); the LLM-mode table below is
+the comparison that answers the Track 3 question. Offline runs are deterministic, so the variance between repetitions is zero.
 
 | Variant | Checks passed | Decision | Detection | False alarms | False citations in final plan |
 |---|---|---|---|---|---|
@@ -365,6 +377,18 @@ What this shows, and what it does not:
 - **Stable across repetitions:** standard deviation of the accuracy between repetitions ≤ 0.018; plans differ between
   repetitions in 2 of 12 scenarios.
 - **Exposure-weighted ETA** (how long exposed people wait for a crew): 4.40 h for A, 3.77 h for C.
+- **Per single run, not per 81/87.** The totals above add up 3 repetitions of the same 27 checks (A, B) or 29 checks
+  (C, D). Per run, LLM mode gives A 6.0/27, B 17.7/27, C 22.0/29, D 21.3/29 (offline: 6, 16, 23 and 17). So in LLM mode
+  C − D is 0.67 of a check per run, within the run-to-run variation of D: **with this sample we cannot claim that memory
+  improves LLM mode** (offline, C − D is 6 checks per run).
+- **No over-escalation in any variant, in either mode** (0 escalated occurrences without exposed population or with a
+  free, feasible, unblocked resource beyond the reserve), so the answer keys' credit for escalating did not reward
+  "escalate everything". Honest caveat: **in LLM mode every escalation came from a deadlock** ("3 rounds without
+  approval", mostly a citation the Planner could not fix), not from a decision to ask for help; 18 of those 46
+  escalations are in the two control scenarios, a false alarm the accuracy table does not show; and the check "every
+  exposed occurrence without a resource is escalated" fails in B, C and D. This is being addressed (the
+  "solicitar apoio externo" guard rail above and Critic changes), and the LLM ablation has **not** been re-run since.
+  Details: `eval/RELATORIO.md` ("Sobre-escalação").
 
 A real trace with Nemotron calls, routed model and signed receipt ids: [`output_examples/nemotron-trace/trace.jsonl`](output_examples/nemotron-trace/trace.jsonl).
 
@@ -377,16 +401,48 @@ Full write-up: [`docs/PATROCINADORES.md`](docs/PATROCINADORES.md).
 
 | Sponsor | Role in FocoCerto | Status |
 |---|---|---|
-| **Zetaris** | Data layer: federates Postgres (FIRMS detections), file-store CSVs (GeoNames localities, OSM stations, region table) and an Open-Meteo REST table with `CACHE TABLE`; four views compute occurrences, localities, context and priority. Registered entirely by `scripts/setup_zetaris.py` | Views validated in a local **Spark SQL 4.0** against the Python logic (**698/698 occurrences identical**, `sql/validar_views_spark.py`). **Not yet run on a real Zetaris.** Missing: a running Zetaris + `.env`, then `setup_zetaris.py` and `run` without `--sample` |
+| **Zetaris** | Data layer: federates Postgres (FIRMS detections), file-store CSVs (GeoNames localities, OSM stations, the official station list with sources, region table) and an Open-Meteo REST table with `CACHE TABLE`; four views compute occurrences, localities, context and priority. Registered entirely by `scripts/setup_zetaris.py` | Views validated in a local **Spark SQL 4.0** against the Python logic (**698/698 occurrences identical**, `sql/validar_views_spark.py`). **Not yet run on a real Zetaris.** Missing: a running Zetaris + `.env`, then `setup_zetaris.py` and `run` without `--sample` |
 | **Meterless H-MEM** | Memory across periods, scoped per region: coordinator notes become memories that change the plan; a contradicting note **supersedes** the old one; data-derived memories (e.g. "cell X was deprioritized and grew") raise priority | Official Meterless reference engine (Apache-2.0) in `services/hmem/`, adaptations marked "FocoCerto adaptation". **Conformance 13/13** (`npm test`). Persistent Python port `MemoriaLocal` for sample mode, checked against the service in tests |
 | **Meterless Nightshift** | Primary AI provider for Planner, Critic and Analyst, via its OpenAI-compatible endpoint; each call logs `modelo`, `routed_model`, `receipt` | **Working against the real service** since 25 Oct 2026: Nightshift for Windows on a team GPU machine over Tailscale; each call returns a signed receipt (`meterless.compute_receipt.v1`, Ed25519) logged in every `llm_call`. Also unit-tested with a fake HTTP layer |
-| **NVIDIA Nemotron** | The reasoning model behind the agents, reached only through Nightshift | `nvidia/nemotron-3-ultra-550b-a55b` answers the real calls (`routed_model` in the log); one LLM-mode period ≈ 23 s, 2 calls. LLM-mode ablation running, no results yet |
+| **NVIDIA Nemotron** | The reasoning model behind the agents, reached only through Nightshift | `nvidia/nemotron-3-ultra-550b-a55b` answers the real calls (`routed_model` in the log); one LLM-mode period ≈ 23 s, 2 calls. LLM-mode ablation complete: 144 runs, 450 calls, 0 offline fallbacks ([Evaluation](#evaluation)) |
+
+---
+
+## AI and Model Usage
+
+**Models (through Meterless Nightshift).** One model, `nvidia/nemotron-3-ultra-550b-a55b` (NVIDIA Nemotron 3 Ultra), requested by name, in three roles:
+- **Planner**: builds the resource order from the greedy baseline and the tool outputs, may deviate with a written justification.
+- **Critic**: judges the grey zone (trade-offs, exceptions from memory, swaps, when to escalate) and writes the counter-proposal.
+- **Analyst**: called by the Critic for an open question ("recurrent agricultural burning or native-vegetation fire?"), answers with a conclusion and a confidence level.
+
+**Reasoning is turned off** (`chat_template_kwargs: {"enable_thinking": false}` plus a `/no_think` system message; `LLM_NO_THINK=0` turns it back on). On the real service, with reasoning on, Nemotron spent the whole 4096-token budget thinking and never returned the JSON the agents need. Numbers (ETA, population, distances) always come from deterministic tools, never from the model, and every fact the model cites is re-checked by `checar_citacoes`. No embedding model is used: H-MEM uses the reference engine's deterministic embedder.
+
+**Agent frameworks and libraries.** LangGraph (the Planner ⇄ Critic ⇄ Analyst loop), pydantic (typed contracts and validation of every LLM output), httpx (Nightshift, Zetaris and H-MEM clients), FastAPI + uvicorn (HTTP API), psycopg, PyYAML, pytest; Node 24 + tsx for the H-MEM service; Leaflet for the map. Versions are pinned in `requirements.txt` and `services/hmem/package-lock.json`.
+
+**Sponsor technology** (details in [`docs/PATROCINADORES.md`](docs/PATROCINADORES.md)):
+- **Zetaris**: the read path. It federates Postgres (FIRMS), file-store CSVs (GeoNames, OSM, official stations) and an Open-Meteo REST table; four SQL views compute occurrences, exposure and priority. Implemented and validated in Spark SQL, **not yet run on a real Zetaris**.
+- **Meterless Engine: H-MEM**: memory across periods per region (coordinator notes that change the plan, supersedes, data-derived memories). Official reference engine, conformance suite 13/13.
+- **Meterless Nightshift**: the only AI provider; every call goes through `app/llm/client.py` (OpenAI-compatible) and logs `modelo`, `routed_model` and the signed `receipt`.
+- **NVIDIA**: Nemotron 3 Ultra answers every agent call, reached only through Nightshift.
+
+**AI coding tool.** The code was written and reviewed with **Claude Code (Anthropic)**, used for writing code, tests and documentation and for reviewing them. The team reviewed and tested the result and is responsible for it.
+
+**Data sources, and what is simulated.**
+- Real: NASA FIRMS VIIRS detections (17–24 Oct 2026), GeoNames localities and population, OpenStreetMap fire stations, Open-Meteo weather, and the official Tocantins station list (CBMTO, Prevfogo/Ibama Portaria nº 114/2024, ICMBio), each station with its source URL.
+- Simulated, and labelled as such in every plan: **how many crews and aircraft each station has** (the scenario), the coordinator notes of the demo, the stations declared in the evaluation scenarios, and the wrong facts injected in the evaluation.
+
+**Adapted open-source code.** The Meterless H-MEM reference engine (Apache-2.0), copied into `services/hmem/src/engine/` with small marked adaptations for Portuguese; see [Credits](#credits-and-third-party-components).
+
+**Sample mode.** `SAMPLE_MODE=true` (or `--sample`) runs the whole pipeline on cached real data with offline deterministic agents and the local H-MEM port, with no calls to Zetaris, Nightshift or any other service, and no keys. The tools and rules run for real; there are no recorded answers. In sample mode the log fields `modelo`, `routed_model` and `receipt` are `null`. If Nightshift fails during a real run, the agent falls back to its deterministic logic and logs `status: fallback_offline` (0 times in the 450-call LLM ablation).
+
+**Known limitations:** see [Limitations](#limitations).
 
 ---
 
 ## Limitations
 
-- **Zetaris not yet tested on a real instance:** the views were validated only in a local Spark SQL 4.0. Nightshift/Nemotron does run against the real service, but the **LLM-mode ablation has no results yet**, so we cannot yet say whether the LLM agents beat the offline ones.
+- **Zetaris not yet tested on a real instance:** the views were validated only in a local Spark SQL 4.0. Nightshift/Nemotron runs against the real service and the LLM-mode ablation is complete.
+- **The evaluation predates the latest agent changes:** both ablations were measured before the "solicitar apoio externo" guard rail and the `troca_recurso_local` rule (25 Oct). In LLM mode all escalations came from deadlocks, and the memory gain (C − D) is within run-to-run noise. Small sample: 27–29 checks per run, written by the team.
 - **Offline agents are simple:** in sample mode the Planner is essentially the greedy baseline; differences between ablation variants depend on LLM mode.
 - **Data-derived memories are learned between periods**: before each `run`, the system compares the previous period's plan with the new FIRMS data and stores, for example, "cell X was left without a resource and grew from 2 to 8 detections" (`app/agents/aprendizado.py`). Each ablation scenario has a single period, so the ablation seeds these memories; the multi-period effect is shown by `scripts/demo_3_periodos.sh`.
 - **Exposure is overestimated near mid-size towns:** `pop_raio` sums GeoNames population, which is often the whole municipality (e.g. Porto Nacional ~53k), not just the town.
@@ -394,7 +450,7 @@ Full write-up: [`docs/PATROCINADORES.md`](docs/PATROCINADORES.md).
 - **Distances are straight lines × a tortuosity factor**, and speeds are declared assumptions; ETA is an estimate.
 - **The weather term is a simplified surface Hot-Dry-Windy** (VPD × wind from Open-Meteo daily maxima).
 - **Indigenous lands and protected areas are not ingested** (`dist_ti_uc_km` is null).
-- **Resources and most bases are simulated** (only the Palmas station from OSM is real in the demo scenarios). GeoNames lists only places with 1,000+ inhabitants.
+- **Crew counts are simulated; station locations are real but approximate.** The demo stations come from public sources (CBMTO news, Ibama Portaria nº 114/2024, ICMBio), with the municipal seat as coordinate (except Palmas). Some CBMTO companies were reorganised in 2023: each station "exists according to the cited source", not according to an up-to-date official inventory. The evaluation scenarios and the Analyst example still use coordinator-declared stations. GeoNames lists only places with 1,000+ inhabitants.
 - **No validation with operators:** the framing comes from public incident-command doctrine; the doctrine is simplified.
 - The H-MEM embedder is the reference's deterministic mock, so recall is lexical, not semantic.
 - The region pipeline is generic, but only Tocantins has cached data; Iberia has a configuration only.
@@ -410,7 +466,8 @@ Full write-up: [`docs/PATROCINADORES.md`](docs/PATROCINADORES.md).
 | **GeoNames** `cities1000` | localities and population | CC BY 4.0 |
 | **OpenStreetMap** (Overpass, `amenity=fire_station`) | fire stations | ODbL, © OpenStreetMap contributors |
 | **Open-Meteo** forecast API | VPD, wind, humidity, precipitation | CC BY 4.0 |
+| **Official Tocantins station list** (`config/regioes/tocantins_bases_oficiais.csv`) | station names and agencies, compiled by the team from public sources (CBMTO news, Ibama Portaria nº 114/2024, ICMBio); one URL and year per row | public information, cited per row |
 | **Leaflet** 1.9.4 | map | BSD-2-Clause |
-| LangGraph, pydantic, httpx, psycopg, PyYAML, pytest, tsx | libraries | their own open-source licenses |
+| LangGraph, pydantic, httpx, FastAPI, uvicorn, psycopg, PyYAML, pytest, tsx | libraries | their own open-source licenses |
 
-All other code was written during the hackathon build window (first commit 24 Oct 2026). Generated with AI coding assistance; the team is accountable for it.
+All other code was written during the hackathon build window (first commit 24 Oct 2026), with Claude Code as the AI coding tool (see [AI and Model Usage](#ai-and-model-usage)); the team is accountable for it.
