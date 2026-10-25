@@ -311,7 +311,7 @@ The test suite covers the tools and rules, the agents' offline logic, the graph,
 
 ## Evaluation
 
-The Track 3 question: **do the agents and the memory make better decisions?** We compare four variants on scenarios where the right answer is *not* given by the rule checker, each checked against an answer key **written and committed before any run** (commit `fcf42df`, "Avaliação: cenários e gabaritos escritos antes de qualquer execução").
+The Track 3 question: **do the agents and the memory make better decisions?** We compare four variants on scenarios where the right answer is *not* given by the rule checker, each checked against an answer key **written and committed before any run** (commit `1d722b5`, "Avaliação: cenários e gabaritos escritos antes de qualquer execução").
 
 | Variant | Description |
 |---|---|
@@ -324,7 +324,7 @@ The Track 3 question: **do the agents and the memory make better decisions?** We
 
 **Metrics:** answer-key accuracy (split into decision, detection and false alarm), false citations, exposure-weighted ETA (how long, on average, exposed population waits for a resource), rounds to approval, escalations, and variance over **3 runs per scenario and variant**.
 
-**Honesty notes:** the answer keys were written by the team, there is no field ground truth, and the reservations for each case are in the key itself. The agents' code already existed when the keys were committed (commit `0cfcb66`, 28 minutes before `fcf42df`), and after the first offline runs we fixed **7 bugs** that we found because checks failed (commit `b97dfe7`). The fixes are general behaviour fixes with regression tests, each one documented with how to reproduce it in `eval/RELATORIO.md`, but they were made after seeing the results, and the "before" table is kept there. In offline mode every run is deterministic and A and B tend to coincide, so offline results only validate the pipeline; **the comparison that matters is in LLM mode**. Details: `eval/README.md` and `eval/RELATORIO.md`.
+**Honesty notes:** the answer keys were written by the team, there is no field ground truth, and the reservations for each case are in the key itself. The agents' code already existed when the keys were committed (commit `e06ec8d`, 28 minutes before `1d722b5`), and after the first offline runs we fixed **7 bugs** that we found because checks failed (commit `39e42d2`). The fixes are general behaviour fixes with regression tests, each one documented with how to reproduce it in `eval/RELATORIO.md`, but they were made after seeing the results, and the "before" table is kept there. In offline mode every run is deterministic and A and B tend to coincide, so offline results only validate the pipeline; **the comparison that matters is in LLM mode**. Details: `eval/README.md` and `eval/RELATORIO.md`.
 
 **Ablation results: offline deterministic agents — LLM-mode results pending.** These numbers validate the
 evaluation pipeline (12 scenarios × 4 variants × 3 repetitions, `python -m eval.run_ablacao --modo offline --repeticoes 3`);

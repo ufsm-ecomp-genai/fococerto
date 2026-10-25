@@ -7,11 +7,11 @@
 > `llm` está rodando; os resultados ainda não existem.
 
 - Método, variantes, definições das checagens e das métricas: `eval/README.md`.
-- Cenários e gabaritos: commit `fcf42df` ("Avaliação: cenários e gabaritos escritos antes de qualquer execução",
+- Cenários e gabaritos: commit `1d722b5` ("Avaliação: cenários e gabaritos escritos antes de qualquer execução",
   24/10/2026 15:56 -03:00). Nenhum gabarito foi alterado depois.
 - **Execução atual:** `.venv/bin/python -m eval.run_ablacao --modo offline --repeticoes 3`, com o código depois da
-  correção dos 7 bugs (commit `b97dfe7`) e da memória derivada automática entre períodos
-  (`app/agents/aprendizado.py`, commitada depois em `211bb40`). São 12 cenários × 4 variantes × 3 repetições = 144 execuções, em
+  correção dos 7 bugs (commit `39e42d2`) e da memória derivada automática entre períodos
+  (`app/agents/aprendizado.py`, commitada depois em `dcc949f`). São 12 cenários × 4 variantes × 3 repetições = 144 execuções, em
   cerca de 15 s. Resultados: `eval/resultados/20261024T222738Z_offline/` (um JSON por execução, logs JSONL,
   `resumo.json` e `tabela.md`).
 - A tabela é idêntica, célula por célula, à da execução logo depois das correções
@@ -19,7 +19,7 @@
   período só, e a aprendizagem entre períodos roda na CLI `run` (veja `scripts/demo_3_periodos.sh`).
 - Histórico: `eval/resultados/20261024T185955Z_offline_antes_correcao_grafo/` (antes da correção do recall pelo
   líder; C e D davam 48/87 cada, porque nenhuma memória chegava aos agentes) e
-  `eval/resultados/20261024T220043Z_offline/` (commit `25b7f44`, antes da correção dos 7 bugs; tabela "antes" abaixo).
+  `eval/resultados/20261024T220043Z_offline/` (commit `0e6261f`, antes da correção dos 7 bugs; tabela "antes" abaixo).
 
 ## Tabela atual (modo offline, depois das correções)
 
@@ -82,7 +82,7 @@ Por cenário: P = passou e F = falhou, iguais nas 3 repetições; – = não se 
 notas e memórias derivadas). As capacidades que dependem de julgamento (trade-off, fato fora do checador, decidir não
 atender queima agrícola) continuam falhando no offline. Elas precisam ser medidas no modo LLM.
 
-## Tabela antes das correções (histórico, commit `25b7f44`)
+## Tabela antes das correções (histórico, commit `0e6261f`)
 
 | Variante | Acerto | Decisão | Detecção | Alarmes falsos (gabarito) | Citações falsas | ETA pond. (h) | ETA pond. log (h) | Rodadas | Status escala | Escalações | Desvio acerto entre rep. | Cenários com planos ≠ entre rep. |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -94,7 +94,7 @@ atender queima agrícola) continuam falhando no offline. Elas precisam ser medid
 Naquela execução as memórias derivadas não chegavam aos agentes (bug 1), os dois casos de reignição falhavam em
 todas as variantes, e o Crítico offline escalava com a justificativa falsa ainda no plano (bug 3).
 
-## Bugs encontrados pela ablação (corrigidos no commit `b97dfe7`, testes em `tests/test_regressao_ablacao.py`)
+## Bugs encontrados pela ablação (corrigidos no commit `39e42d2`, testes em `tests/test_regressao_ablacao.py`)
 
 Descrição original, mantida como histórico:
 
@@ -129,7 +129,7 @@ Descrição original, mantida como histórico:
 7. **`exposta_sem_recurso` (rígida) não confere se o recurso da ocorrência sem exposição chegaria à exposta**
    (`app/tools/regras.py`). Em `reignicao_conceicao_20out`, os recursos de Conceição não alcançam Cariri, Pium nem
    Novo Acordo, mas a regra dispara, fica impossível de resolver e força a escalação.
-8. (corrigido no `25b7f44`) `ResultadoPeriodo.status` não era preenchido. O `run_ablacao.py` ainda lê o prefixo
+8. (corrigido no `0e6261f`) `ResultadoPeriodo.status` não era preenchido. O `run_ablacao.py` ainda lê o prefixo
    `[escala]`/`[aprova]` do resumo se o campo vier vazio, e marca `status_lido_do_resumo`. Na execução final o campo
    veio preenchido em todas as execuções.
 

@@ -120,7 +120,7 @@ Estrutura do `pitch-deck-template.md` (12 slides + apêndice), adaptada ao que o
 - Uma linha `critico`/`escala` e uma `analista`/`consulta` de `output_examples/*/trace.jsonl` ou da execução do cenário agrícola; no modo LLM, uma linha `llm_call` com `routed_model` e `receipt` (de `logs/` da execução real pelo Nightshift).
 
 ### C. Avaliação
-- Variantes A (alocador guloso), B (Planejador + checador), C (completo), D (C sem H-MEM); 12 cenários com dados reais; gabaritos commitados antes de qualquer execução (commit `fcf42df`); 3 execuções por cenário e variante.
+- Variantes A (alocador guloso), B (Planejador + checador), C (completo), D (C sem H-MEM); 12 cenários com dados reais; gabaritos commitados antes de qualquer execução (commit `1d722b5`); 3 execuções por cenário e variante.
 - **Tabela:** **[[colar de eval/RELATORIO.md, dizendo o modo: offline ou LLM]]**.
 
 ### D. Fontes de dados

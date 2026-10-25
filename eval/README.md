@@ -17,10 +17,10 @@ checador, e conferimos cada execução contra um gabarito escrito **antes** de r
   por célula e dia no cache, a matriz de ETA (`app.tools.geo.eta_recurso`), o `monitor` e o `alocador_simples`
   (o baseline), para confirmar que a situação de cada caso acontece de fato nos dados. **Nenhuma variante B, C ou D
   foi executada antes do commit.**
-- **O código dos agentes já existia quando os gabaritos foram escritos:** o commit dos agentes (`0cfcb66`, 24/10
-  15:28 -03:00) é 28 minutos anterior ao dos gabaritos (`fcf42df`, 15:56). Quem escreveu os gabaritos podia ter lido
+- **O código dos agentes já existia quando os gabaritos foram escritos:** o commit dos agentes (`e06ec8d`, 24/10
+  15:28 -03:00) é 28 minutos anterior ao dos gabaritos (`1d722b5`, 15:56). Quem escreveu os gabaritos podia ter lido
   esse código; a garantia é só que nenhuma variante B, C ou D tinha sido executada.
-- **Corrigimos 7 bugs depois de ver checagens falharem** (commit `b97dfe7`, com testes de regressão em
+- **Corrigimos 7 bugs depois de ver checagens falharem** (commit `39e42d2`, com testes de regressão em
   `tests/test_regressao_ablacao.py`). São correções de comportamento geral (recall de memórias, localidades de mesmo
   nome, histórico do Analista sem o dia atual, etc.), cada uma documentada com a reprodução em `RELATORIO.md`, e não
   regras para cenários específicos. Mesmo assim, foram feitas depois de ver os resultados offline, e isso favorece os

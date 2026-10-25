@@ -25,8 +25,8 @@
 - **qa-integracao (pronto):** 44 testes de integração e anti-trapaça, Docker (build e run testados), `.env.example`, `scripts/check_clean_clone.sh`, `scripts/check_submissao.py`
 - **Correções do líder (commitadas):** recall do H-MEM com uma consulta por termo (a nota não voltava), `status` preenchido, escalação que não esconde ocorrências expostas, `pyproject` instalável
 - **Exemplos:** `input_examples/` e `output_examples/` (4 saídas, com trace), gerados por `scripts/gerar_exemplos.sh`
-- **avaliacao (pronto, commitado e3c95c9):** ablação offline A 22,2% / B 44,4% / C 62,1% / D 55,2%. Encontrou 7 bugs.
-- **agentes-llm (pronto, b97dfe7):** os 7 bugs da ablação (lista em eval/RELATORIO.md), com testes em `tests/test_regressao_ablacao.py`; depois roda a ablação offline de novo e `scripts/gerar_exemplos.sh`.
+- **avaliacao (pronto, commitado 87a8336):** ablação offline A 22,2% / B 44,4% / C 62,1% / D 55,2%. Encontrou 7 bugs.
+- **agentes-llm (pronto, 39e42d2):** os 7 bugs da ablação (lista em eval/RELATORIO.md), com testes em `tests/test_regressao_ablacao.py`; depois roda a ablação offline de novo e `scripts/gerar_exemplos.sh`.
 - **docs-submissao (pronto, commitado):** README em inglês (com marcador `<!-- EVAL_RESULTS -->`), `docs/PATROCINADORES.md`, `docs/ROTEIRO-VIDEO.md`, `slides/conteudo.md`, `docs/FORMULARIO.md`
 
 ## Depois
