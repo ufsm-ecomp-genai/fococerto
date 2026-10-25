@@ -10,18 +10,58 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 from app.agents.base import (CONFIANCA_MIN_MEMORIA, Contexto, SaidaInvalida, SaidaPlano, chamar_json, dados_comuns,
-                             pares, plano_de_saida, realocar, reescrever_citacoes, registrar_fallback, resumo_plano,
-                             validar_ids)
+                             pares, plano_de_saida, prioridades_ajustadas, realocar, reescrever_citacoes,
+                             registrar_fallback, resumo_plano, validar_ids)
 from app.core.logging import LogExecucao
 from app.core.models import Plano, VeredictoCritico, Violacao
 from app.llm.client import LLMIndisponivel
-from app.tools.geo import exposta
+from app.tools.alocador import completar_plano, justificar
+from app.tools.geo import eta_recurso, exposta
 from app.tools.regras import INSOLUVEIS
 
 PAPEL = "critico"
 FRACAO_ETA_TRADEOFF = 0.5     # exposta com ETA acima de 50% do limite é candidata a troca
 GANHO_ETA_TRADEOFF_H = 1.0    # troca só se outro recurso chega ≥ 1 h antes
 MAX_ANALISTA = 3
+
+
+def _escolher_trocas(violacoes: list[Violacao]) -> list[dict]:
+    """Trocas ``troca_recurso_local`` compatíveis entre si (cada recurso, origem e destino uma vez só), na ordem do
+    maior ganho de ETA."""
+    cands = []
+    for v in violacoes:
+        if v.regra == "troca_recurso_local":
+            cands += [{**c, "para": v.ocorrencia_id, "pop_para": v.evidencia.get("pop_raio")}
+                      for c in v.evidencia.get("candidatos") or [v.evidencia]]
+    usados_r, usados_o, escolhidas = set(), set(), []
+    for c in sorted(cands, key=lambda c: (-c["ganho_eta_h"], c["pop_de"], c["recurso_id"], c["para"])):
+        if c["recurso_id"] in usados_r or c["de_ocorrencia"] in usados_o or c["para"] in usados_o:
+            continue
+        usados_r.add(c["recurso_id"])
+        usados_o |= {c["de_ocorrencia"], c["para"]}
+        escolhidas.append(c)
+    return escolhidas
+
+
+def _aplicar_trocas(ctx: Contexto, plano: Plano, trocas: list[dict], rodada: int) -> Plano:
+    """Plano com cada recurso das ``trocas`` movido da ocorrência de origem para a exposta sem recurso. O resto do
+    plano fica igual; ETA e justificativa vêm dos dados (template verificável do alocador)."""
+    mover = {(t["recurso_id"], t["de_ocorrencia"]): t["para"] for t in trocas}
+    pri, extras, _ = prioridades_ajustadas(ctx)
+    ds = []
+    for d in plano.designacoes:
+        para = mover.get((d.recurso_id, d.ocorrencia_id))
+        if para is not None:
+            r, o = ctx.rec[d.recurso_id], ctx.occ[para]
+            b = ctx.base_por_id.get(r.base_id)
+            eta = eta_recurso(r, b, o, ctx.regiao)
+            texto, ev = justificar(o, r, b, eta, pri.get(o.id), extras.get(o.id, ""))
+            d = d.model_copy(update={"ocorrencia_id": para, "eta_h": round(eta, 2), "evidencias": ev,
+                                     "justificativa": texto + " (Troca de recurso local proposta pelo Crítico.)"})
+        ds.append(d)
+    p = plano.model_copy(update={"designacoes": ds, "rodada": rodada, "resumo": (
+        "Contra-proposta do Crítico (offline): troca de recurso local. " + plano.resumo).strip()})
+    return completar_plano(p, ctx.ocorrencias, ctx.recursos)
 
 
 def decidir_regras(ctx: Contexto, plano: Plano, violacoes: list[Violacao], rodada: int) -> VeredictoCritico:
@@ -126,6 +166,13 @@ def decidir_offline(ctx: Contexto, plano: Plano, violacoes: list[Violacao], roda
                                f"mas {d2.recurso_id} (em {o2.id}, sem exposição) chegaria em {eta_alt:.1f} h.")
                 break
 
+    # (1b) troca de recurso local ocioso (regra troca_recurso_local, documentada em app/tools/regras.py)
+    trocas = _escolher_trocas(violacoes)
+    for t in trocas:
+        motivos.append(f"Troca de recurso local: {t['recurso_id']} chega a {t['para']} ({t['pop_para']} hab.) em "
+                       f"{t['eta_para_exposta_h']} h, mas foi para {t['de_ocorrencia']} ({t['pop_de']} hab.) a "
+                       f"{t['eta_atual_h']} h; troco e {t['de_ocorrencia']} fica sem recurso (escalação).")
+
     # ocorrências expostas sem recurso: entram em TODA escalação, para o coordenador não perdê-las de vista
     esc_expostas: list[str] = []
     for v in violacoes:
@@ -151,6 +198,10 @@ def decidir_offline(ctx: Contexto, plano: Plano, violacoes: list[Violacao], roda
                                     motivos=motivos + ["Escalação: não encontrei plano alternativo que resolva as "
                                                        "regras rígidas."] + esc_expostas)
         motivos.append("Revisão não muda o plano.")
+
+    if trocas:
+        cp = _aplicar_trocas(ctx, reescrever_citacoes(ctx, plano, citacoes), trocas, rodada)
+        return VeredictoCritico(decisao="rejeita", contra_proposta=cp, motivos=motivos)
 
     if citacoes:  # mesma alocação, justificativas reescritas a partir dos dados; volta ao Planejador
         cp = reescrever_citacoes(ctx, plano, citacoes)

@@ -3,7 +3,9 @@
     python -m app.cli run --regiao R --periodo P --recursos cenarios/X.yaml [--sample]
     python -m app.cli nota --regiao R "texto"
     python -m app.cli aprovar --regiao R --periodo P
-    python -m app.cli avaliar --regiao R
+    python -m app.cli avaliar [--modo offline|llm] [--repeticoes N] [--cenarios ID ...] [--sample]
+
+SAMPLE_MODE=true (variável de ambiente) equivale a --sample em todos os subcomandos.
 
 Os módulos de outros donos (grafo dos agentes, repositório, cliente de memória) são importados
 só quando o subcomando precisa deles. Se algum ainda não existir, a CLI diz qual e de quem é.
@@ -15,7 +17,6 @@ import getpass
 import importlib
 import json
 import os
-import subprocess
 import sys
 import time
 from datetime import date
@@ -32,6 +33,7 @@ DONOS = {
     "app.memory_client": "hmem-engine",
     "app.llm.client": "agentes-llm",
     "app.agents.aprendizado": "agentes-llm",
+    "eval.run_ablacao": "avaliacao",
 }
 
 
@@ -86,8 +88,16 @@ def verificar_modulos(necessarios: dict[str, tuple[str, ...]]) -> dict[str, obje
     return obtidos
 
 
+VERDADEIROS = {"1", "true", "yes", "sim", "on"}
+
+
+def sample_por_ambiente() -> bool:
+    """SAMPLE_MODE=true no ambiente (ou no .env) equivale a --sample (regras do hackathon, submissão §3.3)."""
+    return (config.env("SAMPLE_MODE") or "").strip().lower() in VERDADEIROS
+
+
 def modo_sample(args) -> bool:
-    return bool(getattr(args, "sample", False))
+    return bool(getattr(args, "sample", False)) or sample_por_ambiente()
 
 
 def carregar_regiao(nome: str) -> RegiaoCfg:
@@ -120,7 +130,7 @@ def resolver_recursos(args) -> Path:
 def criar_repositorio(args):
     """RepositorioCache em --sample ou sem ZETARIS_API_KEY; senão RepositorioZetaris."""
     if modo_sample(args) or not config.env("ZETARIS_API_KEY"):
-        motivo = "--sample" if modo_sample(args) else "ZETARIS_API_KEY ausente"
+        motivo = "--sample/SAMPLE_MODE" if modo_sample(args) else "ZETARIS_API_KEY ausente"
         classe = importar("app.data.repositorio", "RepositorioCache")
         progresso(f"Dados: cache local (data/cache/) [{motivo}]")
     else:
@@ -133,7 +143,7 @@ def criar_memoria(args):
     """MemoriaLocal em --sample ou sem HMEM_URL; senão ClienteHMEM(HMEM_URL)."""
     url = config.env("HMEM_URL")
     if modo_sample(args) or not url:
-        motivo = "--sample" if modo_sample(args) else "HMEM_URL ausente"
+        motivo = "--sample/SAMPLE_MODE" if modo_sample(args) else "HMEM_URL ausente"
         classe = importar("app.memory_client", "MemoriaLocal")
         caminho = config.RAIZ / "data" / "estado" / f"memoria_{getattr(args, 'regiao', None) or 'geral'}.json"
         progresso(f"Memória: MemoriaLocal persistida em {caminho.relative_to(config.RAIZ)} [{motivo}]")
@@ -148,6 +158,15 @@ def escolher_modo(args) -> str:
         os.environ["LLM_PROVIDER"] = "offline"  # garante que nenhum agente chame LLM no sample mode
         return "offline"
     return "offline" if (config.env("LLM_PROVIDER") or "").lower() == "offline" else "llm"
+
+
+def caminho_log(caminho) -> str:
+    """Relativo à raiz do repositório quando o log está dentro dela; absoluto quando está fora."""
+    p = Path(caminho).resolve()
+    try:
+        return p.relative_to(RAIZ).as_posix()
+    except ValueError:
+        return str(p)
 
 
 def pasta_saida(args, regiao: str, periodo: str) -> Path:
@@ -231,7 +250,7 @@ def cmd_run(args) -> int:
     t0 = time.monotonic()
     resultado = executar_periodo(regiao, cenario, repo, memoria, log, modo=modo)
     if not resultado.log_path:
-        resultado = resultado.model_copy(update={"log_path": str(log.caminho)})
+        resultado = resultado.model_copy(update={"log_path": caminho_log(log.caminho)})
     progresso(f"Ciclo terminou em {time.monotonic() - t0:.1f}s, {resultado.rodadas} rodada(s)")
 
     pasta = pasta_saida(args, regiao.nome, periodo)
@@ -290,13 +309,28 @@ def cmd_nota(args) -> int:
     return 0
 
 
+def argv_ablacao(args) -> list[str]:
+    """Argumentos de ``eval.run_ablacao.main`` a partir do ``avaliar``. --sample (ou SAMPLE_MODE) vira --modo offline."""
+    modo = "offline" if modo_sample(args) else args.modo
+    argv = ["--modo", modo]
+    if args.repeticoes is not None:
+        argv += ["--repeticoes", str(args.repeticoes)]
+    if args.variantes:
+        argv += ["--variantes", args.variantes]
+    if args.cenarios:
+        argv += ["--cenarios", *args.cenarios]
+    if args.saida:
+        argv += ["--saida", args.saida]
+    return argv
+
+
 def cmd_avaliar(args) -> int:
-    script = RAIZ / "eval" / "run_ablacao.py"
-    if not script.exists():
-        raise ErroDependencia("eval/run_ablacao.py ainda não existe (dono: avaliacao).")
-    cmd = [sys.executable, str(script), "--regiao", args.regiao] + (["--sample"] if modo_sample(args) else [])
-    progresso(f"Delegando para {' '.join(cmd[1:])}")
-    return subprocess.call(cmd, cwd=RAIZ)
+    main_ablacao = importar("eval.run_ablacao", "main")
+    if args.regiao:
+        progresso(f"--regiao {args.regiao} ignorado: os cenários da ablação (eval/cenarios/) já dizem a região")
+    argv = argv_ablacao(args)
+    progresso(f"Ablação: eval.run_ablacao.main({' '.join(argv)})")
+    return int(main_ablacao(argv) or 0)
 
 
 # ----------------------------------------------------------------------------- parser
@@ -304,7 +338,8 @@ def cmd_avaliar(args) -> int:
 def montar_parser() -> argparse.ArgumentParser:
     comum = argparse.ArgumentParser(add_help=False)
     comum.add_argument("--sample", action="store_true",
-                       help="sem Zetaris, Nightshift ou chaves: dados em cache, MemoriaLocal e agentes offline")
+                       help="sem Zetaris, Nightshift ou chaves: dados em cache, MemoriaLocal e agentes offline "
+                            "(o mesmo que SAMPLE_MODE=true)")
     comum.add_argument("--saida", default=str(RAIZ / "out"), help="pasta das saídas (padrão: out/)")
     comum.add_argument("--pasta-logs", default=str(RAIZ / "logs"), help=argparse.SUPPRESS)
 
@@ -331,8 +366,15 @@ def montar_parser() -> argparse.ArgumentParser:
     a.add_argument("--autor", help="padrão: usuário do sistema")
     a.set_defaults(func=cmd_aprovar)
 
-    v = sub.add_parser("avaliar", parents=[comum], help="roda a ablação (eval/run_ablacao.py)")
-    v.add_argument("--regiao", required=True)
+    v = sub.add_parser("avaliar", help="roda a ablação (eval/run_ablacao.py)")
+    v.add_argument("--sample", action="store_true", help="equivale a --modo offline")
+    v.add_argument("--modo", choices=["offline", "llm"], default="offline")
+    v.add_argument("--repeticoes", type=int, default=None, help="padrão: o da ablação (3)")
+    v.add_argument("--variantes", default=None, help="padrão: ABCD")
+    v.add_argument("--cenarios", nargs="*", help="ids de eval/cenarios (padrão: todos)")
+    v.add_argument("--saida", default=None, help="pasta dos resultados (padrão: eval/resultados/)")
+    v.add_argument("--regiao", default=None, help="aceito por compatibilidade; os cenários já dizem a região")
+    v.add_argument("--pasta-logs", default=str(RAIZ / "logs"), help=argparse.SUPPRESS)
     v.set_defaults(func=cmd_avaliar)
     return p
 
@@ -349,7 +391,7 @@ def main(argv: list[str] | None = None) -> int:
         parser.print_help()
         return 2
     if args.comando == "run" and args.regiao is None:
-        if not args.sample:
+        if not modo_sample(args):
             parser.error("run: --regiao é obrigatório fora do --sample")
         args.regiao = "tocantins"
     try:

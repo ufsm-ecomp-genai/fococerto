@@ -2,24 +2,29 @@
 
 Interface: docs/CONTRATOS.md, seção 10. No máximo 3 rodadas Planejador→Crítico. Escalação obrigatória quando há
 população exposta sem recurso viável (regra rígida insolúvel) ou impasse após 3 rodadas; o Crítico também pode
-escalar em zona cinzenta. O Analista é chamado pelo Crítico (no máximo uma vez por rodada).
+escalar em zona cinzenta. Guarda-corpo final (decisão do time): toda ocorrência com população exposta sem recurso
+no plano final vira escalação ("solicitar apoio externo"), mesmo com aprovação do Crítico. O Analista é chamado
+pelo Crítico (no máximo uma vez por rodada).
 """
 from __future__ import annotations
 
 import re
 from datetime import date, datetime, timedelta, timezone
+from pathlib import Path
 from typing import Any, Literal, Protocol, TypedDict
 
 from langgraph.graph import END, START, StateGraph
 
 from app.agents import analista, critico, planejador
 from app.agents.base import Contexto, reescrever_citacoes, resumo_memoria, resumo_plano
+from app.core.config import RAIZ
 from app.core.logging import LogExecucao
 from app.core.models import (Base, Cenario, Memoria, Ocorrencia, ParecerAnalista, Plano, RegiaoCfg,
                              ResultadoPeriodo, VeredictoCritico, Violacao)
 from app.tools.alocador import alocador_simples
 from app.tools.citacoes import checar_citacoes
 from app.tools.consultar import Consultor
+from app.tools.geo import exposta
 from app.tools.memorias import REFORCO, interpretar_memorias, tokens_distintivos
 from app.tools.texto import contem_termo, norm, sem_sufixo_simulada, tokens_nome
 from app.tools.monitor import monitor
@@ -162,6 +167,42 @@ def _puxar_por_memoria(memoria: ClienteMemoria, regiao: str, repo: Repositorio, 
     candidatas = [o for o in repo.ocorrencias(regiao, periodo, top=TOP_ANTERIOR) if o.id in por_cel]
     candidatas.sort(key=lambda o: -o.prioridade)
     return [(o, por_cel[o.id]) for o in candidatas[:MAX_PUXADAS]]
+
+
+SUGESTAO_APOIO_EXTERNO = "solicitar apoio externo"
+
+
+def escalar_expostas_sem_recurso(plano: Plano, ocorrencias: list[Ocorrencia], esc: list[dict]
+                                 ) -> tuple[list[dict], list[dict]]:
+    """Escalação obrigatória determinística: cada ocorrência com ``pop_raio > 0`` sem designação no plano final
+    ganha uma escalação com motivo e ``sugestao`` "solicitar apoio externo". As escalações já existentes ficam
+    (a da mesma ocorrência só ganha a ``sugestao``). Devolve (todas, novas)."""
+    designadas = {d.ocorrencia_id for d in plano.designacoes}
+    saida = [dict(e) for e in esc]
+    novas = []
+    for o in ocorrencias:
+        if not exposta(o) or o.id in designadas:
+            continue
+        existentes = [e for e in saida if e.get("ocorrencia_id") == o.id]
+        for e in existentes:
+            e.setdefault("sugestao", SUGESTAO_APOIO_EXTERNO)
+        if not existentes:
+            nova = {"ocorrencia_id": o.id, "motivo": f"Obrigatória: {o.pop_raio} hab. expostos e nenhum recurso "
+                                                     f"designado no plano final. Sugestão: {SUGESTAO_APOIO_EXTERNO}.",
+                    "sugestao": SUGESTAO_APOIO_EXTERNO}
+            saida.append(nova)
+            novas.append(nova)
+    return saida, novas
+
+
+def caminho_log(caminho) -> str:
+    """Caminho do log relativo à raiz do repositório quando está dentro dela (não vaza o caminho da máquina);
+    absoluto quando está fora (ex.: /tmp)."""
+    p = Path(caminho).resolve()
+    try:
+        return p.relative_to(RAIZ).as_posix()
+    except ValueError:
+        return str(p)
 
 
 def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, memoria: ClienteMemoria,
@@ -340,6 +381,14 @@ def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, mem
                 esc.append({"ocorrencia_id": None, "motivo": " ".join(v.motivos if v else [])[:600]})
         if v is not None and v.decisao == "rejeita":
             log.evento("sistema", "escala", {"rodada": rodada, "motivo": "impasse", "escalacoes": esc})
+        # guarda-corpo (decisão do time, 25/10): toda ocorrência com população exposta que termina sem recurso no
+        # plano final vira escalação com sugestão de apoio externo, mesmo que o Crítico (LLM ou não) tenha aprovado.
+        esc, novas = escalar_expostas_sem_recurso(plano, ocorrencias, esc)
+        if novas:
+            log.evento("sistema", "escala", {"rodada": rodada, "motivo": "exposta_sem_recurso_no_plano_final",
+                                             "decisao_critico": v.decisao if v else None, "escalacoes": novas})
+        if esc:
+            status = "escala"
         # guarda-corpo: o plano que vai ao coordenador nunca leva citação que não confere com os dados
         cit = [x for x in checar_citacoes(plano, ocorrencias, bases, recursos=recursos, regiao_cfg=regiao)
                if x.regra == "citacao_incorreta"]
@@ -382,4 +431,4 @@ def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, mem
     return ResultadoPeriodo(plano=plano, status=final["status"], ocorrencias=ocorrencias, bases=bases, recursos=recursos,
                             escalacoes=final["escalacoes"], pareceres=list(pareceres.values()),
                             memorias_usadas=memorias, historico=final["historico"], rodadas=final["rodada"],
-                            log_path=str(log.caminho))
+                            log_path=caminho_log(log.caminho))

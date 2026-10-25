@@ -30,7 +30,8 @@ class Ocorrencia:      id: str  # "cel_<lat10>_<lon10>"
                        pop_raio: int; dist_ti_uc_km: float | None; vpd_kpa: float | None; vento_kmh: float | None
                        prioridade: float; componentes: dict[str, float]   # exposicao, intensidade, tempo, ...
                        localidades: list[dict]   # [{nome, pop, dist_km}]
-class Base:            id: str; nome: str; lat: float; lon: float
+class Base:            id: str; nome: str; lat: float; lon: float; fonte: str = ""; simulada: bool = False
+                       confianca: Literal["declarada","oficial","osm","estimada"] = "osm"   # procedência (seção 16)
 class Recurso:         id: str; base_id: str; tipo: Literal["terrestre","aereo"]; capacidade: int; disponivel: bool
 class Designacao:      recurso_id: str; ocorrencia_id: str; ordem: int; eta_h: float; justificativa: str
                        evidencias: list[str]   # ids de focos, "pop:...", "eta:..."
@@ -110,7 +111,7 @@ Uma linha por evento em `logs/<execucao_id>.jsonl`:
 
 `cenarios/<nome>.yaml`: `regiao`, `periodo`, `recursos: [{id, base_id, tipo, capacidade, disponivel}]`, `bases: [{id, nome, lat, lon, fonte, simulada}]` (opcional; as bases declaradas pelo coordenador são somadas às do repositório pelo grafo), `reserva`, `notas: [texto]`, `simulado: true`.
 
-Motivo das bases declaradas: o OSM tem só 2 bases de bombeiros dentro do Tocantins, as duas em Palmas. Como os recursos, as bases são informação que o coordenador tem, e não dado público. As bases da demo ficam em cidades reais do GeoNames e são marcadas `simulada: true`.
+As bases vêm em camadas (seção 16). Os cenários da demo do Tocantins não declaram bases: usam as da lista oficial (`config/regioes/tocantins_bases_oficiais.csv`) e a de Palmas; só a **quantidade** de equipes é simulada.
 
 ## 9. CLI
 ```
@@ -172,3 +173,26 @@ Implementações: `ClienteHMEM(base_url)` (HTTP, porta 7070) e `MemoriaLocal(cam
 - As memórias geradas são `tipo="derivada"`, `fonte="aprendizado:<P-1>-><P>"`, com o id da célula e a localidade no texto. O evento é `memoria_gravada`. A geração é idempotente.
 - A lista do período é o top 15 mais até 5 ocorrências citadas pelo id numa derivada ativa de reforço (`memoria_lida.puxadas_por_memoria`), então o LLM pode ver até 20 ocorrências. Pela via `listar`, uma derivada só entra por célula ou localidade do período.
 - Risco conhecido: derivadas de texto parecido com números diferentes podem ser marcadas como conflito pelo engine. O `substituida_por` aparece no evento `memoria_gravada` para isso ficar visível.
+
+## 16. Bases em camadas, com procedência
+Uma base é a localização de uma unidade de combate. A quantidade de equipes em cada uma continua vindo do cenário (o coordenador informa). Camadas, da maior para a menor confiança (`Base.confianca`):
+
+| Camada | `confianca` | Origem | Quem soma |
+|---|---|---|---|
+| 1 | `declarada` | `Cenario.bases` (o coordenador declara) | o grafo |
+| 2 | `oficial` | `config/regioes/<regiao>_bases_oficiais.csv` (opcional): `id,nome,orgao,lat,lon,fonte,data_fonte[,coordenada]`. No Zetaris: `fococerto_arq.bases_oficiais` (coluna `regiao` a mais), registrada por `scripts/setup_zetaris.py` | `Repositorio.bases` |
+| 3 | `osm` | OpenStreetMap `amenity=fire_station` (`data/cache/<regiao>/bases.csv`, `fococerto_arq.bases`) | `Repositorio.bases` |
+| 4 | `estimada` | sede de município do GeoNames com `pop >= bases_estimadas_pop_min` (padrão 20000), unidade **não verificada**. Só entra se nenhuma base das camadas 2–3 cai dentro da bbox, ou se o YAML da região tem `bases_estimadas: sempre` (`nunca` desliga; padrão `auto`) | `Repositorio.bases` |
+
+- **Fusão** (`app/data/bases.py`): mesma unidade = mesmo id ou distância < 3 km (`RAIO_FUSAO_KM`). Fica o registro de maior confiança; as fundidas entram no texto de `fonte` ("fundida com <id> (<camada>: <fonte>)"). `fundir_com_apelidos` também devolve `{id descartado: id mantido}`.
+- `Repositorio.bases(regiao)` devolve as camadas 2–4 já fundidas. Para somar as declaradas sem duplicata: `app.data.bases.fundir_bases(repo_bases, declaradas)` (marca as declaradas como `declarada`, e elas vencem no mesmo lugar) ou `fundir_bases_com_apelidos(...)` para remapear `Recurso.base_id`.
+- `fonte` e `simulada` continuam (compatibilidade). Uma base de `Cenario.bases` ou com `simulada: true` é mostrada como `declarada` mesmo que o YAML não traga `confianca`.
+- **Saída:** `plano.md` rotula a base de cada recurso (`base oficial`, `base OSM`, …), tem a seção "Bases e procedência" (procedência, fonte, recursos) e, com cenário simulado, o aviso "Bases: localização real com fonte; quantidade de equipes simulada (cenário)" (ou a contagem de declaradas/estimadas). No `mapa.html`, a cor e a borda do quadrado da base mudam com a procedência, com legenda e fonte no popup.
+- **Tocantins (primeiro exemplo da camada 2):** CBMTO (1º BBM Palmas, 3ª Cia Paraíso, 5ª Cia Porto Nacional, 3º BBM Gurupi, Cias de Dianópolis e Colinas), brigadas federais Prevfogo/Ibama da Portaria nº 114/2024 (São Félix do Tocantins, Santa Tereza do Tocantins, Itacajá, Goiatins, Arraias) e ICMBio Esec Serra Geral do Tocantins (Rio da Conceição). Coordenada = sede do município no GeoNames (o endereço do quartel não está georreferenciado), exceto Palmas, que usa o ponto do OSM e reaproveita o id `osm_n5067657890`. **Ressalva:** algumas companhias do CBMTO foram reorganizadas em 2023; cada base "existe segundo a fonte citada" (URL e ano no CSV), não segundo um inventário oficial atualizado.
+- Na implantação real, a camada 2 é o sistema do órgão (ex.: Sisfogo) federado pelo Zetaris, no lugar do CSV.
+
+## 17. Ajustes da revisão (25/10)
+- `log_path`: relativo à raiz do repo quando o log está dentro dela; absoluto quando está fora.
+- CLI: `avaliar [--modo offline|llm] [--repeticoes N] [--variantes ABCD] [--cenarios ID…] [--saida DIR] [--sample]` chama `eval.run_ablacao.main` por import (`--regiao` é aceito e ignorado). `SAMPLE_MODE=true` (ou 1/yes/sim/on) equivale a `--sample` em todos os subcomandos.
+- Nova regra não rígida `troca_recurso_local`: ocorrência exposta sem recurso X e um recurso r designado a outra exposta Y; dispara se r chega a X dentro de `eta_max_h` (sem bloqueio por memória), chega a X ≥ 0,5 h antes do que chega a Y, e pop(Y) ≤ 1,1 × pop(X). A evidência traz os candidatos.
+- Guarda-corpo no grafo: toda ocorrência com `pop_raio > 0` sem designação no plano final vira escalação (`sugestao: "solicitar apoio externo"`), mesmo com o Crítico aprovando; o status vira `escala`. `ResultadoPeriodo.escalacoes[]` ganha a chave opcional `sugestao`.

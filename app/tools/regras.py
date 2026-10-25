@@ -16,6 +16,17 @@ Regras (``Violacao.regra``):
    Não rígida (zona cinzenta: o Crítico decide se escala).
 - ``restricao_memoria``: designação terrestre que usa base/rota que uma memória diz estar bloqueada.
    Não rígida (exceção: o Crítico decide se vale).
+- ``troca_recurso_local``: ocorrência exposta X sem recurso enquanto um recurso r está designado a outra ocorrência
+   exposta Y e a troca (r sai de Y e vai para X) reduz o ETA ponderado por exposição de forma significativa:
+     (a) r chega a X dentro do limite (ETA ≤ eta_max_h) e sem rota/base bloqueada por memória (se terrestre);
+     (b) r chega a X pelo menos ``GANHO_MIN_TROCA_H`` antes do que chega a Y (o recurso está "ocioso" perto de X:
+         ex. equipe local que sai para longe enquanto a cidade ao lado da base fica sem ninguém);
+     (c) Y tem exposição menor ou equivalente à de X: pop(Y) ≤ ``TOLERANCIA_EXPOSICAO_TROCA`` × pop(X).
+   Com (b) e (c), a população atendida não diminui (além da tolerância) e ela é atendida mais cedo. Para cada X,
+   a evidência traz o melhor candidato (maior ganho de ETA; em empate, a Y de menor exposição) e a lista de todos.
+   Não rígida: Y passa a ficar sem recurso e o Crítico decide (o offline aplica a troca; Y continua visível como
+   escalação). Recursos em ocorrências sem exposição não entram aqui: esses já são ``exposta_sem_recurso``.
+   Sem ids fixos: só ETA (matriz da ferramenta) e ``pop_raio``.
 """
 from __future__ import annotations
 
@@ -26,6 +37,30 @@ from app.tools.geo import eta_recurso, exposta
 from app.tools.memorias import interpretar_memorias
 
 INSOLUVEIS = {"exposicao_sem_recurso_viavel"}
+GANHO_MIN_TROCA_H = 0.5           # (b) da regra troca_recurso_local
+TOLERANCIA_EXPOSICAO_TROCA = 1.1  # (c): pop(Y) até 10% acima de pop(X) ainda conta como "equivalente"
+
+
+def _trocas_locais(o: Ocorrencia, plano: Plano, occ: dict[str, Ocorrencia], rec: dict[str, Recurso],
+                   por_base: dict[str, Base], regiao_cfg: RegiaoCfg, leitura) -> list[dict]:
+    """Candidatos da regra ``troca_recurso_local`` para a exposta ``o`` sem recurso (melhor primeiro)."""
+    cands = []
+    for d in plano.designacoes:
+        y, r = occ.get(d.ocorrencia_id), rec.get(d.recurso_id)
+        if y is None or r is None or not r.disponivel or not exposta(y) or y.id == o.id:
+            continue
+        if y.pop_raio > TOLERANCIA_EXPOSICAO_TROCA * o.pop_raio:
+            continue
+        if r.tipo == "terrestre" and (r.base_id in leitura.bases_bloqueadas or o.id in leitura.ocorrencias_bloqueadas):
+            continue
+        b = por_base.get(r.base_id)
+        eta_x, eta_y = eta_recurso(r, b, o, regiao_cfg), eta_recurso(r, b, y, regiao_cfg)
+        if eta_x > regiao_cfg.eta_max_h or eta_x + GANHO_MIN_TROCA_H > eta_y:
+            continue
+        cands.append({"recurso_id": r.id, "de_ocorrencia": y.id, "pop_de": y.pop_raio,
+                      "eta_atual_h": round(eta_y, 2), "eta_para_exposta_h": round(eta_x, 2),
+                      "ganho_eta_h": round(eta_y - eta_x, 2)})
+    return sorted(cands, key=lambda c: (-c["ganho_eta_h"], c["pop_de"], c["recurso_id"]))
 
 
 def checar_regras(plano: Plano, ocorrencias: list[Ocorrencia], recursos: list[Recurso], bases: list[Base],
@@ -118,6 +153,15 @@ def checar_regras(plano: Plano, ocorrencias: list[Ocorrencia], recursos: list[Re
                                sugestao="realocar para esta um recurso que está em ocorrência sem exposição: "
                                         + ", ".join(liberaveis)))
         else:
+            trocas = _trocas_locais(o, plano, occ, rec, por_base, regiao_cfg, leitura)
+            if trocas:
+                t = trocas[0]
+                vs.append(Violacao(regra="troca_recurso_local", ocorrencia_id=o.id, recurso_id=t["recurso_id"],
+                                   rigida=False, evidencia={"pop_raio": o.pop_raio, **t, "candidatos": trocas},
+                                   sugestao=f"trocar: {t['recurso_id']} sai de {t['de_ocorrencia']} "
+                                            f"({t['pop_de']} hab., ETA {t['eta_atual_h']} h) e vai para "
+                                            f"{o.id} ({o.pop_raio} hab., ETA {t['eta_para_exposta_h']} h); "
+                                            f"{t['de_ocorrencia']} fica sem recurso e deve ser escalada"))
             vs.append(Violacao(regra="exposta_nao_atendida", ocorrencia_id=o.id, rigida=False,
                                evidencia={"pop_raio": o.pop_raio, "viaveis": viaveis_ids,
                                           "sem_exposicao_atendidas": sem_exposicao_atendidas},
