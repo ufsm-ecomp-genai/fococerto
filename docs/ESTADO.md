@@ -36,7 +36,7 @@
 - Ligar o Zetaris real: `scripts/setup_zetaris.py` e depois `run` sem `--sample`
 
 ## Bloqueios externos (time)
-- [ ] Zetaris rodando na máquina do time + `.env`
+- [x] **Zetaris real funcionando (25/10, noite):** setup com 0 falhas, views = 698 ocorrências (igual ao Python), execução real de ponta a ponta em `output_examples/tocantins-escasso-real/` (Zetaris + Nemotron + H-MEM). Detalhes de acesso em `docs/INFRA-local.md` (fora do git).
 - [x] **Nightshift funcionando (25/10, ~01h UTC)** numa máquina Windows do time com GPU NVIDIA, via Tailscale. Detalhes de acesso: `docs/INFRA-local.md` (fora do git). Token = arquivo `proxy-token`; modelo `nvidia/nemotron-3-ultra-550b-a55b`; raciocínio desligado com `enable_thinking=false`.
 - [ ] Respostas do Help Meterless (seção 19 da especificação)
 
@@ -61,3 +61,7 @@
 11. **README: seção "AI and Model Usage"** (exigida em rules/ai-usage-policy.md §6): modelos pelo Nightshift e o papel de cada um, frameworks, integração com os patrocinadores, **a ferramenta de IA usada para programar (Claude Code)**, bibliotecas, fontes de dados e o que é simulado, código adaptado, limitações, sample mode.
 12. **`SAMPLE_MODE=true` por variável de ambiente** (rules/submission-requirements.md §3.3); hoje só existe `--sample`.
 13. **Bases em camadas (decisão do time, 25/10):** (1) declaradas pelo coordenador, (2) lista oficial da região em CSV com fonte e data (primeiro exemplo: Tocantins: CBMTO Palmas/Paraíso/Porto Nacional/Gurupi/Dianópolis/Colinas; brigadas Prevfogo da Portaria Ibama nº 114/2024 em São Félix do Tocantins, Santa Tereza, Itacajá, Goiatins, Arraias; ICMBio Esec Serra Geral em Rio da Conceição), (3) OSM `fire_station`, (4) sede de município como estimativa. Fusão com remoção de duplicatas por distância; cada base com `fonte` e `confianca` mostrados no plano. Número de equipes continua informado pelo coordenador (referência: brigada Prevfogo = 1 chefe + 2 chefes de esquadrão + 10 brigadistas ≈ 2 equipes). Mateiros sai (sem fonte); a nota da demo vira "estrada para São Félix alagada". Regenerar exemplos, demo, roteiro e slides. Argumento do pitch: na implantação real, a camada 2 é o sistema do órgão (ex.: Sisfogo) federado pelo Zetaris.
+
+## Situação em 25/10, ~21h (Brasília)
+- Feito hoje: 2 ablações com o Nemotron (1ª: 144 execuções; 2ª, depois das correções: 48 execuções, C 82,8%), bases reais em camadas, escalação obrigatória, troca de equipe local, fim dos falsos impasses, API para o front-end, Zetaris real, execução real de ponta a ponta.
+- Falta: front-end (time), vídeo (time), deixar o repositório público e submeter no HackOS (terça até ~18h), revisar este arquivo antes de publicar.
