@@ -124,11 +124,20 @@ def _extrair_meta(corpo: dict, headers: dict | httpx.Headers) -> tuple[str | Non
 
 
 # ---------------------------------------------------------------- JSON
+def limpar_raciocinio(texto: str) -> str:
+    """Remove o raciocínio do modelo. O Nemotron via Nightshift devolve o raciocínio grudado antes da resposta,
+    às vezes só com a tag de fechamento ("...pensamento.</think>resposta"); vale o que vem depois do último </think>."""
+    t = re.sub(r"<think>.*?</think>", "", texto or "", flags=re.S)
+    if "</think>" in t:
+        t = t.rsplit("</think>", 1)[1]
+    return t.strip()
+
+
 def extrair_json(texto: str) -> dict | None:
     """Extrai o primeiro objeto JSON do texto (aceita cercas ```json e texto em volta)."""
     if not texto:
         return None
-    t = re.sub(r"<think>.*?</think>", "", texto, flags=re.S).strip()
+    t = limpar_raciocinio(texto)
     cerca = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", t, flags=re.S)
     candidatos = [cerca.group(1)] if cerca else []
     ini = t.find("{")
@@ -204,7 +213,7 @@ def chat(messages: list[dict], papel: str, json_schema: dict | None = None,
                 break  # erro do cliente: não adianta repetir
             else:
                 dados = resp.json()
-                texto = dados["choices"][0]["message"].get("content") or ""
+                texto = limpar_raciocinio(dados["choices"][0]["message"].get("content") or "")
                 routed, receipt = _extrair_meta(dados, resp.headers)
                 uso = dados.get("usage") or {}
                 res = LLMResult(

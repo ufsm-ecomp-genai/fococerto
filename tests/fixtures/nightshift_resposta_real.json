@@ -1,0 +1,26 @@
+{
+  "_nota": "Resposta REAL do Nightshift Windows (25/10/2026, 01:19 UTC) para uma chamada a nvidia/nemotron-3-ultra-550b-a55b, resumida: mantidos os campos que o cliente usa; o recibo completo tem também host_pressure, cross_check, etc.",
+  "id": "chatcmpl-b5f30a94-ee47-4e6d-9df4-91e2a3cf7407",
+  "object": "chat.completion",
+  "model": "nvidia/nemotron-3-ultra-550b-a55b",
+  "choices": [{"index": 0, "message": {"role": "assistant", "content": "The user wants me to answer only \"ok\".</think>ok"}, "finish_reason": "stop"}],
+  "usage": {"prompt_tokens": 25, "completion_tokens": 13, "total_tokens": 38},
+  "meterless": {
+    "schema": "meterless.compute_receipt.v1",
+    "receipt_id": "rcpt_req_79nabedm",
+    "decision_id": "req_79nabedm",
+    "requested_model": "nvidia/nemotron-3-ultra-550b-a55b",
+    "provider_model": "nvidia/nemotron-3-ultra-550b-a55b",
+    "routed_model": "nvidia/nemotron-3-ultra-550b-a55b",
+    "winning_route": {"model": "nvidia/nemotron-3-ultra-550b-a55b", "label": "Nemotron 3 Ultra 550B A55B", "provider": "nvidia", "kind": "cloud", "tier": "C"},
+    "usage": {"input_tokens": 25, "output_tokens": 13, "total_tokens": 38, "latency_ms": 1159},
+    "privacy": {"path": "cloud-ok", "redaction": {"applied": false, "spans": 0}},
+    "receipt": {"app": "fococerto", "receipt_id": "rcpt_req_79nabedm", "decision_id": "req_79nabedm", "status": "ok",
+                "summary": "ok · Nemotron 3 Ultra 550B A55B · miss · $0.0000 saved",
+                "winning_route": {"kind": "cloud", "label": "Nemotron 3 Ultra 550B A55B", "model": "nvidia/nemotron-3-ultra-550b-a55b", "provider": "nvidia", "tier": "C"}},
+    "receipt_envelope": {"body": {"signer": "meterlessd", "ts_ms": 1792891152101},
+                         "pubkey_b64": "cCmahn91VYL/FxsiikXHaAp4cKYQCBIovLBXS/yOFS4=",
+                         "sig_b64": "Rz0qwqgyaNqwIfOgL1O4zubSl6/ROLKTBZtiSobNBZkbADJ0EgvyJsk5n4piSddErKbqNoPp4RNL4/2Rfts1AQ=="},
+    "app": "fococerto", "mode": "auto", "scope": "user"
+  }
+}
