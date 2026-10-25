@@ -36,10 +36,12 @@ from ingest_comum import CACHE, RAIZ, RAW
 
 from app.core.config import carregar_env, regiao as carregar_regiao
 from app.data import fontes
+from app.data.bases import caminho_oficiais
 from app.data.geo import grade
 
 PG = "fococerto_pg"
 ARQ = "fococerto_arq"
+COLUNAS_OFICIAIS = ["id", "nome", "orgao", "lat", "lon", "fonte", "data_fonte", "coordenada"]
 REST = "fococerto_rest"
 CONTAINER = "fococerto"
 TABELAS_PG = ["focos", "recursos_periodo", "decisoes", "notas"]
@@ -62,7 +64,7 @@ def sql_datasource_pg(dsn: str, host: str) -> list[tuple[str, str]]:
 
 def sql_filestore(dir_container: str) -> list[tuple[str, str]]:
     cmds = [("database de arquivos", f'CREATE LIGHTNING DATABASE {ARQ.upper()} DESCRIBE BY "FocoCerto CSV (GeoNames, OSM, regioes)"')]
-    for t in ("regioes", "localidades", "bases"):
+    for t in ("regioes", "localidades", "bases", "bases_oficiais"):
         cmds.append((f"file store {t}",
                      f"CREATE LIGHTNING FILESTORE TABLE {t} FROM {ARQ.upper()} FORMAT CSV OPTIONS ("
                      f'PATH "{dir_container}/{t}.csv", header "true", inferSchema "true")'))
@@ -129,7 +131,7 @@ def comandos(regioes: list[str], dsn: str, pg_host: str, dir_container: str) -> 
 
 
 def conferencias(regioes: list[str]) -> list[tuple[str, str]]:
-    objs = [f"{PG}.focos", f"{ARQ}.regioes", f"{ARQ}.localidades", f"{ARQ}.bases", f"{CONTAINER}.clima"]
+    objs = [f"{PG}.focos", f"{ARQ}.regioes", f"{ARQ}.localidades", f"{ARQ}.bases", f"{ARQ}.bases_oficiais", f"{CONTAINER}.clima"]
     objs += [f"{CONTAINER}.{v}" for v in VIEWS]
     return [(f"conta {o}", f"SELECT COUNT(*) AS n FROM {o}") for o in objs]
 
@@ -137,7 +139,7 @@ def conferencias(regioes: list[str]) -> list[tuple[str, str]]:
 # --------------------------------------------------------------------------- CSVs do file store
 def preparar_csvs(regioes: list[str], destino: Path) -> dict[str, int]:
     """Junta regiões, localidades e bases de todas as regiões (do cache, ou das fontes se não houver cache)."""
-    regs, locs, bases = [], [], []
+    regs, locs, bases, oficiais = [], [], [], []
     cities = RAW / "cities1000.zip"
     for r in regioes:
         cfg = carregar_regiao(r)
@@ -158,18 +160,22 @@ def preparar_csvs(regioes: list[str], destino: Path) -> dict[str, int]:
             bs = fontes.bases_de_overpass(dados, fontes.ler_geonames(cities, cfg.bbox, 1.5) if cities.exists() else None)
         locs += [{**l, "regiao": r} for l in ls]
         bases += [{**b, "regiao": r} for b in bs]
+        arq_of = caminho_oficiais(r)  # camada 2 (docs/CONTRATOS.md, seção 16): lista oficial, opcional
+        if arq_of.exists():
+            oficiais += [{**b, "regiao": r} for b in fontes.ler_csv(arq_of)]
     return {
         "regioes": fontes.escrever_csv(destino / "regioes.csv", regs,
                                        ["regiao", "lat_min", "lat_max", "lon_min", "lon_max", "raio_km", "passo_clima"]),
         "localidades": fontes.escrever_csv(destino / "localidades.csv", locs, ["regiao"] + fontes.COLUNAS_LOCALIDADES),
         "bases": fontes.escrever_csv(destino / "bases.csv", bases, ["regiao"] + fontes.COLUNAS_BASES),
+        "bases_oficiais": fontes.escrever_csv(destino / "bases_oficiais.csv", oficiais, ["regiao"] + COLUNAS_OFICIAIS),
     }
 
 
 def copiar_para_container(origem: Path, container: str, dir_container: str, dry: bool) -> None:
     cmds = [["docker", "exec", container, "mkdir", "-p", dir_container]]
     cmds += [["docker", "cp", str(origem / f"{t}.csv"), f"{container}:{dir_container}/{t}.csv"]
-             for t in ("regioes", "localidades", "bases")]
+             for t in ("regioes", "localidades", "bases", "bases_oficiais")]
     for c in cmds:
         print("$ " + " ".join(c))
         if not dry:

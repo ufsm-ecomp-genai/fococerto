@@ -19,6 +19,7 @@ from app.core.config import RAIZ, carregar_env
 from app.core.config import regiao as carregar_regiao
 from app.core.models import Base, Ocorrencia, Plano
 from app.data import fontes
+from app.data.bases import PASTA_REGIOES, bases_em_camadas, politica_estimadas, bases_osm_de_linhas, bases_oficiais_de_linhas, ler_bases_oficiais
 from app.data.geo import centro_celula, dentro_bbox
 from app.data.ocorrencias import (dia_anterior, historico, montar_ocorrencias, normalizar_periodo)
 
@@ -57,9 +58,11 @@ def linhas_decisao(plano: Plano, aprovado_por: str) -> list[dict]:
 class RepositorioCache:
     """Lê os CSVs congelados por scripts/congelar_cache.py. Sem rede, sem Zetaris, sem Postgres."""
 
-    def __init__(self, raiz: Path | str = CACHE_PADRAO, estado: Path | str = ESTADO_PADRAO):
+    def __init__(self, raiz: Path | str = CACHE_PADRAO, estado: Path | str = ESTADO_PADRAO,
+                 pasta_regioes: Path | str = PASTA_REGIOES):
         self.raiz = Path(raiz)
         self.estado = Path(estado)
+        self.pasta_regioes = Path(pasta_regioes)  # onde ficam <regiao>_bases_oficiais.csv (camada 2)
         self._dados: dict[str, dict] = {}
         self._ultimo_periodo: dict[str, str] = {}
 
@@ -94,7 +97,11 @@ class RepositorioCache:
                                   passo_clima=d["passo_clima"])
 
     def bases(self, regiao: str) -> list[Base]:
-        return [Base(id=b["id"], nome=b["nome"], lat=b["lat"], lon=b["lon"], fonte=b.get("fonte", "")) for b in self._carregar(regiao)["bases"]]
+        """Camadas 2–4 fundidas (app/data/bases.py): lista oficial da região, OSM e, se nada cobrir a região,
+        sedes de município estimadas. As declaradas no cenário (camada 1) o grafo soma."""
+        d = self._carregar(regiao)
+        return bases_em_camadas(regiao, d["cfg"].bbox, bases_osm_de_linhas(d["bases"]), d["localidades"],
+                                pasta=self.pasta_regioes)
 
     def historico_celula(self, ocorrencia_id: str, dias: int = 7) -> list[dict]:
         regiao = self._regiao_da_celula(ocorrencia_id)
@@ -323,9 +330,24 @@ class RepositorioZetaris:
     def bases(self, regiao: str) -> list[Base]:
         lat_min, lat_max, lon_min, lon_max = carregar_regiao(regiao).bbox
         m = 1.0
-        linhas = self.sql("SELECT id, nome, lat, lon FROM fococerto_arq.bases "
-                          f"WHERE lat BETWEEN {lat_min - m} AND {lat_max + m} AND lon BETWEEN {lon_min - m} AND {lon_max + m}")
-        return [Base(id=b["id"], nome=b["nome"], lat=float(b["lat"]), lon=float(b["lon"])) for b in linhas]
+        filtro = f"lat BETWEEN {lat_min - m} AND {lat_max + m} AND lon BETWEEN {lon_min - m} AND {lon_max + m}"
+        linhas = self.sql(f"SELECT id, nome, lat, lon, fonte FROM fococerto_arq.bases WHERE {filtro}")
+        # camada 2: lista oficial registrada no Zetaris por scripts/setup_zetaris.py; se a tabela não existir
+        # (setup antigo), lê o CSV local de config/regioes/ (fallback registrado em self.erro_bases_oficiais)
+        try:
+            oficiais = bases_oficiais_de_linhas(self.sql(
+                "SELECT id, nome, orgao, lat, lon, fonte, data_fonte, coordenada FROM fococerto_arq.bases_oficiais "
+                f"WHERE regiao = '{regiao}'"))
+        except ErroZetaris as e:
+            self.erro_bases_oficiais = str(e)
+            oficiais = ler_bases_oficiais(regiao)
+        locs = None
+        modo, pop_min = politica_estimadas(regiao)
+        if modo == "sempre" or (modo == "auto" and not oficiais and not linhas):
+            locs = self.sql(f"SELECT geonameid, nome, lat, lon, pop FROM fococerto_arq.localidades WHERE {filtro} "
+                            f"AND pop >= {int(pop_min)}")
+        return bases_em_camadas(regiao, (lat_min, lat_max, lon_min, lon_max), bases_osm_de_linhas(linhas), locs,
+                                oficiais=oficiais)
 
     def historico_celula(self, ocorrencia_id: str, dias: int = 7) -> list[dict]:
         _, i, j = ocorrencia_id.split("_")

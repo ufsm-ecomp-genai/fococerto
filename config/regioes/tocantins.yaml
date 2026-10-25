@@ -5,3 +5,7 @@ velocidade_kmh: 40        # suposição declarada: estradas de terra, areia no J
 fator_tortuosidade: 1.4   # linha reta -> estrada (estimativa)
 raio_exposicao_km: 15
 eta_max_h: 6
+# Bases em camadas (docs/CONTRATOS.md, seção 16): lista oficial em tocantins_bases_oficiais.csv + OSM.
+# auto = sedes de município (GeoNames, "estimada") só se nenhuma outra camada tiver base na bbox.
+bases_estimadas: auto
+bases_estimadas_pop_min: 20000

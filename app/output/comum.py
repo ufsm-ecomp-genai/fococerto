@@ -52,3 +52,35 @@ def localidade_proxima(localidades: list[dict]) -> dict | None:
     if not localidades:
         return None
     return min(localidades, key=lambda l: l.get("dist_km", float("inf")) if l.get("dist_km") is not None else float("inf"))
+
+
+REAIS = ("oficial", "osm")  # procedências com localização real verificável por fonte (docs/CONTRATOS.md, seção 16)
+
+
+def procedencia_base(base: Any, cenario: Any = None) -> str:
+    """Confiança efetiva da base: 'declarada' se veio do cenário (id em Cenario.bases ou simulada=True);
+    senão o campo ``confianca`` (padrão 'osm', o default do contrato)."""
+    ids_cenario = {campo(b, "id") for b in (campo(cenario, "bases", []) or [])}
+    if campo(base, "id") in ids_cenario or campo(base, "simulada", False):
+        return "declarada"
+    return campo(base, "confianca", "osm") or "osm"
+
+
+def bases_usadas(resultado: ResultadoPeriodo) -> list:
+    """Bases que têm ao menos um recurso do cenário, na ordem do repositório."""
+    ids = {r.base_id for r in resultado.recursos}
+    return [b for b in resultado.bases if b.id in ids]
+
+
+def aviso_bases(resultado: ResultadoPeriodo, cenario: Any, T: dict) -> str | None:
+    """Aviso de procedência para o topo do plano e do mapa (só quando o cenário é simulado)."""
+    if cenario is None or not campo(cenario, "simulado", False):
+        return None
+    usadas = bases_usadas(resultado)
+    outras = [b for b in usadas if procedencia_base(b, cenario) not in REAIS]
+    if not usadas:
+        return None
+    if not outras:
+        return T["aviso_bases_reais"]
+    return T["aviso_bases_mistas"].format(n_reais=len(usadas) - len(outras), n_outras=len(outras),
+                                          ids=", ".join(b.id for b in outras))

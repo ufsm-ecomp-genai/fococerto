@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Demonstração de 3 períodos em sample mode (dados reais do FIRMS em cache, agentes offline determinísticos,
-# recursos e bases SIMULADOS do cenário escasso). Mostra o H-MEM melhorando o plano de um período para outro:
+# bases reais com fonte e QUANTIDADE de recursos simulada, cenário escasso). Mostra o H-MEM melhorando o plano de um período para outro:
 #   - memória derivada: antes de cada período, o que ficou sem recurso no anterior e cresceu (app/agents/aprendizado.py);
-#   - nota do coordenador: "estrada para Mateiros alagada" e, depois, "estrada para Mateiros liberada" (supersedes).
+#   - nota do coordenador: "estrada para São Félix alagada" e, depois, "estrada para São Félix liberada" (supersedes).
 # Para cada período, imprime o que mudou por causa da memória: memórias gravadas e lidas, ocorrências puxadas
 # para a lista, prioridades ajustadas e a diferença entre o plano com memória e o mesmo período sem memória.
 #
@@ -88,17 +88,17 @@ if com == sm:
 EOF
 }
 
-echo "Demo de 3 períodos (sample mode, cenário $CENARIO, recursos SIMULADOS): $P1 -> $P2 -> $P3"
+echo "Demo de 3 períodos (sample mode, cenário $CENARIO, bases reais com fonte, quantidade de recursos SIMULADA): $P1 -> $P2 -> $P3"
 echo "Estado local limpo; saídas em $TMP"
 
 run "$P1"; resumo "$P1"
 
-echo; echo ">>> nota do coordenador ($P2): estrada para Mateiros alagada"
-cli nota --regiao "$REGIAO" --periodo "$P2" --autor coordenador "estrada para Mateiros alagada" 2>/dev/null
+echo; echo ">>> nota do coordenador ($P2): estrada para São Félix alagada"
+cli nota --regiao "$REGIAO" --periodo "$P2" --autor coordenador "estrada para São Félix alagada" 2>/dev/null
 run "$P2"; resumo "$P2"
 
-echo; echo ">>> nota do coordenador ($P3): estrada para Mateiros liberada"
-cli nota --regiao "$REGIAO" --periodo "$P3" --autor coordenador "estrada para Mateiros liberada" 2>/dev/null
+echo; echo ">>> nota do coordenador ($P3): estrada para São Félix liberada"
+cli nota --regiao "$REGIAO" --periodo "$P3" --autor coordenador "estrada para São Félix liberada" 2>/dev/null
 run "$P3"; resumo "$P3"
 
 echo; echo "Saídas e logs: $TMP"

@@ -7,7 +7,7 @@
     "modo": "offline",
     "simulado": true,
     "arquivo_cenario": "input_examples/tocantins-parana-analista.yaml",
-    "gerado_em": "2026-10-24T22:27:14.093090+00:00",
+    "gerado_em": "2026-10-25T20:13:34.430369+00:00",
     "aprovacao_humana": "pendente"
   },
   "plano": {
@@ -526,20 +526,121 @@
   ],
   "bases": [
     {
+      "id": "osm_n5067657890",
+      "nome": "CBMTO 1º BBM Palmas",
+      "lat": -10.206127,
+      "lon": -48.343395,
+      "fonte": "CBMTO — https://conexaoto.com.br/2023/01/16/1o-batalhao-e-quatro-companhias-de-bombeiros-militar-com-novos-comandos (2023); coordenada: quartel mapeado no OpenStreetMap (node/5067657890); id reaproveitado do OSM, a mesma unidade; fundida com osm_n5067657890 (OpenStreetMap: OpenStreetMap node/5067657890)",
+      "simulada": false,
+      "confianca": "oficial"
+    },
+    {
+      "id": "cbmto_paraiso",
+      "nome": "CBMTO 3ª Cia do 1º BBM Paraíso do Tocantins",
+      "lat": -10.17611,
+      "lon": -48.86667,
+      "fonte": "CBMTO — https://conexaoto.com.br/2023/01/27/companhia-de-bombeiros-em-paraiso-tem-novo-comandante-que-vai-atuar-frente-a-uma-das-cidades-mais-movimentadas-do-estado (2023); coordenada: sede do município (GeoNames); endereço do quartel não georreferenciado",
+      "simulada": false,
+      "confianca": "oficial"
+    },
+    {
+      "id": "cbmto_porto_nacional",
+      "nome": "CBMTO 5ª Cia do 1º BBM Porto Nacional",
+      "lat": -10.70806,
+      "lon": -48.41722,
+      "fonte": "CBMTO — https://conexaoto.com.br/2022/02/17/governador-wanderlei-autoriza-inicio-das-obras-do-quartel-do-corpo-de-bombeiros-de-porto-nacional (2022); coordenada: sede do município (GeoNames); endereço do quartel não georreferenciado",
+      "simulada": false,
+      "confianca": "oficial"
+    },
+    {
+      "id": "cbmto_gurupi",
+      "nome": "CBMTO 3º BBM Gurupi",
+      "lat": -11.72917,
+      "lon": -49.06861,
+      "fonte": "CBMTO — https://conexaoto.com.br/2023/07/09/praias-de-palmas-e-do-interior-recebem-apoio-com-presenca-de-bombeiros-militares (2023); coordenada: sede do município (GeoNames); endereço do quartel não georreferenciado",
+      "simulada": false,
+      "confianca": "oficial"
+    },
+    {
+      "id": "cbmto_dianopolis",
+      "nome": "CBMTO Companhia de Dianópolis",
+      "lat": -11.62778,
+      "lon": -46.82056,
+      "fonte": "CBMTO — https://conexaoto.com.br/2023/01/16/1o-batalhao-e-quatro-companhias-de-bombeiros-militar-com-novos-comandos (2023); coordenada: sede do município (GeoNames); endereço do quartel não georreferenciado",
+      "simulada": false,
+      "confianca": "oficial"
+    },
+    {
+      "id": "cbmto_colinas",
+      "nome": "CBMTO Companhia de Colinas do Tocantins",
+      "lat": -8.05917,
+      "lon": -48.475,
+      "fonte": "CBMTO — https://conexaoto.com.br/2023/01/16/1o-batalhao-e-quatro-companhias-de-bombeiros-militar-com-novos-comandos (2023); coordenada: sede do município (GeoNames); endereço do quartel não georreferenciado",
+      "simulada": false,
+      "confianca": "oficial"
+    },
+    {
+      "id": "prevfogo_sao_felix",
+      "nome": "Brigada Prevfogo/Ibama São Félix do Tocantins",
+      "lat": -10.16833,
+      "lon": -46.65944,
+      "fonte": "Prevfogo/Ibama — https://sbtnews.sbt.com.br/noticia/brasil/ibama-autoriza-contratacao-de-brigadas-federais-para-combate-a-incendios-em-municipios-de-19-estados (2024); coordenada: sede do município (GeoNames); Portaria Ibama nº 114/2024",
+      "simulada": false,
+      "confianca": "oficial"
+    },
+    {
+      "id": "prevfogo_santa_tereza",
+      "nome": "Brigada Prevfogo/Ibama Santa Tereza do Tocantins",
+      "lat": -10.28222,
+      "lon": -47.80833,
+      "fonte": "Prevfogo/Ibama — https://sbtnews.sbt.com.br/noticia/brasil/ibama-autoriza-contratacao-de-brigadas-federais-para-combate-a-incendios-em-municipios-de-19-estados (2024); coordenada: sede do município (GeoNames); Portaria Ibama nº 114/2024",
+      "simulada": false,
+      "confianca": "oficial"
+    },
+    {
+      "id": "prevfogo_itacaja",
+      "nome": "Brigada Prevfogo/Ibama Itacajá",
+      "lat": -8.39167,
+      "lon": -47.76778,
+      "fonte": "Prevfogo/Ibama — https://sbtnews.sbt.com.br/noticia/brasil/ibama-autoriza-contratacao-de-brigadas-federais-para-combate-a-incendios-em-municipios-de-19-estados (2024); coordenada: sede do município (GeoNames); Portaria Ibama nº 114/2024",
+      "simulada": false,
+      "confianca": "oficial"
+    },
+    {
+      "id": "prevfogo_goiatins",
+      "nome": "Brigada Prevfogo/Ibama Goiatins",
+      "lat": -7.71,
+      "lon": -47.31417,
+      "fonte": "Prevfogo/Ibama — https://sbtnews.sbt.com.br/noticia/brasil/ibama-autoriza-contratacao-de-brigadas-federais-para-combate-a-incendios-em-municipios-de-19-estados (2024); coordenada: sede do município (GeoNames); Portaria Ibama nº 114/2024",
+      "simulada": false,
+      "confianca": "oficial"
+    },
+    {
+      "id": "prevfogo_arraias",
+      "nome": "Brigada Prevfogo/Ibama Arraias",
+      "lat": -12.93139,
+      "lon": -46.93833,
+      "fonte": "Prevfogo/Ibama — https://sbtnews.sbt.com.br/noticia/brasil/ibama-autoriza-contratacao-de-brigadas-federais-para-combate-a-incendios-em-municipios-de-19-estados (2024); coordenada: sede do município (GeoNames); Portaria Ibama nº 114/2024",
+      "simulada": false,
+      "confianca": "oficial"
+    },
+    {
+      "id": "icmbio_rio_conceicao",
+      "nome": "ICMBio Esec Serra Geral do Tocantins em Rio da Conceição",
+      "lat": -11.40028,
+      "lon": -46.88333,
+      "fonte": "ICMBio — https://folha.qconcursos.com/n/icmbio-concurso-abre-cadastro-reserva-para-agentes-temporarios-em-rio-da-conceicao-to (2026); coordenada: sede do município (GeoNames); brigada temporária da Esec Serra Geral do Tocantins",
+      "simulada": false,
+      "confianca": "oficial"
+    },
+    {
       "id": "osm_n3165869368",
       "nome": "Bombeiros (perto de Porangatu, 1 km)",
       "lat": -13.445225,
       "lon": -49.136863,
       "fonte": "OpenStreetMap node/3165869368",
-      "simulada": false
-    },
-    {
-      "id": "osm_n5067657890",
-      "nome": "1º Batalhão de Bombeiros Militar",
-      "lat": -10.206127,
-      "lon": -48.343395,
-      "fonte": "OpenStreetMap node/5067657890",
-      "simulada": false
+      "simulada": false,
+      "confianca": "osm"
     },
     {
       "id": "osm_w1022455273",
@@ -547,7 +648,8 @@
       "lat": -10.293075,
       "lon": -48.360013,
       "fonte": "OpenStreetMap way/1022455273",
-      "simulada": false
+      "simulada": false,
+      "confianca": "osm"
     },
     {
       "id": "osm_w365506007",
@@ -555,7 +657,8 @@
       "lat": -13.274527,
       "lon": -50.167664,
       "fonte": "OpenStreetMap way/365506007",
-      "simulada": false
+      "simulada": false,
+      "confianca": "osm"
     },
     {
       "id": "osm_w412958353",
@@ -563,7 +666,8 @@
       "lat": -12.15074,
       "lon": -44.998205,
       "fonte": "OpenStreetMap way/412958353",
-      "simulada": false
+      "simulada": false,
+      "confianca": "osm"
     },
     {
       "id": "sim_guarai",
@@ -571,7 +675,8 @@
       "lat": -8.83417,
       "lon": -48.51028,
       "fonte": "GeoNames 3398573",
-      "simulada": true
+      "simulada": true,
+      "confianca": "osm"
     },
     {
       "id": "sim_gurupi",
@@ -579,7 +684,8 @@
       "lat": -11.72917,
       "lon": -49.06861,
       "fonte": "GeoNames 3461724",
-      "simulada": true
+      "simulada": true,
+      "confianca": "osm"
     },
     {
       "id": "sim_miracema",
@@ -587,7 +693,8 @@
       "lat": -9.56722,
       "lon": -48.39167,
       "fonte": "GeoNames 3394817",
-      "simulada": true
+      "simulada": true,
+      "confianca": "osm"
     },
     {
       "id": "sim_paraiso",
@@ -595,7 +702,8 @@
       "lat": -10.17611,
       "lon": -48.86667,
       "fonte": "GeoNames 3479329",
-      "simulada": true
+      "simulada": true,
+      "confianca": "osm"
     },
     {
       "id": "sim_parana",
@@ -603,7 +711,8 @@
       "lat": -12.61528,
       "lon": -47.88306,
       "fonte": "GeoNames 3455079",
-      "simulada": true
+      "simulada": true,
+      "confianca": "osm"
     }
   ],
   "recursos": [
@@ -646,15 +755,18 @@
   "escalacoes": [
     {
       "ocorrencia_id": "cel_-83_-490",
-      "motivo": "Escalação: cel_-83_-490 tem 2305 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva."
+      "motivo": "Escalação: cel_-83_-490 tem 2305 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
+      "sugestao": "solicitar apoio externo"
     },
     {
       "ocorrencia_id": "cel_-88_-479",
-      "motivo": "Escalação: cel_-88_-479 tem 2726 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva."
+      "motivo": "Escalação: cel_-88_-479 tem 2726 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
+      "sugestao": "solicitar apoio externo"
     },
     {
       "ocorrencia_id": "cel_-90_-475",
-      "motivo": "Escalação: cel_-90_-475 tem 2135 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva."
+      "motivo": "Escalação: cel_-90_-475 tem 2135 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
+      "sugestao": "solicitar apoio externo"
     }
   ],
   "pareceres": [
@@ -841,5 +953,5 @@
     }
   ],
   "rodadas": 1,
-  "log_path": "/tmp/tmp.LsycRlDpnm/logs-tocantins-parana-analista/20261024T222713-d55e6a.jsonl"
+  "log_path": "output_examples/tocantins-parana-analista/trace.jsonl"
 }

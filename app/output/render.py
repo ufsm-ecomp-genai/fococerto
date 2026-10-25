@@ -10,8 +10,10 @@ import os
 from datetime import datetime, timezone
 from pathlib import Path
 
+from app.core.config import RAIZ
 from app.core.models import Cenario, RegiaoCfg, ResultadoPeriodo
-from app.output.comum import campo, faixas_prioridade, ids_escalados, localidade_proxima
+from app.output.comum import (aviso_bases, bases_usadas, campo, faixas_prioridade, ids_escalados,
+                               localidade_proxima, procedencia_base)
 from app.output.textos import textos
 
 VERSAO_FORMATO = 1
@@ -49,14 +51,17 @@ def _num(v: float | None, casas: int = 1) -> str:
 
 
 def _link_log(log_path: str, pasta_saida: Path | None) -> str:
+    """Link do log relativo à pasta do plano.md. ``log_path`` pode ser absoluto ou relativo à raiz do repositório
+    (o grafo grava relativo quando o log fica dentro do repositório, para não vazar o caminho da máquina)."""
     if not log_path:
         return ""
-    if pasta_saida is not None and os.path.isabs(log_path):
-        try:
-            return os.path.relpath(log_path, pasta_saida)
-        except ValueError:
-            return log_path
-    return log_path
+    if pasta_saida is None:
+        return log_path
+    alvo = log_path if os.path.isabs(log_path) else str(RAIZ / log_path)
+    try:
+        return Path(os.path.relpath(alvo, os.path.abspath(pasta_saida))).as_posix()
+    except ValueError:
+        return log_path
 
 
 def render_markdown(resultado: ResultadoPeriodo, regiao: RegiaoCfg, cenario: Cenario | None = None, *,
@@ -84,7 +89,10 @@ def render_markdown(resultado: ResultadoPeriodo, regiao: RegiaoCfg, cenario: Cen
         if r is None:
             return f"`{rid}`"
         b = bases.get(r.base_id)
-        return f"`{rid}` ({r.tipo}, {b.nome if b else r.base_id})"
+        if b is None:
+            return f"`{rid}` ({r.tipo}, {r.base_id})"
+        proc = T["procedencias"].get(procedencia_base(b, cenario), procedencia_base(b, cenario))
+        return f"`{rid}` ({r.tipo}, {b.nome}, {T['base_rotulo'].format(procedencia=proc)})"
 
     L: list[str] = []
     L.append(f"# {T['titulo'].format(periodo=plano.periodo, regiao=regiao.nome)}")
@@ -92,6 +100,10 @@ def render_markdown(resultado: ResultadoPeriodo, regiao: RegiaoCfg, cenario: Cen
     if cenario is not None and cenario.simulado:
         L.append(f"> **{T['aviso_simulado'].format(arquivo=arquivo_cenario or '-')}**")
         L.append(">")
+        av_bases = aviso_bases(resultado, cenario, T)
+        if av_bases:
+            L.append(f"> **{av_bases}**")
+            L.append(">")
     L.append(f"> {T['aviso_aprovacao'].format(regiao=regiao.nome, periodo=plano.periodo)}")
     L.append("")
     status = T["status_escalado"] if resultado.escalacoes else T["status_aprovado"]
@@ -174,6 +186,26 @@ def render_markdown(resultado: ResultadoPeriodo, regiao: RegiaoCfg, cenario: Cen
             L.append("")
             ev = ", ".join(f"`{e}`" for e in d.evidencias) or T["sem_evidencias"]
             L.append(f"**{T['evidencias']}:** {ev}")
+            L.append("")
+
+    # 4b. Bases e procedência (docs/CONTRATOS.md, seção 16).
+    usadas = bases_usadas(resultado)
+    if usadas:
+        L.append(f"## {T['bases_procedencia']}")
+        L.append("")
+        L.append(f"| {T['col_base']} | {T['col_procedencia']} | {T['col_fonte']} | {T['col_recursos']} |")
+        L.append("|---|---|---|---|")
+        for b in usadas:
+            proc = procedencia_base(b, cenario)
+            recs = ", ".join(f"`{r.id}`" for r in resultado.recursos if r.base_id == b.id)
+            L.append(f"| {_cel(b.nome)} (`{b.id}`) | **{T['procedencias'].get(proc, proc)}**: "
+                     f"{_cel(T['procedencia_desc'].get(proc, ''))} | {_cel(b.fonte or '-')} | {recs} |")
+        L.append("")
+        ids_usadas = {b.id for b in usadas}
+        sem = [b for b in resultado.bases if b.id not in ids_usadas]
+        if sem:
+            lista = "; ".join(f"{b.nome} ({T['procedencias'].get(procedencia_base(b, cenario), '?')})" for b in sem)
+            L.append(T["bases_sem_recurso"].format(n=len(sem), lista=lista))
             L.append("")
 
     # 5. Pareceres do Analista.

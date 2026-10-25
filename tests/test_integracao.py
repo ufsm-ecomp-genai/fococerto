@@ -241,16 +241,30 @@ def test_outro_periodo_usa_outras_ocorrencias(arvore, execucoes, tmp_path):
 
 
 def test_base_movida_muda_eta(arvore, execucoes, tmp_path):
-    """Mudar a posição de uma base declarada muda o ETA calculado (não é texto pronto)."""
+    """Mudar a posição de uma base da lista oficial (config/regioes/<regiao>_bases_oficiais.csv) muda o ETA
+    calculado (não é texto pronto). A cópia do CSV na árvore é restaurada no fim."""
+    import csv as _csv
     base = arvore / "cenarios" / "tocantins-escasso.yaml"
     antes = execucoes["tocantins-escasso"]
     cen = yaml.safe_load(base.read_text(encoding="utf-8"))
     por_rec = {x["id"]: x["base_id"] for x in cen["recursos"]}
-    d0 = next(d for d in antes["plano_json"]["plano"]["designacoes"] if por_rec[d["recurso_id"]].startswith("sim_"))
+    arq = arvore / "config" / "regioes" / "tocantins_bases_oficiais.csv"
+    original = arq.read_text(encoding="utf-8")
+    linhas = list(_csv.DictReader(original.splitlines()))
+    ids_oficiais = {l["id"] for l in linhas if l["id"] != "osm_n5067657890"}  # Palmas também está no OSM
+    d0 = next(d for d in antes["plano_json"]["plano"]["designacoes"] if por_rec[d["recurso_id"]] in ids_oficiais)
     base_id = por_rec[d0["recurso_id"]]
-    cam = escrever_cenario(arvore, base, "base-movida", bases=lambda bs: [
-        {**b, "lat": b["lat"] + 0.5, "lon": b["lon"] + 0.5} if b["id"] == base_id else b for b in bs])
-    depois = rodar(arvore, cam, tmp_path)
+    try:
+        with arq.open("w", encoding="utf-8", newline="") as f:
+            w = _csv.DictWriter(f, fieldnames=list(linhas[0]))
+            w.writeheader()
+            for l in linhas:
+                if l["id"] == base_id:
+                    l = {**l, "lat": float(l["lat"]) + 0.5, "lon": float(l["lon"]) + 0.5}
+                w.writerow(l)
+        depois = rodar(arvore, base, tmp_path)
+    finally:
+        arq.write_text(original, encoding="utf-8")
     eta = {(d["recurso_id"], d["ocorrencia_id"]): d["eta_h"] for d in depois["plano_json"]["plano"]["designacoes"]}
     chave = (d0["recurso_id"], d0["ocorrencia_id"])
     assert chave not in eta or eta[chave] != d0["eta_h"], (chave, d0["eta_h"])
@@ -263,7 +277,7 @@ def com_nota(arvore, tmp_path_factory) -> dict:
     """`nota` em --sample bloqueando a base de um recurso que o plano usa, e depois um novo `run`."""
     cen = arvore / "cenarios" / "tocantins-escasso.yaml"
     antes = rodar(arvore, cen, tmp_path_factory.mktemp("antes-nota"))
-    texto = "base de Mateiros alagada, sem acesso por terra"
+    texto = "base de São Félix alagada, sem acesso por terra"
     p = cli(arvore, "nota", "--sample", "--regiao", "tocantins", "--periodo", "2026-10-23", "--autor", "qa",
             "--pasta-logs", str(tmp_path_factory.mktemp("logs-nota")), texto)
     depois = rodar(arvore, cen, tmp_path_factory.mktemp("depois-nota"))
@@ -287,8 +301,8 @@ def test_nota_aparece_no_run_seguinte(com_nota):
     ativas = [m for d in lidas for m in d.get("ativas", [])]
     assert any(com_nota["texto"] in json.dumps(m, ensure_ascii=False) for m in ativas), lidas
     assert any(com_nota["texto"] == m["texto"] for m in depois["plano_json"]["memorias_usadas"])
-    # a nota bloqueia a base de Mateiros: o recurso de lá não sai por terra
-    assert "mateiros-t1" not in ids_designados(depois)
+    # a nota bloqueia a base de São Félix (Prevfogo): o recurso de lá não sai por terra
+    assert "saofelix-t1" not in ids_designados(depois)
     # regressão: a escalação pela memória não pode esconder as ocorrências expostas sem recurso
     designadas = {d["ocorrencia_id"] for d in depois["plano_json"]["plano"]["designacoes"]}
     escaladas = {e["ocorrencia_id"] for e in depois["plano_json"]["escalacoes"]}

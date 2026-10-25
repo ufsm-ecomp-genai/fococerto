@@ -36,7 +36,8 @@ def cache(tmp_path):
                         [{"lat": -10.0, "lon": -48.5, "dia": "2026-10-23", "vpd_kpa_max": 4.0, "vento_kmh_max": 18,
                           "umidade_min_pct": 30, "chuva_mm": 0}], fontes.COLUNAS_CLIMA)
     (pasta / "meta.json").write_text(json.dumps({"passo_clima": 0.5}))
-    return RepositorioCache(tmp_path / "cache", tmp_path / "estado")
+    # pasta_regioes vazia: sem lista oficial (camada 2), só o OSM do cache mínimo
+    return RepositorioCache(tmp_path / "cache", tmp_path / "estado", pasta_regioes=tmp_path)
 
 
 def test_cache_implementa_protocol(cache):
@@ -54,7 +55,7 @@ def test_cache_ocorrencias(cache):
 
 
 def test_cache_bases_e_historico(cache):
-    assert [b.id for b in cache.bases("tocantins")] == ["osm_n1"]
+    assert [(b.id, b.confianca) for b in cache.bases("tocantins")] == [("osm_n1", "osm")]
     cache.ocorrencias("tocantins", "2026-10-23")
     h = cache.historico_celula("cel_-103_-484", dias=2)
     assert [(x["dia"], x["n_focos"]) for x in h] == [("2026-10-22", 1), ("2026-10-23", 1)]

@@ -5,7 +5,26 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 PY=${PY:-.venv/bin/python}
 TMP=$(mktemp -d)
-rm -rf input_examples output_examples
+# Rewrites log_path in plano.json and the log link in plano.md to the copied trace.jsonl (repo-relative), so the
+# examples never carry the /tmp path of the machine that generated them.
+fix_log() {
+  "$PY" - "$1" "$TMP" <<'PYEOF'
+import json, re, sys
+from pathlib import Path
+pasta, tmp = Path(sys.argv[1]), sys.argv[2]
+tr = pasta / "trace.jsonl"  # output paths inside the trace: $TMP/out-<nome>/<regiao>/<periodo>/x -> output_examples/<nome>/x
+tr.write_text(re.sub(re.escape(tmp) + r"/out-[^/\"]+/[^/\"]+/[^/\"]+/", pasta.as_posix() + "/",
+                     tr.read_text(encoding="utf-8")), encoding="utf-8")
+pj = pasta / "plano.json"
+d = json.loads(pj.read_text(encoding="utf-8"))
+d["log_path"] = f"{pasta.as_posix()}/trace.jsonl"
+pj.write_text(json.dumps(d, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+md = pasta / "plano.md"
+md.write_text(re.sub(r"\]\([^)]*\.jsonl\)", "](trace.jsonl)", md.read_text(encoding="utf-8")), encoding="utf-8")
+PYEOF
+}
+# only the folders this script regenerates (output_examples/ also holds hand-published traces, e.g. nemotron-trace/)
+rm -rf input_examples output_examples/tocantins-*
 mkdir -p input_examples output_examples
 for c in cenarios/tocantins-escasso.yaml cenarios/tocantins-medio.yaml cenarios/tocantins-folgado.yaml; do
   nome=$(basename "$c" .yaml)
@@ -17,16 +36,18 @@ for c in cenarios/tocantins-escasso.yaml cenarios/tocantins-medio.yaml cenarios/
   mkdir -p "output_examples/$nome"
   cp "$TMP/out-$nome/tocantins/$periodo/"{plano.json,plano.md,mapa.html} "output_examples/$nome/"
   cp "$TMP"/logs-"$nome"/*.jsonl "output_examples/$nome/trace.jsonl"
+  fix_log "output_examples/$nome"
 done
 # memory example: a coordinator note changes the next period's plan (H-MEM in sample mode)
 rm -rf data/estado
 nome=tocantins-escasso-com-nota
-"$PY" -m app.cli nota --sample --regiao tocantins --periodo 2026-10-23 "estrada para Mateiros alagada, sem acesso" > /dev/null 2>&1
+"$PY" -m app.cli nota --sample --regiao tocantins --periodo 2026-10-23 "estrada para São Félix alagada, sem acesso" > /dev/null 2>&1
 "$PY" -m app.cli run --sample --regiao tocantins --recursos input_examples/tocantins-escasso.yaml \
       --saida "$TMP/out-$nome" --pasta-logs "$TMP/logs-$nome" > /dev/null 2>&1
 mkdir -p "output_examples/$nome"
 cp "$TMP/out-$nome/tocantins/2026-10-23/"{plano.json,plano.md,mapa.html} "output_examples/$nome/"
 cp "$TMP"/logs-"$nome"/*.jsonl "output_examples/$nome/trace.jsonl"
+fix_log "output_examples/$nome"
 # Analyst example: a small recurring burn far from people (Paranã, 24/10). The Critic asks the Analyst
 # "agricultural burn or vegetation fire?" before spending the only nearby resource on it. The input is the
 # eval scenario eval/cenarios/agricola_recorrente_parana_24out.yaml copied as a plain scenario (eval-only
@@ -49,6 +70,7 @@ PYEOF
 mkdir -p "output_examples/$nome"
 cp "$TMP/out-$nome/tocantins/2026-10-24/"{plano.json,plano.md,mapa.html} "output_examples/$nome/"
 cp "$TMP"/logs-"$nome"/*.jsonl "output_examples/$nome/trace.jsonl"
+fix_log "output_examples/$nome"
 grep -q '"agente": "analista"' "output_examples/$nome/trace.jsonl" || { echo "erro: o Analista não foi chamado em $nome" >&2; exit 1; }
 rm -rf data/estado "$TMP"
-echo "ok: $(ls input_examples | wc -l) inputs, $(ls output_examples | wc -l) outputs"
+echo "ok: $(ls input_examples | wc -l) inputs, $(ls -d output_examples/tocantins-* | wc -l) outputs"

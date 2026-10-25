@@ -31,7 +31,7 @@ def test_markdown_ordem_das_secoes_e_conteudo():
                               md.index("## Lista de prioridades"))
     assert i_esc < i_ordem < i_prio
     assert "**ESCALADA** `cel_-110_-462`" in md
-    assert "| 1 | `r-terra-1` (terrestre, Base Teste Mateiros) | `cel_-102_-465` (Mateiros, 8.4 km)" in md
+    assert "| 1 | `r-terra-1` (terrestre, Base Teste Mateiros, base OSM) | `cel_-102_-465` (Mateiros, 8.4 km)" in md
     assert "`pop:Mateiros:2300`" in md and "(nenhuma evidência citada)" in md
     assert "provável queima agrícola ou de manejo** (confiança: **média**)" in md
     assert "substitui m1" in md
@@ -94,11 +94,12 @@ def test_cenarios_da_demo_sao_validos_e_simulados():
     for a in arquivos:
         c = ler_cenario(a)
         assert c.simulado is True and c.regiao == "tocantins" and c.recursos
-        # toda base de recurso existe no cache (OSM) ou foi declarada no cenário
-        ids_cache = {l.split(",")[0] for l in (RAIZ / "data/cache/tocantins/bases.csv").read_text().splitlines()[1:]}
-        ids_declarados = {b.id for b in c.bases}
-        assert all(b.simulada for b in c.bases)
-        assert all(r.base_id in ids_cache | ids_declarados for r in c.recursos)
+        # toda base de recurso vem do repositório (lista oficial ou OSM, com fonte); nenhuma base declarada/simulada
+        from app.data.repositorio import RepositorioCache
+        bases = {b.id: b for b in RepositorioCache().bases("tocantins")}
+        assert c.bases == []
+        assert all(r.base_id in bases for r in c.recursos)
+        assert all(bases[r.base_id].confianca in ("oficial", "osm") and bases[r.base_id].fonte for r in c.recursos)
 
 
 # ----------------------------------------------------------------------------- CLI

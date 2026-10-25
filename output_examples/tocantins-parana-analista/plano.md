@@ -2,6 +2,8 @@
 
 > **RECURSOS SIMULADOS: as equipes e aeronaves deste plano vêm de um cenário de demonstração (input_examples/tocantins-parana-analista.yaml), não de um inventário real.**
 >
+> **Bases: 0 com localização real e fonte, 5 declarada(s) ou estimada(s) sem verificação (sim_guarai, sim_gurupi, sim_miracema, sim_paraiso, sim_parana); quantidade de equipes simulada (cenário).**
+>
 > Recomendação para o coordenador. Nada é despachado sem aprovação: `python -m app.cli aprovar --regiao tocantins --periodo 2026-10-24`
 
 - **Situação:** ESCALADO: há decisões que precisam do coordenador
@@ -18,11 +20,11 @@
 
 | Ordem | Recurso | Ocorrência | Prioridade | ETA |
 |---|---|---|---|---|
-| 1 | `paraiso-t1` (terrestre, Paraíso do Tocantins (simulada)) | `cel_-104_-489` (Pugmil, 6.2 km) | 0.61 (alta) | 0.8 h |
-| 2 | `guarai-t1` (terrestre, Guaraí (simulada)) | `cel_-86_-487` (Itaporã do Tocantins, 2.0 km) | 0.59 (alta) | 1.2 h |
-| 3 | `miracema-t1` (terrestre, Miracema do Tocantins (simulada)) | `cel_-93_-486` (Rio dos Bois, 12.8 km) | 0.56 (alta) | 1.4 h |
-| 4 | `gurupi-t1` (terrestre, Gurupi (simulada)) | `cel_-117_-491` (Gurupi, 9.1 km) | 0.54 (alta) | 0.3 h |
-| 5 | `parana-t1` (terrestre, Paranã (simulada)) | `cel_-124_-479` | 0.31 (baixa) | 1.2 h |
+| 1 | `paraiso-t1` (terrestre, Paraíso do Tocantins (simulada), base declarada) | `cel_-104_-489` (Pugmil, 6.2 km) | 0.61 (alta) | 0.8 h |
+| 2 | `guarai-t1` (terrestre, Guaraí (simulada), base declarada) | `cel_-86_-487` (Itaporã do Tocantins, 2.0 km) | 0.59 (alta) | 1.2 h |
+| 3 | `miracema-t1` (terrestre, Miracema do Tocantins (simulada), base declarada) | `cel_-93_-486` (Rio dos Bois, 12.8 km) | 0.56 (alta) | 1.4 h |
+| 4 | `gurupi-t1` (terrestre, Gurupi (simulada), base declarada) | `cel_-117_-491` (Gurupi, 9.1 km) | 0.54 (alta) | 0.3 h |
+| 5 | `parana-t1` (terrestre, Paranã (simulada), base declarada) | `cel_-124_-479` | 0.31 (baixa) | 1.2 h |
 
 - **Recursos em reserva:** nenhum
 - **Ocorrências não atendidas:** `cel_-88_-479` (Santa Maria do Tocantins, 10.4 km), `cel_-90_-475` (Centenário, 11.7 km), `cel_-83_-490` (Juarina, 14.5 km), `cel_-82_-461`, `cel_-96_-465`, `cel_-91_-479`, `cel_-105_-482`, `cel_-106_-481`, `cel_-104_-466`, `cel_-87_-495`
@@ -55,35 +57,47 @@ _Prioridade calculada pelos dados (maior = mais urgente). Faixas relativas a est
 
 ## Justificativas e evidências
 
-### 1. `paraiso-t1` (terrestre, Paraíso do Tocantins (simulada)) → `cel_-104_-489` (Pugmil, 6.2 km), ETA 0.8 h
+### 1. `paraiso-t1` (terrestre, Paraíso do Tocantins (simulada), base declarada) → `cel_-104_-489` (Pugmil, 6.2 km), ETA 0.8 h
 
 **Justificativa:** Prioridade 0.61; 2231 habitantes no raio; Pugmil a 6.2 km; 4 focos, FRP somado 10 MW; paraiso-t1 (terrestre) chega em ETA 0.8 h saindo de Paraíso do Tocantins (simulada).
 
 **Evidências:** `focos:4`, `eta:0.78`, `pop:2231`, `dist:Pugmil:6.2`, `base:sim_paraiso`
 
-### 2. `guarai-t1` (terrestre, Guaraí (simulada)) → `cel_-86_-487` (Itaporã do Tocantins, 2.0 km), ETA 1.2 h
+### 2. `guarai-t1` (terrestre, Guaraí (simulada), base declarada) → `cel_-86_-487` (Itaporã do Tocantins, 2.0 km), ETA 1.2 h
 
 **Justificativa:** Prioridade 0.59; 2464 habitantes no raio; Itaporã do Tocantins a 2.0 km; 3 focos, FRP somado 7 MW; guarai-t1 (terrestre) chega em ETA 1.2 h saindo de Guaraí (simulada).
 
 **Evidências:** `focos:3`, `eta:1.17`, `pop:2464`, `dist:Itaporã do Tocantins:2.0`, `base:sim_guarai`
 
-### 3. `miracema-t1` (terrestre, Miracema do Tocantins (simulada)) → `cel_-93_-486` (Rio dos Bois, 12.8 km), ETA 1.4 h
+### 3. `miracema-t1` (terrestre, Miracema do Tocantins (simulada), base declarada) → `cel_-93_-486` (Rio dos Bois, 12.8 km), ETA 1.4 h
 
 **Justificativa:** Prioridade 0.56; 2833 habitantes no raio; Rio dos Bois a 12.8 km; 4 focos, FRP somado 7 MW; miracema-t1 (terrestre) chega em ETA 1.5 h saindo de Miracema do Tocantins (simulada).
 
 **Evidências:** `focos:4`, `eta:1.45`, `pop:2833`, `dist:Rio dos Bois:12.8`, `base:sim_miracema`
 
-### 4. `gurupi-t1` (terrestre, Gurupi (simulada)) → `cel_-117_-491` (Gurupi, 9.1 km), ETA 0.3 h
+### 4. `gurupi-t1` (terrestre, Gurupi (simulada), base declarada) → `cel_-117_-491` (Gurupi, 9.1 km), ETA 0.3 h
 
 **Justificativa:** Prioridade 0.54; 87545 habitantes no raio; Gurupi a 9.1 km; 2 focos, FRP somado 3 MW; gurupi-t1 (terrestre) chega em ETA 0.3 h saindo de Gurupi (simulada).
 
 **Evidências:** `focos:2`, `eta:0.32`, `pop:87545`, `dist:Gurupi:9.1`, `base:sim_gurupi`
 
-### 5. `parana-t1` (terrestre, Paranã (simulada)) → `cel_-124_-479`, ETA 1.2 h
+### 5. `parana-t1` (terrestre, Paranã (simulada), base declarada) → `cel_-124_-479`, ETA 1.2 h
 
 **Justificativa:** Prioridade 0.31; sem população no raio; 2 focos, FRP somado 2 MW; parana-t1 (terrestre) chega em ETA 1.2 h saindo de Paranã (simulada).
 
 **Evidências:** `focos:2`, `eta:1.17`, `base:sim_parana`
+
+## Bases e procedência
+
+| Base | Procedência | Fonte | Recursos |
+|---|---|---|---|
+| Guaraí (simulada) (`sim_guarai`) | **declarada**: declarada pelo coordenador no cenário | GeoNames 3398573 | `guarai-t1` |
+| Gurupi (simulada) (`sim_gurupi`) | **declarada**: declarada pelo coordenador no cenário | GeoNames 3461724 | `gurupi-t1` |
+| Miracema do Tocantins (simulada) (`sim_miracema`) | **declarada**: declarada pelo coordenador no cenário | GeoNames 3394817 | `miracema-t1` |
+| Paraíso do Tocantins (simulada) (`sim_paraiso`) | **declarada**: declarada pelo coordenador no cenário | GeoNames 3479329 | `paraiso-t1` |
+| Paranã (simulada) (`sim_parana`) | **declarada**: declarada pelo coordenador no cenário | GeoNames 3455079 | `parana-t1` |
+
+Outras 16 base(s) conhecidas na região, sem recurso neste cenário: CBMTO 1º BBM Palmas (oficial); CBMTO 3ª Cia do 1º BBM Paraíso do Tocantins (oficial); CBMTO 5ª Cia do 1º BBM Porto Nacional (oficial); CBMTO 3º BBM Gurupi (oficial); CBMTO Companhia de Dianópolis (oficial); CBMTO Companhia de Colinas do Tocantins (oficial); Brigada Prevfogo/Ibama São Félix do Tocantins (oficial); Brigada Prevfogo/Ibama Santa Tereza do Tocantins (oficial); Brigada Prevfogo/Ibama Itacajá (oficial); Brigada Prevfogo/Ibama Goiatins (oficial); Brigada Prevfogo/Ibama Arraias (oficial); ICMBio Esec Serra Geral do Tocantins em Rio da Conceição (oficial); Bombeiros (perto de Porangatu, 1 km) (OSM); SCI (Palmas) (OSM); Corpo de Bombeiros Militar (OSM); Bombeiros (perto de Barreiras, 1 km) (OSM).
 
 ## Pareceres do Analista
 
@@ -113,6 +127,6 @@ Nenhuma memória foi usada neste período.
 - O índice de tempo é uma simplificação de superfície.
 - A doutrina é simplificada, e não houve validação com operadores.
 
-[Log completo da execução](../../../logs-tocantins-parana-analista/20261024T222713-d55e6a.jsonl)
+[Log completo da execução](trace.jsonl)
 
-_Gerado em 2026-10-24 22:27 UTC_
+_Gerado em 2026-10-25 20:13 UTC_

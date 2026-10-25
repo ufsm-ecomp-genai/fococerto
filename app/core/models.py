@@ -34,6 +34,9 @@ class Base(BaseModel):
     lon: float
     fonte: str = ""
     simulada: bool = False  # declarada no cenário, sem verificação de que a unidade existe
+    # procedência da localização (docs/CONTRATOS.md, seção 16): declarada no cenário > lista oficial da região
+    # > OpenStreetMap > estimada (sede de município do GeoNames, unidade não verificada)
+    confianca: Literal["declarada", "oficial", "osm", "estimada"] = "osm"
 
 
 class Recurso(BaseModel):

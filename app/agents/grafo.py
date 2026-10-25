@@ -17,6 +17,7 @@ from langgraph.graph import END, START, StateGraph
 
 from app.agents import analista, critico, planejador
 from app.agents.base import Contexto, reescrever_citacoes, resumo_memoria, resumo_plano
+from app.data.bases import fundir_bases_com_apelidos
 from app.core.config import RAIZ
 from app.core.logging import LogExecucao
 from app.core.models import (Base, Cenario, Memoria, Ocorrencia, ParecerAnalista, Plano, RegiaoCfg,
@@ -242,14 +243,13 @@ def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, mem
     ocorrencias = monitor(atuais, anteriores)
     log.evento("ferramenta", "consulta", {"consulta": "monitor", "anterior": ant, "n_atuais": len(ocorrencias),
                                           "status": {o.id: o.status for o in ocorrencias}})
-    bases = repo.bases(regiao.nome)
-    ids_repo = {b.id for b in bases}
-    declaradas = [b for b in cenario.bases if b.id not in ids_repo]
-    if declaradas:
-        bases = bases + declaradas
+    # bases em camadas (CONTRATOS §16): as declaradas no cenário vencem; a menos de 3 km de outra base, são fundidas
+    # e os recursos passam a apontar para a base mantida
+    bases, apelidos = fundir_bases_com_apelidos(repo.bases(regiao.nome), cenario.bases)
+    if cenario.bases:
         log.evento("sistema", "inicio", {"bases_declaradas_no_cenario": [
-            {"id": b.id, "nome": b.nome, "simulada": b.simulada} for b in declaradas]})
-    recursos = list(cenario.recursos)
+            {"id": b.id, "nome": b.nome, "simulada": b.simulada} for b in cenario.bases], "fundidas": apelidos})
+    recursos = [r.model_copy(update={"base_id": apelidos.get(r.base_id, r.base_id)}) for r in cenario.recursos]
     ids_bases = {b.id for b in bases}
     sem_base = [r.id for r in recursos if r.base_id not in ids_bases]
     if sem_base:
