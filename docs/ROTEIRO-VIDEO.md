@@ -1,14 +1,18 @@
 # Roteiro do vídeo de demonstração (até 4 min)
 
-Baseado na seção 14 da especificação, ajustado ao que **existe de fato** no repositório em 25/10/2026 (bases em camadas, API HTTP, ablação no modo LLM concluída). O vídeo vale 15 pontos e precisa mostrar o agente funcionando (não slides), a integração com o Zetaris, o engine Meterless e **uma requisição real passando pelo Nightshift**.
+Baseado na seção 14 da especificação, ajustado ao que **existe de fato** no repositório em 25/10/2026 (bases em camadas, API HTTP, ablação no modo LLM concluída, **Zetaris real funcionando** e uma execução real de ponta a ponta em `output_examples/tocantins-escasso-real/`). O vídeo vale 15 pontos e precisa mostrar o agente funcionando (não slides), a integração com o Zetaris, o engine Meterless e **uma requisição real passando pelo Nightshift**.
 
-Legenda: **[NIGHTSHIFT]** = precisa do Nightshift real no ar na hora de gravar (funciona desde 25/10/2026 ~01h UTC: Nightshift Windows na máquina do time com GPU NVIDIA, via Tailscale, modelo `nvidia/nemotron-3-ultra-550b-a55b`). **[ZETARIS]** = depende do Zetaris real (ainda não testado; vai ser instalado no servidor do time). **[WEB]** = depende da tela web (front-end) existir e funcionar na hora de gravar: hoje só existe a API (`uvicorn app.api:app --port 8000`, contrato em `web/README.md`), ainda não há tela. Cada trecho marcado tem um **plano B** que já funciona hoje e não finge o que não aconteceu.
+Legenda: **[NIGHTSHIFT]** = precisa do Nightshift real no ar na hora de gravar (funciona desde 25/10/2026 ~01h UTC: Nightshift Windows na máquina do time com GPU NVIDIA, via Tailscale, modelo `nvidia/nemotron-3-ultra-550b-a55b`). **[ZETARIS]** = precisa do Zetaris real no ar na hora de gravar (funciona desde 25/10/2026 à noite: Zetaris 2.4 em Docker no servidor Debian do time, acessado por túnel SSH/Tailscale; UI em `http://localhost:3000` pelo túnel). **[WEB]** = depende da tela web (front-end) existir e funcionar na hora de gravar: hoje só existe a API (`uvicorn app.api:app --port 8000`, contrato em `web/README.md`), ainda não há tela. Cada trecho marcado tem um **plano B** que não finge o que não aconteceu.
+
+**Base da gravação:** a execução real de 25/10/2026 (23:22–23:25 UTC) salva em `output_examples/tocantins-escasso-real/` (dados pelas views do Zetaris, decisões do Nemotron 3 Ultra pelo Nightshift, memória no serviço H-MEM real): 2 rodadas, 4 chamadas ao Nemotron, ~2,5 min, 6 designações e 9 escalações obrigatórias. Gravar uma execução nova igual a essa; se algo cair na hora, mostrar os arquivos dessa execução (plano, mapa e trace), dizendo que é a execução de 25/10.
 
 ## Antes de gravar (checklist)
-- [ ] `rm -rf data/estado out` para começar com a memória vazia.
+- [ ] `rm -rf data/estado out` para começar com a memória vazia (com o serviço H-MEM real, a memória fica em `services/hmem/data/`: esvaziar também, se quiser começar do zero).
 - [ ] Terminal com fonte grande; `.env` **nunca** aparece na tela (nem token, nem chave da NVIDIA).
 - [ ] Nightshift: ligar a máquina do time e o Tailscale; `.env` com `LLM_PROVIDER=nightshift`, `METERLESS_BASE_URL` (endereço Tailscale), `METERLESS_RUNTIME_TOKEN` (conteúdo do arquivo `proxy-token`) e `METERLESS_MODEL=nvidia/nemotron-3-ultra-550b-a55b`; rodar **sem** `--sample`. Rodar uma vez antes: no teste de 25/10 um período do cenário escasso levou ~23 s com 2 chamadas (Planejador e Crítico). Gravar a execução real, cortando só a espera.
-- [ ] Se o Zetaris estiver no ar: `scripts/setup_zetaris.py --regioes tocantins` feito antes e `--so-cache` depois de qualquer reinício.
+- [ ] Zetaris: subir o servidor e o túnel; conferir que `scripts/setup_zetaris.py --regioes tocantins` já foi feito (rodar `--so-cache` depois de qualquer reinício do Zetaris, senão a tabela do Open-Meteo perde o cache). `.env` com `ZETARIS_REST_URL`, `ZETARIS_ORG_ID`, `ZETARIS_API_KEY`, `POSTGRES_DSN`, `ZETARIS_PG_HOST`, `ZETARIS_PG_PORT`. Abrir a UI em `http://localhost:3000` já logado, no Data Explorer, com a consulta da seção 2 pronta no SQL editor.
+- [ ] Serviço H-MEM no ar (`cd services/hmem && npm start`, porta 7070) e `HMEM_URL=http://127.0.0.1:7070` no `.env`.
+- [ ] Ensaiar uma vez: na execução de 25/10 a leitura dos dados pelo Zetaris levou ~1 min e as 4 chamadas ao Nemotron ~1,5 min. Cortar só a espera.
 - [ ] Abrir `out/tocantins/2026-10-23/mapa.html` no navegador já com o zoom no Tocantins.
 - [ ] Ter a tabela da ablação pronta (de `eval/RELATORIO.md`, seção "Modo LLM").
 - [ ] **[WEB]** Se a tela existir: API no ar (`.venv/bin/uvicorn app.api:app --port 8000`) e a tela aberta no navegador, já com o período 23/10. Conferir antes que ela mostra a procedência das bases e as escalações.
@@ -25,27 +29,35 @@ Legenda: **[NIGHTSHIFT]** = precisa do Nightshift real no ar na hora de gravar (
 **Mostrar (5 s):** no mapa, a legenda das bases por procedência (oficial, OSM, declarada, estimada) e o popup de uma base com a fonte; ou, no `plano.md`, a tabela "Bases e procedência". **Fala:** "Cada base mostra de onde veio. Hoje a camada oficial é uma lista com fonte; numa implantação real, seria o sistema do próprio órgão, como o Sisfogo, federado pelo Zetaris."
 
 ## 2. (0:25–0:55) Os dados pelo Zetaris
-**[ZETARIS] Se o Zetaris estiver no ar:** mostrar no SQL editor do Zetaris um `SELECT * FROM fococerto.ocorrencias_prioridade WHERE regiao='tocantins' AND dia='2026-10-23' ORDER BY prioridade DESC LIMIT 15`, e depois o `run` sem `--sample` imprimindo `Dados: Zetaris`.
+**[ZETARIS] Tela:** a UI do Zetaris (`http://localhost:3000`). No **Data Explorer**, mostrar o container `fococerto` e as fontes registradas (`fococerto_pg.focos` no Postgres, os CSVs `fococerto_arq.*` no file store, `fococerto.clima` vindo do Open-Meteo). Depois, no SQL editor:
+```sql
+SELECT * FROM fococerto.ocorrencias_prioridade WHERE regiao='tocantins' AND dia='2026-10-23' ORDER BY prioridade DESC LIMIT 15
+```
+Mostrar as colunas `c_exposicao` … `c_crescimento` e a `prioridade`. No terminal, o `run` sem `--sample` imprime `Dados: Zetaris`.
 
-**Fala:** "Uma camada no Zetaris federa três tipos de fonte: os focos no Postgres, as cidades, as bases do OSM e a lista oficial de bases (com fonte) em CSV no file store, e o tempo do Open-Meteo numa tabela REST com cache. Quatro views calculam as ocorrências, a exposição e a prioridade, com uma fórmula transparente."
+**Fala:** "Uma camada no Zetaris federa três tipos de fonte: os focos no Postgres, as cidades, as bases do OSM e a lista oficial de bases (com fonte) em CSV no file store, e o tempo do Open-Meteo numa tabela REST com cache. Quatro views calculam as ocorrências, a exposição e a prioridade, com uma fórmula transparente. É um Zetaris real, no servidor do time: 1.875 focos reais de uma semana, e a view de prioridade devolve as mesmas 698 ocorrências que o cálculo de referência em Python."
 
-**Plano B (funciona hoje, honesto):** mostrar `sql/zetaris_views.sql` (a view `ocorrencias_prioridade`) e `python scripts/setup_zetaris.py --dry-run | head -40`. Fala: "As views foram validadas num Spark SQL local, o motor sob o Zetaris: 698 de 698 ocorrências iguais à implementação em Python. A ligação com o Zetaris real é o próximo passo." **Não** dizer que rodou no Zetaris.
+**Fala opcional (honestidade, 5 s):** "Escrevemos a integração antes de ter um Zetaris; ao rodar de verdade, tivemos de ajustar o formato da resposta da API, as descrições das tabelas e a porta do Postgres dentro da rede do Zetaris."
+
+**Plano B (se o Zetaris cair na hora):** mostrar `sql/zetaris_views.sql` (a view `ocorrencias_prioridade`) e, no `trace.jsonl` de `output_examples/tocantins-escasso-real/`, o evento `ferramenta`/`consulta` com `fonte: zetaris`, `modo_usado: views` e as 6 consultas SQL. Fala: "Esta é a execução real de 25 de outubro: as seis consultas que o FocoCerto fez às views do Zetaris."
 
 ## 3. (0:55–2:00) O raciocínio: Planejador, Crítico e Analista
 **Tela:** terminal.
 ```bash
-python -m app.cli run --regiao tocantins --recursos cenarios/tocantins-escasso.yaml   # [NIGHTSHIFT]
-# plano B: o mesmo comando com --sample
+python -m app.cli run --regiao tocantins --recursos cenarios/tocantins-escasso.yaml   # [ZETARIS] + [NIGHTSHIFT] + H-MEM, sem --sample
+# plano B: mostrar output_examples/tocantins-escasso-real/ (execução real de 25/10); plano C: o mesmo comando com --sample
 ```
-**Mostrar:** as linhas de progresso (planejador: proposta → ferramenta: violacao → critico: escala) e o resultado: 6 designações e 9 escaladas no modo offline (números do `output_examples/tocantins-escasso/` atual; conferir depois que os exemplos forem regerados). No modo LLM o resultado pode ser outro: mostrar o que sair, sem trocar pelos números do offline. Neste cenário o Crítico **não** chama o Analista (no teste real de 25/10 foram só 2 chamadas: Planejador e Crítico); o Analista aparece no cenário abaixo.
+**Mostrar:** as linhas de progresso e o resultado. **Resultado da execução real de 25/10** (`output_examples/tocantins-escasso-real/`): 2 rodadas e 4 chamadas ao Nemotron (Planejador, Crítico, Planejador, Crítico). Na rodada 1 o Crítico **rejeita** o plano e pede 3 trocas `troca_recurso_local`: `palmas-a1` para Santa Tereza do Tocantins (ganho de 0,6 h), `dianopolis-t1` para Dianópolis (22.424 hab., ETA 0,16 h em vez de 2,51 h) e `paraiso-t1` para Porto Nacional (53.316 hab.). Na rodada 2 o Planejador adota as trocas e o Crítico **aprova**. Final: 6 designações e 9 escalações obrigatórias ("solicitar apoio externo"), entre elas Fortaleza do Tabocão (29.357 hab.). Se a execução gravada der outro resultado, mostrar o que sair, sem trocar por estes números. Neste cenário o Crítico **não** chama o Analista; o Analista aparece no cenário abaixo.
 
-**[NIGHTSHIFT] Se o Nightshift estiver no ar:** mostrar no log as linhas `llm_call` com `routed_model` e `receipt`:
+**[NIGHTSHIFT] Mostrar no log** as linhas `llm_call` com `routed_model` e `receipt`:
 ```bash
-grep llm_call logs/<execucao>.jsonl | python -c "import sys,json;[print(j['agente'],j['modelo'],j['routed_model'],j['latencia_s']) for j in map(json.loads,sys.stdin)]"
+grep llm_call logs/<execucao>.jsonl | python -c "import sys,json;[print(j['agente'],j['modelo'],j['routed_model'],j['receipt'],j['latencia_s']) for j in map(json.loads,sys.stdin)]"
 ```
-Fala: "Cada agente fala com o Nemotron pelo Nightshift, e o log registra qual modelo respondeu." **É o trecho que prova a requisição real pelo Nightshift: não cortar.**
+Na execução de 25/10 saem 4 linhas com `nvidia/nemotron-3-ultra-550b-a55b` e recibos `rcpt_req_ffku2qfy`, `rcpt_req_66s1etud`, `rcpt_req_qumkyxqs`, `rcpt_req_5gjg112f` (6,9 a 33,5 s cada). Fala: "Cada agente fala com o Nemotron pelo Nightshift, e o log registra qual modelo respondeu, com o recibo assinado." **É o trecho que prova a requisição real pelo Nightshift: não cortar.** Plano B: o mesmo `grep` no `trace.jsonl` da execução de 25/10.
 
-**Fala (vale nos dois modos):** "O alocador guloso propõe. As ferramentas aplicam as regras rígidas e conferem cada fato citado. O Crítico julga o que fica em zona cinzenta: aqui há 9 ocorrências com população que ficaram sem recurso [trocar pelo número que aparecer na execução gravada], então ele escala para o coordenador em vez de esconder o problema, com a sugestão de pedir apoio externo." (Desde 25/10, toda ocorrência com população que termina sem recurso é escalada com "solicitar apoio externo", mesmo se o Crítico aprovar.)
+**Fala:** "O alocador guloso propõe. As ferramentas aplicam as regras rígidas e conferem cada fato citado. O Crítico julga o que fica em zona cinzenta: aqui ele recusou a primeira proposta, porque três recursos chegavam mais rápido a ocorrências com mais gente, e o Planejador refez o plano. Nove ocorrências com população ficaram sem recurso, e o sistema escala para o coordenador em vez de esconder o problema, com a sugestão de pedir apoio externo." (Desde 25/10, toda ocorrência com população que termina sem recurso é escalada com "solicitar apoio externo", mesmo se o Crítico aprovar.)
+
+**Fala curta (ponta a ponta):** "Nesta execução tudo é real: os dados vêm das views do Zetaris, as decisões do Nemotron pelo Nightshift, e a memória do serviço H-MEM. Só a quantidade de equipes é simulada."
 
 **O Analista (≈20 s):** rodar o cenário em que o Crítico tem uma pergunta em aberto (o mesmo de `output_examples/tocantins-parana-analista/`, período 24/10):
 ```bash
@@ -108,5 +120,5 @@ python -m app.cli aprovar --regiao tocantins --periodo 2026-10-23
 |---|---|
 | Tela web (front-end) | **[WEB]**: só a API existe hoje (`app/api.py`, contrato em `web/README.md`). Mostrar só se a tela existir e funcionar na hora de gravar. |
 | "Mesmo código, outra região" (Península Ibérica) | Só existe `config/regioes/iberia.yaml`; não há dados em cache nem execução. Não mostrar, a não ser que alguém rode de verdade antes de gravar. |
-| SQL federada ao vivo no Zetaris | **[ZETARIS]**: só se o Zetaris real estiver no ar. |
+| SQL federada ao vivo no Zetaris | **[ZETARIS]**: funciona (Zetaris 2.4 no servidor do time, 25/10). Mostrar a UI em `localhost:3000` (Data Explorer + consulta à `fococerto.ocorrencias_prioridade`). Plano B: o trace da execução real de 25/10. |
 | Nemotron respondendo, com `routed_model` | **[NIGHTSHIFT]**: obrigatório pelas regras ("one real request passing through Nightshift"). Já funciona (25/10); basta o Nightshift estar no ar na hora de gravar. Mostrar a linha `llm_call` com `routed_model` e o `receipt` (ex.: `rcpt_req_…`). |

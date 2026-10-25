@@ -146,6 +146,6 @@ Nenhuma memória foi usada neste período.
 - O índice de tempo é uma simplificação de superfície.
 - A doutrina é simplificada, e não houve validação com operadores.
 
-[Log completo da execução](../../../logs/20261025T232253-bbd48f.jsonl)
+[Log completo da execução](trace.jsonl)
 
 _Gerado em 2026-10-25 23:25 UTC_
