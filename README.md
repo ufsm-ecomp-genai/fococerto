@@ -6,7 +6,7 @@ Open Agent Hackathon 2026 · **Track 3: Reasoning Architecture** · Team UFSM (U
 
 FocoCerto crosses NASA FIRMS heat detections with weather, nearby communities, fire stations and the resources the coordinator declares. A **Planner** proposes a resource order, a **Critic** challenges it (trade-offs, exceptions from memory, when to escalate) and can call an **Analyst** to answer an open question with stated uncertainty. The output is a **priority list plus a resource order**, where every assignment carries its evidence. Nothing is dispatched without human approval.
 
-> **Status, stated plainly:** the full pipeline runs end to end in **sample mode** (real cached FIRMS data, offline deterministic agents). **Meterless Nightshift works against the real service** since 25 Oct 2026 (~01:00 UTC): Nightshift for Windows on a team machine with an NVIDIA GPU, reached over Tailscale, serving `nvidia/nemotron-3-ultra-550b-a55b`; every call returns a signed receipt that the app logs. A full LLM-mode period (scarce scenario) took ~23 s with 2 calls (Planner and Critic). The **ablation in LLM mode is running and has no results yet**. The **Zetaris** integration is implemented but **not yet tested on a real Zetaris instance** (views validated only in a local Spark SQL). See [Sponsor technology](#sponsor-technology) and [Limitations](#limitations).
+> **Status, stated plainly:** the full pipeline runs end to end in **sample mode** (real cached FIRMS data, offline deterministic agents). **Meterless Nightshift works against the real service** since 25 Oct 2026 (~01:00 UTC): Nightshift for Windows on a team machine with an NVIDIA GPU, reached over Tailscale, serving `nvidia/nemotron-3-ultra-550b-a55b`; every call returns a signed receipt that the app logs. A full LLM-mode period (scarce scenario) took ~23 s with 2 calls (Planner and Critic). The **ablation in LLM mode is complete**: 144 runs, 450 Nemotron calls, 0 offline fallbacks; the full system passes 75.9% of the answer-key checks against 22.2% for a simple allocator, and no final plan carries a false citation (see [Evaluation](#evaluation)). The **Zetaris** integration is implemented but **not yet tested on a real Zetaris instance** (views validated only in a local Spark SQL). See [Sponsor technology](#sponsor-technology) and [Limitations](#limitations).
 
 ---
 
@@ -340,7 +340,34 @@ they are not the final comparison. Offline runs are deterministic, so the varian
 H-MEM contribution (C − D): +18 checks (coordinator notes and data-derived reignition memories). Full table,
 per-scenario results and the before/after of the bug fixes: `eval/RELATORIO.md`.
 
-<!-- EVAL_RESULTS_LLM -->
+### LLM mode: NVIDIA Nemotron 3 Ultra through Meterless Nightshift
+
+Same 12 scenarios × 4 variants × 3 repetitions, with every agent decision made by `nvidia/nemotron-3-ultra-550b-a55b`
+through a real Meterless Nightshift (25 Oct 2026): **144 runs, 450 LLM calls, 449 valid on the first try, 1 invalid JSON
+recovered by the retry, 0 fallbacks to offline**, mean latency 29 s per call. Results: `eval/resultados/20261025T015525Z_llm/`.
+
+| Variant | Checks passed | Decision | Detection | False alarms | Wrong facts written by the LLM and caught | False citations in final plan |
+|---|---|---|---|---|---|---|
+| **A** simple allocator | 18/81 (22.2%) | 15/51 | 0/27 | 0/3 | n/a | 6 (injected; A has no checker) |
+| **B** Planner + rule checker | 53/81 (65.4%) | 32/51 | 18/27 | 0/3 | 56 | **0** |
+| **C** full (Planner ⇄ Critic ⇄ Analyst + H-MEM) | 66/87 (75.9%) | 36/51 | 24/30 | 0/6 | 54 | **0** |
+| **D** C without H-MEM | 64/87 (73.6%) | 37/51 | 21/30 | 0/6 | 47 | **0** |
+
+What this shows, and what it does not:
+
+- **The checks matter most.** Nemotron wrote a wrong fact (town, distance, population or ETA) about 50 times across the
+  run; `checar_citacoes` caught every one and no final plan of B, C or D carries a false citation.
+- **The LLM Critic catches what code cannot.** In `fato_errado_tendencia` (a false trend claim no tool checks) B fails and
+  C and D pass in all repetitions; in `tradeoff_noite_gurupi` the LLM variants pass where the offline agents failed.
+- **Memory adds little in LLM mode:** C − D is +2 checks (it was +18 offline). With Nemotron, the variant without memory
+  already reasons well from the period data, and the reignition case in Conceição fails in every variant. We report this
+  as measured.
+- **Stable across repetitions:** standard deviation of the accuracy between repetitions ≤ 0.018; plans differ between
+  repetitions in 2 of 12 scenarios.
+- **Exposure-weighted ETA** (how long exposed people wait for a crew): 4.40 h for A, 3.77 h for C.
+
+A real trace with Nemotron calls, routed model and signed receipt ids: [`output_examples/nemotron-trace/trace.jsonl`](output_examples/nemotron-trace/trace.jsonl).
+
 
 ---
 

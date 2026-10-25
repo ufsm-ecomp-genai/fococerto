@@ -3,8 +3,8 @@
 > **ATENÇÃO: este é o resultado do modo OFFLINE.** Os agentes são as versões determinísticas (`decidir_offline`),
 > sem LLM. Este relatório **valida o pipeline da ablação** (cenários, injeção, checagens e métricas) e mostra o que
 > as ferramentas e as heurísticas offline fazem. **Não é o resultado final do FocoCerto**: a comparação que responde à
-> pergunta da Track 3 é a do modo `llm` (Nightshift). O Nightshift real funciona desde 25/10/2026 e a ablação no modo
-> `llm` está rodando; os resultados ainda não existem.
+> pergunta da Track 3 é a do modo `llm` (Nightshift). O Nightshift real funciona desde 25/10/2026, e a ablação no modo
+> `llm` foi concluída em 25/10: veja a seção "Modo LLM" no fim deste arquivo.
 
 - Método, variantes, definições das checagens e das métricas: `eval/README.md`.
 - Cenários e gabaritos: commit `1d722b5` ("Avaliação: cenários e gabaritos escritos antes de qualquer execução",
@@ -145,3 +145,27 @@ A estimativa usa os pontos de decisão observados no offline atual, por execuç�
 - No modo LLM a trajetória pode ser mais longa (até 3 rodadas). O teto teórico é 54 chamadas por execução. Para
   calibrar a latência, rode primeiro `--cenarios fato_errado_tendencia_23out --repeticoes 1` e use a latência
   medida em `--latencia-s`.
+
+
+## Modo LLM (Nemotron 3 Ultra via Nightshift), 25/10/2026
+
+`eval/resultados/20261025T015525Z_llm/` · 144 execuções · 450 chamadas (449 válidas na primeira tentativa, 1 JSON
+inválido recuperado, 0 fallbacks para o offline) · latência média de 29 s. A execução ficou presa 14 h numa chamada
+(timeout entre pacotes, corrigido no cliente com um prazo total) e foi retomada com `--retomar`, reaproveitando as 30
+execuções já feitas (a mudança foi só no transporte HTTP, sem efeito nas decisões).
+
+| Variante | Acerto | Decisão | Detecção | Alarmes falsos | Fatos errados escritos pelo LLM e pegos | Citações falsas no plano final |
+|---|---|---|---|---|---|---|
+| A | 18/81 (22,2%) | 15/51 | 0/27 | 0/3 | n/a | 6 (injetadas; A não tem checador) |
+| B | 53/81 (65,4%) | 32/51 | 18/27 | 0/3 | 56 | 0 |
+| C | 66/87 (75,9%) | 36/51 | 24/30 | 0/6 | 54 | 0 |
+| D | 64/87 (73,6%) | 37/51 | 21/30 | 0/6 | 47 | 0 |
+
+Leitura honesta:
+- O checador de citações é o que mais pesa: o Nemotron errou fatos ~50 vezes, e nenhum plano final de B, C ou D
+  chegou ao coordenador com citação falsa (conferido rodando `checar_citacoes` sobre os 108 planos finais).
+- O Crítico com LLM pega o que o código não pega: em `fato_errado_tendencia`, B falha e C e D passam nas 3 repetições.
+- A memória acrescenta pouco no modo LLM (C − D = +2 checagens, contra +18 no offline). `reignicao_conceicao` falha em
+  todas as variantes.
+- Variação entre repetições: desvio do acerto ≤ 0,018; planos diferentes entre repetições em 2 de 12 cenários.
+- ETA ponderado por exposição: 4,40 h (A) → 3,77 h (C).

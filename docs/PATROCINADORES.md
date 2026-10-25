@@ -90,7 +90,7 @@ All LLM calls go through `app/llm/client.py::chat()` (a test forbids direct prov
 Every call (success or failure) becomes an `llm_call` line in `logs/<run>.jsonl` with **`modelo`** (the `model` returned), **`routed_model`** (the model Nightshift actually routed to) and **`receipt`**, plus tokens, latency and number of attempts. On the real Nightshift each response carries a signed receipt (`meterless.compute_receipt.v1`, Ed25519) with `routed_model` and a `receipt_id` (e.g. `rcpt_req_7yxkcil7`); the app logs the routed model and the receipt id. `_extrair_meta` looks for them tolerantly in the body (`meterless_receipt`, `receipt`, `meterless`) and in response headers. `tests/test_llm_client.py` checks this with a fake response (`routed_model: "nvidia/nemotron-x"`, `receipt: "rcpt_123"`).
 
 ### Test status (honest)
-**Working against the real service since 25 Oct 2026 (~01:00 UTC).** Nightshift for Windows runs on a team machine with an NVIDIA GPU and the app reaches it over Tailscale. A full LLM-mode period on the scarce scenario took about 23 s with 2 calls (Planner and Critic), each logged with `routed_model` and its receipt id. The **ablation in LLM mode is running now; its results are not in yet** (see `eval/RELATORIO.md`). To switch it on: run Nightshift, put the NVIDIA key in Nightshift's Providers tab, set `LLM_PROVIDER=nightshift`, `METERLESS_BASE_URL`, `METERLESS_RUNTIME_TOKEN` (the `proxy-token` file) and `METERLESS_MODEL` in `.env`, and run without `--sample`.
+**Working against the real service since 25 Oct 2026 (~01:00 UTC).** Nightshift for Windows runs on a team machine with an NVIDIA GPU and the app reaches it over Tailscale. A full LLM-mode period on the scarce scenario took about 23 s with 2 calls (Planner and Critic), each logged with `routed_model` and its receipt id. The **LLM-mode ablation is complete**: 144 runs, 450 Nemotron calls (449 valid on the first try, 1 recovered by retry, 0 offline fallbacks), mean latency 29 s; results in the README and `eval/RELATORIO.md`. To switch it on: run Nightshift, put the NVIDIA key in Nightshift's Providers tab, set `LLM_PROVIDER=nightshift`, `METERLESS_BASE_URL`, `METERLESS_RUNTIME_TOKEN` (the `proxy-token` file) and `METERLESS_MODEL` in `.env`, and run without `--sample`.
 
 ---
 
@@ -100,7 +100,11 @@ The Planner, Critic and Analyst run on **NVIDIA Nemotron** (`nvidia/nemotron-3-u
 
 **Status:** real calls work (section 3); the model that answered is in `routed_model` of every `llm_call`. The LLM-mode ablation is still running, so we do not claim yet that Nemotron improves the decisions. A log excerpt from the real run goes below.
 
-<!-- NEMOTRON_LOG_EXCERPT -->
+A real `llm_call` event from the LLM-mode ablation (full trace in `output_examples/nemotron-trace/trace.jsonl`; 450 such calls in the run):
+
+```json
+{"t": "2026-10-25T19:43:39.909860+00:00", "execucao": "tradeoff_noite_gurupi_20out__C__r1", "regiao": "tocantins", "periodo": "2026-10-20", "agente": "planejador", "evento": "llm_call", "dados": {"status": "ok", "tentativas": 1, "json_ok": true}, "modelo": "nvidia/nemotron-3-ultra-550b-a55b", "routed_model": "nvidia/nemotron-3-ultra-550b-a55b", "receipt": "rcpt_req_bf344q2l", "tokens": 13031, "latencia_s": 15.674}
+```
 
 ---
 

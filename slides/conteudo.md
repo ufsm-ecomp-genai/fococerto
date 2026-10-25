@@ -95,7 +95,7 @@ Estrutura do `pitch-deck-template.md` (12 slides + apêndice), adaptada ao que o
 
 ## Slide 11: Riscos, limitações e mitigações
 - **Zetaris ainda não testado numa instância real** → views validadas em Spark SQL 4.0 (698/698 iguais ao Python); passos para ligar documentados (`scripts/setup_zetaris.py`, `.env`).
-- **Ablação no modo LLM ainda sem resultado** (rodando) → por enquanto só a tabela offline, que valida o pipeline; o Nightshift/Nemotron real já responde às chamadas.
+- **Ablação no modo LLM concluída** (25/10): A 22,2%, B 65,4%, C 75,9%, D 73,6%; ~50 fatos errados escritos pelo Nemotron, todos pegos; ganho da memória pequeno no modo LLM (+2 checagens).
 - **Agentes offline são simples** (Planejador ≈ alocador guloso) → o ganho das variantes da ablação depende do modo LLM.
 - **Exposição superestimada** (população municipal do GeoNames) · **detecção ≠ incêndio** · queima agrícola inferida com incerteza · distância em linha reta × fator · Hot-Dry-Windy simplificado de superfície · TI/UC não ingeridos · recursos simulados · sem validação com operadores.
 - **IA responsável:** aprovação humana em todo plano; escalação obrigatória; incerteza declarada; só dados públicos, sem dados pessoais; dados simulados identificados.
