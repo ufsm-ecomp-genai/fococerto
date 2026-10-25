@@ -89,8 +89,8 @@ _JS = r"""
     });
   }
   var mapa = L.map('mapa');
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    maxZoom: 18, attribution: '&copy; OpenStreetMap contributors &copy; CARTO', subdomains: 'abcd'
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+    maxZoom: 18, attribution: 'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, USGS, &copy; OpenStreetMap contributors'
   }).addTo(mapa);
   var limites = L.latLngBounds(D.bbox);
 
