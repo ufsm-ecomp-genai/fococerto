@@ -315,3 +315,30 @@ comparação limpa é a offline. Para medir de verdade: rodar C e D com `METERLE
 Duas falhas reais de C, independentes do vazamento: em Mateiros o Planejador devolveu a equipe da base bloqueada na
 rodada 2 e o Crítico aprovou (`restricao_memoria` é regra não rígida, `app/tools/regras.py`); em Conceição a célula
 reforçada pela memória não foi atendida.
+
+### Causa encontrada e medição limpa (26/10, noite)
+
+A causa não era a ordem C→D: era o escopo do Nightshift. O mesmo prompt do Planejador da variante D (Morros), que
+não tem "482 MW" nem "13 focos", enviado com `meterless-scope: user` chegou ao modelo com **15.595** tokens de
+entrada e a resposta citou a memória; com um escopo novo chegou com **10.682** e não citou. O Nightshift junta
+~4.900 tokens de contexto lembrado de chamadas anteriores ao prompt no escopo `user`. Correção: o cliente manda um
+escopo próprio por execução (`fococerto-<id da execução>`, commit `73aed60`).
+
+Medição limpa, só os 5 cenários com memória, 1 repetição, Nemotron, escopos isolados:
+`eval/resultados/20261026T232357Z_llm_memoria_escopo_isolado/`.
+
+| Cenário | C | D | Diferença |
+|---|---|---|---|
+| `excecao_mateiros_alagada_23out` | 4/4 | 3/4 | c1: C respeita a base bloqueada pela nota; D manda a equipe |
+| `excecao_dianopolis_ponte_18out` | 1/2 | 1/2 | — |
+| `controle_taguatinga_liberada_21out` | 2/2 | 2/2 | — (controle) |
+| `reignicao_conceicao_20out` | 0/2 | 1/2 | c2: D passa, C falha |
+| `reignicao_morros_24out` | 2/2 | 2/2 | D chega à célula só pelos dados |
+| **Total** | **9/12** | **9/12** | |
+
+Nenhum texto da D cita memória. Leitura: com o Nemotron, a memória mudou uma decisão de forma atribuível
+(Mateiros) e, no total, C = D nesta amostra (uma repetição, 12 checagens; uma checagem vale ~8 pontos). Não dá para
+afirmar ganho líquido da memória no modo LLM; o efeito medido de forma limpa continua sendo o offline (+18). As
+rodadas LLM completas (`20261025T015525Z_llm`, `20261025T220912Z_llm`) foram feitas com o escopo `user` e, portanto,
+com contexto injetado pelo Nightshift em B, C e D.
+

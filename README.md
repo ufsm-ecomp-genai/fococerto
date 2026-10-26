@@ -449,6 +449,14 @@ Critic, mandatory escalation of exposed occurrences, idle-local-crew swap, real 
   cannot prove it. The clean memory comparison is the offline one (+18 checks). Two real gaps in C stay visible: in
   Mateiros the Planner re-assigned the blocked crew in round 2 and the Critic approved it, because the memory
   restriction is a soft rule; in Conceição the boosted cell was not attended.
+- **Cause found, and a clean measurement (26 Oct, night).** It was the Nightshift scope: the same D prompt sent with
+  `meterless-scope: user` reached the model with 15,595 input tokens and the answer quoted the memory; in a fresh
+  scope, 10,682 tokens and no quote. Nightshift adds ~4,900 tokens of remembered context in the `user` scope, so in
+  both full LLM runs above B, C and D received that context. FocoCerto now sends its own scope per run (the only
+  memory is H-MEM, which is audited). Clean re-run of the 5 memory scenarios (1 repetition, isolated scopes): **C 9/12,
+  D 9/12**, no D text quoting a memory; memory changed one decision attributably (Mateiros: C keeps the blocked crew
+  at its station, D sends it). So with Nemotron we cannot claim a net memory gain from this sample; the clean memory
+  effect we can show is offline (+18 checks). Results: `eval/resultados/20261026T232357Z_llm_memoria_escopo_isolado/`.
 - **Not covered by either run:** the plan-language option and the check for invented ids and false coverage claims
   (26 Oct) came after both LLM runs, and the evaluation runs in Portuguese.
 
