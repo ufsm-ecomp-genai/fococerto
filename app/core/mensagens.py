@@ -93,6 +93,14 @@ MENSAGENS: dict[str, dict] = {
         "cit_mal_formatada": "evidência mal formatada",
         "cit_localidade_texto": "{nome} não está no raio desta ocorrência",
         "cit_dist_texto": "conferir a distância citada",
+        "cit_id_inexistente": "{id} não existe nos dados desta execução: cite só ids de recursos, bases e ocorrências dos DADOS",
+        "cit_cobertura_falsa": "no plano, {oid} é atendida por: {reais}",
+        "cit_sem_recurso": "nenhum recurso",
+        "resumo_sistema": ("{n} designação(ões): {lista}. Sem recurso: {sem}. Reserva: {res}."),
+        "resumo_nenhuma": "nenhuma",
+        "resumo_nenhum": "nenhum",
+        "nota_resumo_reescrito": (" (Resumo reescrito pelo sistema a partir das designações finais: o resumo do "
+                                  "agente citava id inexistente ou atendimento que não confere com o plano.)"),
         # ------------------------------------------------ Crítico offline (app/agents/critico.py)
         "cr_checador_ok": "checador: nenhuma violação rígida solúvel",
         "cr_excecao_aceita": ("Exceção aceita: memória {mid} (\"{texto}\", confiança {conf:.2f}) vale sobre a regra da "
@@ -231,6 +239,14 @@ MENSAGENS: dict[str, dict] = {
         "cit_mal_formatada": "malformed evidence",
         "cit_localidade_texto": "{nome} is outside this incident's radius",
         "cit_dist_texto": "check the cited distance",
+        "cit_id_inexistente": "{id} does not exist in this run's data: cite only crew/aircraft, base and incident ids from the DATA",
+        "cit_cobertura_falsa": "in the plan, {oid} is served by: {reais}",
+        "cit_sem_recurso": "no crew/aircraft",
+        "resumo_sistema": ("{n} assignment(s): {lista}. Without a crew: {sem}. Reserve: {res}."),
+        "resumo_nenhuma": "none",
+        "resumo_nenhum": "none",
+        "nota_resumo_reescrito": (" (Summary rewritten by the system from the final assignments: the agent's summary "
+                                  "cited a nonexistent id or a coverage that does not match the plan.)"),
         "cr_checador_ok": "checker: no solvable hard violation",
         "cr_excecao_aceita": ("Exception accepted: memory {mid} (\"{texto}\", confidence {conf:.2f}) overrides the "
                               "nearest-base rule; {rid} should not go by road to {oid}."),

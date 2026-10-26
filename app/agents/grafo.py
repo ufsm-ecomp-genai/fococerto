@@ -16,7 +16,7 @@ from typing import Any, Literal, Protocol, TypedDict
 from langgraph.graph import END, START, StateGraph
 
 from app.agents import analista, critico, planejador
-from app.agents.base import Contexto, reescrever_citacoes, resumo_memoria, resumo_plano
+from app.agents.base import Contexto, reescrever_citacoes, resumo_deterministico, resumo_memoria, resumo_plano
 from app.data.bases import fundir_bases_com_apelidos
 from app.core.config import RAIZ
 from app.core.logging import LogExecucao
@@ -24,7 +24,7 @@ from app.core.mensagens import msg, normalizar_idioma, prefixos_escalacao, rotul
 from app.core.models import (Base, Cenario, Memoria, Ocorrencia, ParecerAnalista, Plano, RegiaoCfg,
                              ResultadoPeriodo, VeredictoCritico, Violacao)
 from app.tools.alocador import alocador_simples
-from app.tools.citacoes import checar_citacoes
+from app.tools.citacoes import checar_citacoes, problemas_texto
 from app.tools.consultar import Consultor
 from app.tools.geo import exposta
 from app.tools.memorias import REFORCO, interpretar_memorias, tokens_distintivos
@@ -297,6 +297,9 @@ def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, mem
                               "reforcos": {k: v.id for k, v in leitura.reforcos.items()},
                               "reserva_minima": leitura.reserva_minima}})
     pareceres: dict[str, ParecerAnalista] = ctx.pareceres
+    # ids que existem nos dados além do período/cenário (CONTRATOS §20): células do período anterior e das memórias,
+    # e ids de base do cenário fundidos com uma base do repositório
+    ids_extras = ({o.id for o in anteriores} | set(_ids_cel([m.texto for m in ctx.memorias])) | set(apelidos))
     consultor = Consultor(repo, ocorrencias, log, agente="analista")
 
     # ------------------------------------------------------------ nós
@@ -312,7 +315,26 @@ def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, mem
 
     def checar(plano: Plano) -> list[Violacao]:
         vs = checar_regras(plano, ocorrencias, recursos, bases, regiao, ctx.memorias, reserva_minima=cenario.reserva)
-        return vs + checar_citacoes(plano, ocorrencias, bases, recursos=recursos, regiao_cfg=regiao)
+        return vs + checar_citacoes(plano, ocorrencias, bases, recursos=recursos, regiao_cfg=regiao,
+                                    ids_extras=ids_extras)
+
+    def correcoes(plano: Plano, corrigido: Plano, cit: list[Violacao]) -> list[dict]:
+        antes = {(d.recurso_id, d.ocorrencia_id): d for d in plano.designacoes}
+        depois = {(d.recurso_id, d.ocorrencia_id): d for d in corrigido.designacoes}
+        out = []
+        for v in cit:
+            if v.evidencia.get("onde") == "resumo":
+                out.append({"campo": "resumo", "motivo": v.evidencia.get("campo"), "ocorrencia_id": v.ocorrencia_id,
+                            "citado": v.evidencia.get("citado"), "real": v.evidencia.get("real"),
+                            "resumo_antes": plano.resumo, "resumo_depois": corrigido.resumo})
+                continue
+            k = (v.recurso_id, v.ocorrencia_id)
+            out.append({"recurso_id": v.recurso_id, "ocorrencia_id": v.ocorrencia_id,
+                        "campo": v.evidencia.get("campo"), "citado": v.evidencia.get("citado"),
+                        "real": v.evidencia.get("real"),
+                        "justificativa_antes": antes[k].justificativa if k in antes else None,
+                        "justificativa_depois": depois[k].justificativa if k in depois else None})
+        return out
 
     def no_checar(s: Estado) -> dict:
         """Regras + citações. Citação errada é corrigida aqui, de forma determinística, ANTES do Crítico: a
@@ -327,20 +349,12 @@ def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, mem
         if not cit:
             return {"violacoes": vs, "violacoes_critico": vs, "citacoes_corrigidas": []}
         corrigido = reescrever_citacoes(ctx, plano, cit)
-        antes = {(d.recurso_id, d.ocorrencia_id): d for d in plano.designacoes}
-        depois = {(d.recurso_id, d.ocorrencia_id): d for d in corrigido.designacoes}
         restantes = checar(corrigido)
         log.evento("ferramenta", "citacao_corrigida", {
             "rodada": rodada, "agente_que_errou": "planejador",
             "obs": "o agente citou fato que não confere com os dados; o sistema reescreveu a justificativa a partir "
                    "dos dados antes do Crítico (a alocação não muda)",
-            "correcoes": [{"recurso_id": v.recurso_id, "ocorrencia_id": v.ocorrencia_id,
-                           "campo": v.evidencia.get("campo"), "citado": v.evidencia.get("citado"),
-                           "real": v.evidencia.get("real"),
-                           "justificativa_antes": antes[(v.recurso_id, v.ocorrencia_id)].justificativa
-                           if (v.recurso_id, v.ocorrencia_id) in antes else None,
-                           "justificativa_depois": depois[(v.recurso_id, v.ocorrencia_id)].justificativa
-                           if (v.recurso_id, v.ocorrencia_id) in depois else None} for v in cit],
+            "correcoes": correcoes(plano, corrigido, cit),
             "citacoes_restantes": sum(v.regra == "citacao_incorreta" for v in restantes)})
         # o histórico guarda TODAS as violações da rodada (inclusive as citações corrigidas); o Crítico, as do
         # plano corrigido
@@ -455,13 +469,28 @@ def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, mem
                                              "decisao_critico": v.decisao if v else None, "escalacoes": novas})
         if esc:
             status = "escala"
-        # guarda-corpo: o plano que vai ao coordenador nunca leva citação que não confere com os dados
-        cit = [x for x in checar_citacoes(plano, ocorrencias, bases, recursos=recursos, regiao_cfg=regiao)
-               if x.regra == "citacao_incorreta"]
+        # guarda-corpo: o plano que vai ao coordenador nunca leva citação que não confere com os dados, nem resumo
+        # com id inexistente ou atendimento que não está nas designações finais (CONTRATOS §20)
+        cit = [x for x in checar_citacoes(plano, ocorrencias, bases, recursos=recursos, regiao_cfg=regiao,
+                                          ids_extras=ids_extras) if x.regra == "citacao_incorreta"]
         if cit:
+            antes = plano
             plano = reescrever_citacoes(ctx, plano, cit)
+            if divergencia is not None and any(x.evidencia.get("onde") == "resumo" for x in cit):
+                # mantém o aviso de divergência, só com os motivos do Crítico que conferem com os dados
+                ok = [m for m in v.motivos if not problemas_texto(m, plano, ocorrencias, bases, recursos, ids_extras)]
+                plano = plano.model_copy(update={"resumo": msg(
+                    "resumo_divergencia", idioma, n=rodada,
+                    plano=msg("plano_cp_critico" if divergencia["plano_escolhido"] == "contra_proposta_critico"
+                              else "plano_ultima", idioma),
+                    motivos=" | ".join(ok)[:800], resumo=plano.resumo)})
             log.evento("sistema", "violacao", {"rodada": rodada, "acao": "justificativa_reescrita_no_plano_final",
                                                "violacoes": [x.model_dump() for x in cit]})
+            log.evento("ferramenta", "citacao_corrigida", {
+                "rodada": rodada, "agente_que_errou": "planejador" if divergencia is None else "planejador/critico",
+                "no_plano_final": True,
+                "obs": "plano final: o sistema reescreveu a partir das designações finais o texto que não confere",
+                "correcoes": correcoes(antes, plano, cit)})
         return {"status": status, "escalacoes": esc, "plano": plano, "divergencia": divergencia}
 
     # ------------------------------------------------------------ arestas

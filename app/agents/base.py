@@ -114,7 +114,11 @@ def realocar(ctx: Contexto, rodada: int, *, proibidos=(), bases_bloqueadas=(), r
 def reescrever_citacoes(ctx: Contexto, plano: Plano, violacoes: list) -> Plano:
     """Reescreve, a partir dos dados (template verificável do alocador), justificativa, evidências e ETA das
     designações com ``citacao_incorreta``. Mantém os pares: a alocação não muda, só o texto falso sai."""
-    alvo = {(v.recurso_id, v.ocorrencia_id) for v in violacoes if v.regra == "citacao_incorreta"}
+    cit = [v for v in violacoes if v.regra == "citacao_incorreta"]
+    alvo = {(v.recurso_id, v.ocorrencia_id) for v in cit if v.evidencia.get("onde") != "resumo"}
+    if any(v.evidencia.get("onde") == "resumo" for v in cit):
+        # resumo com id inexistente ou cobertura falsa: reescrito a partir das designações (o texto do agente sai)
+        plano = plano.model_copy(update={"resumo": resumo_deterministico(plano, ctx.regiao.idioma)})
     if not alvo:
         return plano
     pri, extras, _ = prioridades_ajustadas(ctx)
@@ -129,6 +133,16 @@ def reescrever_citacoes(ctx: Contexto, plano: Plano, violacoes: list) -> Plano:
                                      "justificativa": texto + msg("nota_reescrita", ctx.regiao.idioma)})
         ds.append(d)
     return plano.model_copy(update={"designacoes": ds})
+
+
+def resumo_deterministico(plano: Plano, idioma: str | None) -> str:
+    """Resumo coerente com as designações do plano (catálogo app/core/mensagens.py), com o aviso de reescrita.
+    Usado quando o resumo do agente cita id inexistente ou cobertura falsa (CONTRATOS §20)."""
+    lista = ", ".join(f"{d.recurso_id}→{d.ocorrencia_id}" for d in plano.designacoes) or msg("resumo_nenhuma", idioma)
+    texto = msg("resumo_sistema", idioma, n=len(plano.designacoes), lista=lista,
+                sem=", ".join(plano.nao_atendidas) or msg("resumo_nenhuma", idioma),
+                res=", ".join(plano.reserva) or msg("resumo_nenhum", idioma))
+    return texto + msg("nota_resumo_reescrito", idioma)
 
 
 def pares(plano: Plano | None) -> set[tuple[str, str]]:

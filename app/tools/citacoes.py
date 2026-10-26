@@ -5,12 +5,24 @@ Verifica (i) os tokens de ``Designacao.evidencias`` (``pop:N``, ``eta:H``, ``dis
 localidades/bases citadas, "N habitantes", "ETA X h" e "X km". O texto livre pode estar em pt-BR ou em inglês
 ("N people/inhabitants/residents", "ETA X h", "arrives in X h", "X km", "within the 6 h limit"); os tokens de
 evidência não dependem do idioma. As sugestões saem no idioma de ``regiao_cfg.idioma`` (app/core/mensagens.py).
+
+Ids citados (CONTRATOS §20): todo token com cara de id de recurso (``<nome>-t<n>``/``<nome>-a<n>``), de base
+(``osm_*``, ``cbmto_*``, ``prevfogo_*``, ``icmbio_*``, ``sim_*``) ou de célula (``cel_<n>_<n>``) nas justificativas e
+no resumo tem de existir nos dados da execução (recursos do cenário, bases do repositório, ocorrências do período e
+``ids_extras``); senão, ``campo: id_inexistente``. Não há lista fixa: o universo vem dos argumentos.
+
+Cobertura no resumo (heurística simples, documentada em CONTRATOS §20): afirmações "<cel> atendida/coberta/covered/
+served/assigned por|by <recurso>" e "<recurso> →|->|atende|cobre|covers|serves|assigned to|para|to <cel>" são
+conferidas contra as designações do plano; se o par não está no plano, ``campo: cobertura_falsa``. Não conta como
+afirmação: negação ou condicional ("sem", "não", "not", "without", "would", "could", "removido", "instead"...) entre a
+célula e o verbo (1ª forma) ou na mesma oração antes do recurso (2ª forma), a seção de respostas ao Crítico e os motivos do Crítico citados na divergência (descrevem
+o plano anterior ou uma alternativa, não o plano).
 """
 from __future__ import annotations
 
 import re
 
-from app.core.mensagens import msg
+from app.core.mensagens import IDIOMAS, msg
 from app.core.models import Base, Designacao, Ocorrencia, Plano, Recurso, RegiaoCfg, Violacao
 from app.tools.geo import eta_recurso, haversine_km
 from app.tools.texto import contem_termo, norm, sem_sufixo_simulada
@@ -25,6 +37,122 @@ RE_KM = re.compile(r"(\d+(?:[.,]\d+)?)\s*km\b")
 # en: "ETA ≤ 6 h", "within the 6 h limit", "limit 6 h", "max 6 h", "up to 6 h", "under/below/above 6 h"
 RE_LIMITE = re.compile(r"[≤<>≥]|\bate\b|limite|maxim|\bmax\b|acima|abaixo|dentro|exced|ultrapass"
                        r"|limit|within|\bup to\b|\bunder\b|below|above|beyond|exceed")
+
+
+# ids com a forma dos ids reais (o universo de ids válidos vem dos dados da execução, não daqui)
+RE_ID_RECURSO = re.compile(r"(?<![\w-])([a-z][a-z0-9]*(?:-[a-z0-9]+)*-[ta]\d+)(?![\w-])")
+RE_ID_BASE = re.compile(r"(?<![\w-])((?:osm|cbmto|prevfogo|icmbio|sim)_[a-z0-9]+(?:_[a-z0-9]+)*)(?![\w-])")
+RE_ID_CEL = re.compile(r"(?<![\w-])(cel_-?\d+_-?\d+)(?![\w-])")
+_REC = r"([a-z][a-z0-9]*(?:-[a-z0-9]+)*-[ta]\d+)"
+_CEL = r"(cel_-?\d+_-?\d+)"
+# "<cel> (87545 people, covered by gurupi-t1)", "cel_x atendida pelo recurso palmas-t1"
+RE_COB_CEL_REC = re.compile(
+    _CEL + r"((?:(?!cel_|\.\s|[;|])[^\n]){0,80}?)(?<![a-z])(?:atendid[oa]s?|cobert[oa]s?|covered|served|assigned"
+    r"|designad[oa]s?|alocad[oa]s?|allocated)\s+(?:por|pel[oa]|by|to|a|ao|para)\s+(?:(?:o|a|the)\s+)?"
+    r"(?:(?:recurso|resource|equipe|crew|aeronave|aircraft)\s+)?" + _REC + r"(?![\w-])")
+# "palmas-a1 → cel_x", "palmas-a1 assigned to cel_x", "dianopolis-t1 atende cel_x", "palmas-a1 to cel_x"
+RE_COB_REC_CEL = re.compile(
+    r"(?<![\w-])" + _REC + r"\s*(?:(?:is|esta|e|fica)\s+)?(?:→|->|=>|\bassigned to\b|\bdesignad[oa] (?:para|a)\b"
+    r"|\bsent to\b|\benviad[oa] (?:para|a)\b|\bcovers\b|\bcobre\b|\batende\b|\bserves\b|\bpara\b|\bto\b)"
+    r"\s*(?:(?:a|the|o)\s+)?(?:(?:ocorrencia|incident|celula|cell)\s+)?" + _CEL)
+RE_NEGACAO = re.compile(
+    r"(?<![a-z])(?:nao|sem|not|without|nenhum\w*|none|never|nunca|remov\w*|retir\w*|liberad\w*|libera|freed?"
+    r"|freeing|dropped|saiu|left|deixad\w*|deixa|instead|em vez|ao inves|anterior\w*|previous\w*|before|antes"
+    r"|baseline|would|could|should|poderia|deveria|seria|pode|can|might|propos\w*|suggest\w*|suger\w*"
+    r"|unassigned|uncovered|moved|desloc\w*|realoc\w*|if|se)(?![a-z])")
+RE_FIM_ORACAO = re.compile(r"[;|,(\n]|\.\s")
+
+
+def _trechos_do_critico(t: str) -> str:
+    """Tira do texto (normalizado) as partes que citam o Crítico: a seção "Respostas ao Crítico"/"Replies to the
+    Critic" (vai até o fim) e "Motivos do Crítico: ... ||"/"Critic's reasons: ... ||" (divergência)."""
+    t = re.sub(r"(?:motivos do critico|critic's reasons):.*?\|\|", " ", t, flags=re.S)
+    for idi in IDIOMAS:
+        marca = norm(msg("sufixo_respostas", idi)).strip()
+        i = t.find(marca)
+        if i >= 0:
+            t = t[:i]
+    return t
+
+
+def _negada(prefixo: str) -> bool:
+    """Negação/condicional na mesma oração, antes da afirmação."""
+    partes = RE_FIM_ORACAO.split(prefixo)
+    return bool(RE_NEGACAO.search(partes[-1] if partes else prefixo))
+
+
+def ids_inexistentes(texto: str, ids_recursos: set[str] | None, ids_bases: set[str], ids_ocorrencias: set[str]
+                     ) -> list[tuple[str, str]]:
+    """[(tipo, id)] dos ids citados em ``texto`` que não existem. ``ids_recursos`` None = universo de recursos
+    desconhecido (não confere recursos). Comparação sem acento/caixa ("Paraíso-t1" == "paraiso-t1")."""
+    t = norm(texto)
+    out: list[tuple[str, str]] = []
+    vistos: set[str] = set()
+    grupos = [("ocorrencia", RE_ID_CEL, {norm(x) for x in ids_ocorrencias}),
+              ("base", RE_ID_BASE, {norm(x) for x in ids_bases})]
+    if ids_recursos is not None:
+        grupos.append(("recurso", RE_ID_RECURSO, {norm(x) for x in ids_recursos}))
+    for tipo, rx, validos in grupos:
+        for m in rx.finditer(t):
+            i = m.group(1)
+            if i not in validos and i not in vistos:
+                vistos.add(i)
+                out.append((tipo, i))
+    return out
+
+
+def coberturas_falsas(texto: str, pares: set[tuple[str, str]]) -> list[tuple[str, str]]:
+    """[(recurso, ocorrência)] que o texto afirma como atendimento e que não estão em ``pares`` (as designações).
+    Ignora frase negativa/condicional e as partes que citam o Crítico (ver docstring do módulo)."""
+    t = _trechos_do_critico(norm(texto))
+    validos = {(norm(r), norm(o)) for r, o in pares}
+    out: list[tuple[str, str]] = []
+    for m in RE_COB_CEL_REC.finditer(t):
+        cel, gap, r = m.group(1), m.group(2), m.group(3)
+        # só o trecho entre a célula e o verbo decide: em "escalated without a crew: cel_x (..., covered by r)" o
+        # "without" é da lista, e o parêntese afirma o atendimento (caso real de 25/10)
+        if RE_NEGACAO.search(gap):
+            continue
+        if (r, cel) not in validos and (r, cel) not in out:
+            out.append((r, cel))
+    for m in RE_COB_REC_CEL.finditer(t):
+        r, cel = m.group(1), m.group(2)
+        if _negada(t[:m.start()]):
+            continue
+        if (r, cel) not in validos and (r, cel) not in out:
+            out.append((r, cel))
+    return out
+
+
+def checar_resumo(plano: Plano, ocorrencias: list[Ocorrencia], bases: list[Base], recursos: list[Recurso] | None,
+                  idioma: str | None = None, ids_extras=()) -> list[Violacao]:
+    """``citacao_incorreta`` no resumo do plano: id inexistente e cobertura falsa. ``evidencia.onde == "resumo"``."""
+    extras = set(ids_extras)
+    vs: list[Violacao] = []
+    ids_rec = ({r.id for r in recursos} | extras) if recursos is not None else None
+    for tipo, i in ids_inexistentes(plano.resumo, ids_rec, {b.id for b in bases} | extras,
+                                    {o.id for o in ocorrencias} | extras):
+        vs.append(Violacao(regra="citacao_incorreta", ocorrencia_id=None, recurso_id=None, rigida=True,
+                           evidencia={"campo": "id_inexistente", "onde": "resumo", "tipo_id": tipo, "citado": i,
+                                      "real": None, "resumo": plano.resumo},
+                           sugestao=msg("cit_id_inexistente", idioma, id=i)))
+    pares = {(d.recurso_id, d.ocorrencia_id) for d in plano.designacoes}
+    for r, cel in coberturas_falsas(plano.resumo, pares):
+        reais = sorted(d.recurso_id for d in plano.designacoes if norm(d.ocorrencia_id) == cel)
+        oid = next((o.id for o in ocorrencias if norm(o.id) == cel), cel)
+        vs.append(Violacao(regra="citacao_incorreta", ocorrencia_id=oid, recurso_id=None, rigida=True,
+                           evidencia={"campo": "cobertura_falsa", "onde": "resumo", "citado": f"{r}→{oid}",
+                                      "real": reais, "resumo": plano.resumo},
+                           sugestao=msg("cit_cobertura_falsa", idioma, oid=oid,
+                                        reais=", ".join(reais) or msg("cit_sem_recurso", idioma))))
+    return vs
+
+
+def problemas_texto(texto: str, plano: Plano, ocorrencias: list[Ocorrencia], bases: list[Base],
+                    recursos: list[Recurso] | None, ids_extras=()) -> bool:
+    """True se ``texto`` (ex.: um motivo do Crítico que vai para o resumo) cita id inexistente ou cobertura falsa."""
+    p = plano.model_copy(update={"resumo": texto})
+    return bool(checar_resumo(p, ocorrencias, bases, recursos, ids_extras=ids_extras))
 
 
 def resolver_localidade(nome: str, locs: dict[str, list[dict]]) -> list[dict] | None:
@@ -66,9 +194,16 @@ def _v(d: Designacao, campo: str, citado, real, sug: str) -> Violacao:
 
 
 def checar_citacoes(plano: Plano, ocorrencias: list[Ocorrencia], bases: list[Base],
-                    recursos: list[Recurso] | None = None, regiao_cfg: RegiaoCfg | None = None) -> list[Violacao]:
+                    recursos: list[Recurso] | None = None, regiao_cfg: RegiaoCfg | None = None,
+                    ids_extras=()) -> list[Violacao]:
     """``recursos`` e ``regiao_cfg`` são opcionais (extensão do contrato): com eles o ETA é recalculado da base
-    do recurso; sem eles, só da ``base:<id>`` citada nas evidências."""
+    do recurso; sem eles, só da ``base:<id>`` citada nas evidências (e ids de recurso no texto não são conferidos).
+    ``ids_extras``: outros ids que existem nos dados (ex.: células citadas nas memórias, período anterior).
+    Também confere o resumo do plano (``checar_resumo``), com ``evidencia.onde == "resumo"``."""
+    extras = set(ids_extras)
+    ids_rec = ({r.id for r in recursos} | extras) if recursos is not None else None
+    ids_bas = {b.id for b in bases} | extras
+    ids_occ = {o.id for o in ocorrencias} | extras
     occ = {o.id: o for o in ocorrencias}
     por_base = {b.id: b for b in bases}
     rec = {r.id: r for r in (recursos or [])}
@@ -148,6 +283,10 @@ def checar_citacoes(plano: Plano, ocorrencias: list[Ocorrencia], bases: list[Bas
             except ValueError:
                 vs.append(_v(d, chave, valor, None, msg("cit_mal_formatada", idioma)))
 
+        # ids citados no texto livre (recurso, base, célula) têm de existir nos dados da execução
+        for _tipo, i in ids_inexistentes(d.justificativa, ids_rec, ids_bas, ids_occ):
+            vs.append(_v(d, "id_inexistente", i, None, msg("cit_id_inexistente", idioma, id=i)))
+
         # texto livre
         t = norm(d.justificativa)
         nomes_base = {norm(b.nome) for b in bases}
@@ -191,4 +330,4 @@ def checar_citacoes(plano: Plano, ocorrencias: list[Ocorrencia], bases: list[Bas
             val = _num(m.group(1))
             if not any(_perto(val, x, 0.15, 1) for x in dists_validas):
                 vs.append(_v(d, "dist_texto", val, [round(x, 1) for x in dists_validas], msg("cit_dist_texto", idioma)))
-    return vs
+    return vs + checar_resumo(plano, ocorrencias, bases, recursos, idioma, ids_extras=extras)
