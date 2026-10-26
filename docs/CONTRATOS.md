@@ -228,3 +228,30 @@ Regressão da execução real com Nemotron em inglês (25/10): o texto citou `gu
 - Violações do resumo trazem `evidencia.onde = "resumo"` (e `evidencia.resumo`). Como nas outras citações (§18), não forçam escalação.
 - **Correção:** `base.reescrever_citacoes` substitui o resumo com problema por `base.resumo_deterministico(plano, idioma)`. É um texto do catálogo (`resumo_sistema` + `nota_resumo_reescrito`, pt-BR e en) com os pares `recurso→ocorrência`, as não atendidas e a reserva, mais o aviso de que foi reescrito. Isso vale no nó de checagem, antes do Crítico, e no nó final. O evento `ferramenta/citacao_corrigida` traz, para o resumo, `correcoes[]` com `campo: "resumo"`, `motivo` (`id_inexistente`/`cobertura_falsa`), `citado`, `real`, `resumo_antes` e `resumo_depois`. No nó final, o evento sai com `no_plano_final: true`. Se houve divergência em zona cinzenta, o aviso de divergência é mantido, só com os motivos do Crítico que passam na checagem. Assim, o resumo publicado é coerente com as designações finais.
 - Fora do escopo: o texto das escalações (`escalacoes[].motivo`) não é conferido.
+
+## 21. Cenário montado na tela (API, 26/10)
+A tela "Recursos do dia" monta o cenário sem YAML. Endpoints novos ou alterados em `app/api.py` (detalhes e
+exemplos reais em `web/README.md`):
+- `GET /api/bases?regiao=R[&sample=true]` → `{regiao, repositorio, periodos, bases[]}`. As bases são as camadas 2–4
+  (§16) de `Repositorio.bases(R)`, do mesmo repositório que o `run` usaria (`cli.criar_repositorio`: cache no sample
+  mode ou sem `ZETARIS_API_KEY`, senão Zetaris). Cada base: `id, nome, lat, lon, confianca, fonte, simulada` e, nas
+  `oficial`, `orgao, fonte_url, data_fonte, coordenada` (do `config/regioes/<R>_bases_oficiais.csv`). `periodos` =
+  `periodos_disponiveis(R)` quando o repositório tem o método, senão `null`. Região não configurada ou sem dados →
+  404; falha do repositório → 503. Resposta em memória por 5 min.
+- `POST /api/run` aceita **`recursos` (caminho) ou `cenario` (objeto `Cenario`)**, exatamente um (senão 422).
+  O `cenario` passa por `validar_cenario` (422 com todos os erros, formato FastAPI `[{loc, msg, type}]`):
+  `base_id` fora de bases conhecidas ∪ declaradas, ids repetidos (recursos; bases declaradas), `tipo` inválido
+  (pydantic), `capacidade < 1`, `reserva < 0`, base declarada fora da bbox da região + 1°, período efetivo
+  (`periodo` do pedido ou do cenário) fora de `periodos`, região do cenário ≠ `regiao`. As bases declaradas saem
+  com `confianca = "declarada"`. O cenário não vira arquivo: `app.cli.rodar_cenario(args, cenario, origem)` (o
+  `cmd_run` da linha de comando é `rodar_cenario(args)`, sem mudança de comportamento) roda o ciclo com o objeto, e
+  `meta.arquivo_cenario` / evento `sistema/inicio.cenario` = `"cenário da tela (POST /api/run)"`. `idioma` (§19) e
+  o job assíncrono continuam iguais.
+- `POST /api/cenarios {nome, cenario, sample}` → 201; grava o cenário validado (mesma validação) em
+  `FOCOCERTO_CENARIOS_DIR/<nome>.yaml` (padrão `data/estado/cenarios/`, ignorado pelo git). `nome` só
+  `[A-Za-z0-9_-]{1,64}` (senão 400). Nome de um cenário do repositório (stem em `cenarios/` ou `input_examples/`)
+  → 409, nunca sobrescreve; nome já salvo é substituído (`substituido: true`).
+- `GET /api/cenarios` lista os do repositório (`origem: "repositorio"`, com `caminho`) e os salvos
+  (`origem: "salvo"`, `caminho: null`, `salvo_em`); cada item ganhou `bases_declaradas`. `GET /api/cenarios/{nome}`
+  → `{nome, origem, caminho, cenario}` (repositório primeiro, depois salvos; 404 se não existe).
+- A quantidade de equipes continua vindo do coordenador (§16): a API não completa nem sugere recursos.

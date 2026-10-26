@@ -26,6 +26,9 @@ caminhos.
 - Pasta das saídas: `out/` (ou `FOCOCERTO_SAIDA`). O `.env` da raiz é lido quando o servidor sobe, igual à CLI.
 - `web/api.yaml` diz onde estão os exemplos e de quais pastas o `POST /api/run` aceita cenários
   (sobrescreva com `FOCOCERTO_EXEMPLOS` e `FOCOCERTO_PASTAS_CENARIOS`).
+- Cenários montados na tela e salvos (`POST /api/cenarios`) vão para `FOCOCERTO_CENARIOS_DIR` (padrão
+  `data/estado/cenarios/`, fora do git). Os cenários do repositório (`cenarios/`, `input_examples/`) nunca são
+  sobrescritos.
 
 ## Conceitos
 
@@ -75,13 +78,71 @@ Dias com dados no cache e dias que já têm plano salvo. Região sem `config/reg
  "periodos_com_plano": ["2026-10-23"], "erro_cache": null}
 ```
 
-### `GET /api/cenarios`
-Arquivos de recursos que o `POST /api/run` aceita (as duas primeiras pastas de `web/api.yaml`: `cenarios/` e
-`input_examples/`).
+### `GET /api/bases?regiao=tocantins[&sample=true]`
+Bases **conhecidas** da região: camadas `oficial`, `osm` e `estimada` (`docs/CONTRATOS.md` §16), já fundidas, do
+mesmo repositório que o `run` usaria (cache local com `sample=true` ou sem `ZETARIS_API_KEY`; senão Zetaris). Vem
+também `periodos` (dias com dados; `null` se o repositório não informa). Nas bases da lista oficial vêm `orgao`,
+`fonte_url`, `data_fonte` e `coordenada` (de onde veio a coordenada). Região sem `config/regioes/<r>.yaml` → 404;
+região sem dados no cache → 404 com a explicação; Zetaris fora do ar → 503. A resposta fica 5 min em memória.
 ```json
-[{"caminho": "cenarios/tocantins-escasso.yaml", "nome": "tocantins-escasso", "regiao": "tocantins",
-  "periodo": "2026-10-23", "simulado": true, "recursos": 6, "reserva": 0, "notas": []}]
+{"regiao": "tocantins", "repositorio": "RepositorioCache",
+ "periodos": ["2026-10-17", "2026-10-18", "2026-10-19", "2026-10-20", "2026-10-21", "2026-10-22", "2026-10-23", "2026-10-24"],
+ "bases": [
+  {"id": "cbmto_paraiso", "nome": "CBMTO 3ª Cia do 1º BBM Paraíso do Tocantins", "lat": -10.17611, "lon": -48.86667,
+   "confianca": "oficial",
+   "fonte": "CBMTO — https://conexaoto.com.br/2023/01/27/companhia-de-bombeiros-em-paraiso-… (2023); coordenada: sede do município (GeoNames); endereço do quartel não georreferenciado",
+   "simulada": false, "orgao": "CBMTO", "fonte_url": "https://conexaoto.com.br/2023/01/27/companhia-de-bombeiros-em-paraiso-…",
+   "data_fonte": "2023", "coordenada": "sede do município (GeoNames); endereço do quartel não georreferenciado"},
+  {"id": "osm_n3165869368", "nome": "Bombeiros (perto de Porangatu, 1 km)", "lat": -13.445225, "lon": -49.136863,
+   "confianca": "osm", "fonte": "OpenStreetMap node/3165869368", "simulada": false}
+ ]}
 ```
+(Tocantins: 16 bases, das camadas `oficial` e `osm`.)
+
+### `GET /api/cenarios`
+Cenários do repositório (as duas primeiras pastas de `web/api.yaml`, `origem: "repositorio"`, com `caminho`,
+aceito em `recursos` no `POST /api/run`) e os salvos pela tela (`origem: "salvo"`, `caminho: null`, com
+`salvo_em`). Para usar um salvo, carregue com `GET /api/cenarios/{nome}` e mande o objeto em `cenario`.
+```json
+[{"caminho": "cenarios/tocantins-medio.yaml", "nome": "tocantins-medio", "origem": "repositorio", "regiao": "tocantins",
+  "periodo": "2026-10-23", "simulado": true, "recursos": 10, "bases_declaradas": 0, "reserva": 1, "notas": []},
+ {"caminho": null, "nome": "meu-dia-23", "origem": "salvo", "regiao": "tocantins", "periodo": "2026-10-23",
+  "simulado": true, "recursos": 4, "bases_declaradas": 1, "reserva": 1, "notas": ["ponte do rio Sono interditada"],
+  "salvo_em": "2026-10-26T18:57:06+00:00"}]
+```
+O mesmo nome pode aparecer em `cenarios/` e em `input_examples/`; `GET /api/cenarios/{nome}` devolve o de
+`cenarios/`.
+
+### `GET /api/cenarios/{nome}`
+O cenário inteiro, no formato de `cenarios/*.yaml` (`Cenario`), pronto para preencher a tela. Primeiro procura
+nos do repositório, depois nos salvos. Nome com caractere fora de `[A-Za-z0-9_-]` → 400; não existe → 404.
+```json
+{"nome": "meu-dia-23", "origem": "salvo", "caminho": null,
+ "cenario": {"regiao": "tocantins", "periodo": "2026-10-23",
+   "recursos": [{"id": "palmas-t1", "base_id": "osm_n5067657890", "tipo": "terrestre", "capacidade": 1, "disponivel": true},
+                {"id": "palmas-a1", "base_id": "osm_n5067657890", "tipo": "aereo", "capacidade": 1, "disponivel": true},
+                {"id": "gurupi-t1", "base_id": "cbmto_gurupi", "tipo": "terrestre", "capacidade": 1, "disponivel": true},
+                {"id": "novoacordo-t1", "base_id": "decl_novo_acordo", "tipo": "terrestre", "capacidade": 1, "disponivel": true}],
+   "bases": [{"id": "decl_novo_acordo", "nome": "Brigada municipal de Novo Acordo", "lat": -9.97, "lon": -47.68,
+              "fonte": "coordenador (tela)", "simulada": false, "confianca": "declarada"}],
+   "reserva": 1, "notas": ["ponte do rio Sono interditada"], "simulado": true}}
+```
+
+### `POST /api/cenarios` → `201`
+Salva o cenário montado na tela em `FOCOCERTO_CENARIOS_DIR/<nome>.yaml`, depois de passar pela **mesma
+validação** do `POST /api/run` (422 com a lista de erros). `sample: true` valida as bases contra o cache local.
+```json
+// request
+{"nome": "meu-dia-23", "cenario": {"regiao": "tocantins", "periodo": "2026-10-23", "…": "mesmo objeto do POST /api/run"},
+ "sample": true}
+// response 201
+{"ok": true, "nome": "meu-dia-23", "origem": "salvo", "substituido": false, "url": "/api/cenarios/meu-dia-23"}
+// nome de um cenário do repositório → 409 (não sobrescreve)
+{"detail": "'tocantins-medio' é um cenário do repositório (cenarios/tocantins-medio.yaml) e não pode ser sobrescrito. Escolha outro nome."}
+// nome inválido → 400
+{"detail": "Nome de cenário inválido: '../x' (use só letras, números, _ ou -; até 64)."}
+```
+Salvar de novo um nome já salvo **substitui** (`"substituido": true`); peça confirmação na tela.
 
 ### `GET /api/exemplos` e `GET /api/exemplos/{nome}`
 A lista traz o cabeçalho de cada exemplo. O detalhe devolve o `plano.json` inteiro (mesmo formato do
@@ -197,8 +258,25 @@ no sample mode, 1 a 2 s.
 // response 202
 {"job_id": "61db0e96f557", "status": "rodando", "url": "/api/jobs/61db0e96f557"}
 ```
+- Mande **um** de dois: `recursos` (caminho) **ou** `cenario` (o objeto inteiro, montado na tela). Nenhum ou
+  os dois → 422.
 - `recursos`: caminho relativo de um `.yaml` numa das `pastas_cenarios` de `web/api.yaml` (`cenarios/`,
   `input_examples/`, `eval/cenarios/`, `eval/cenarios_2periodos/`; lista em `GET /api/cenarios`). Outro caminho → 400; arquivo inexistente → 404.
+- `cenario`: o mesmo formato de `cenarios/*.yaml` (`regiao, periodo, recursos[{id, base_id, tipo, capacidade,
+  disponivel}], bases[{id, nome, lat, lon, fonte}]` (declaradas, opcional), `reserva, notas[], simulado`). Não
+  vira arquivo: vai direto para o ciclo, e `meta.arquivo_cenario` do plano diz `"cenário da tela (POST /api/run)"`.
+  As bases declaradas entram com `confianca: "declarada"`. Validação (422, todos os erros juntos, no formato do
+  FastAPI `[{loc, msg, type}]`): `base_id` que não está nas bases conhecidas (`GET /api/bases`) nem nas declaradas,
+  id de recurso ou de base repetido, `tipo` fora de `terrestre`/`aereo`, `capacidade` < 1, `reserva` < 0, base
+  declarada fora da região (bbox + 1°), período sem dados (`periodo` do pedido ou do cenário), região do cenário
+  diferente de `regiao`. Exemplo real (id repetido e base inexistente):
+  ```json
+  {"detail": [
+    {"loc": ["body", "cenario", "recursos", 1, "id"], "msg": "Id de recurso repetido: 'palmas-t1'.", "type": "value_error"},
+    {"loc": ["body", "cenario", "recursos", 2, "base_id"], "msg": "A base 'cbmto_xyz' do recurso 'gurupi-t1' não existe: não está nas bases conhecidas de 'tocantins' (GET /api/bases?regiao=tocantins) nem nas declaradas no cenário.", "type": "value_error"}]}
+  ```
+  `"tipo": "helicoptero"` → `{"type": "literal_error", "loc": ["body", "cenario", "recursos", 0, "tipo"], "msg": "Input should be 'terrestre' or 'aereo'", …}`;
+  período sem dados → `"Não há dados de 2026-09-01 para 'tocantins' (dias disponíveis: 2026-10-17 a 2026-10-24; lista em GET /api/periodos?regiao=tocantins)."`.
 - `periodo` é opcional (padrão: o do cenário). `sample` é opcional (padrão `false`, como a CLI: sem
   `ZETARIS_API_KEY` usa o cache, sem `HMEM_URL` usa a memória local, e o LLM segue `LLM_PROVIDER`).
 - `idioma` é opcional: `"pt-BR"` ou `"en"` (aceita `"pt"`, `"en-US"`...; vazio ou `null` = padrão). É o idioma do
@@ -260,6 +338,71 @@ aprovação **não** resolve as escalações: a mensagem avisa.
 // sem plano salvo → 404
 {"detail": "Não há plano salvo em …/out/tocantins/2026-10-19/plano.json. Rode antes: python -m app.cli run --regiao tocantins --periodo 2026-10-19 --recursos cenarios/<cenario>.yaml"}
 ```
+
+## Tela "Recursos do dia": montar o cenário e gerar o plano
+
+O coordenador monta o dia na tela, sem YAML. Fluxo (cada passo com o endpoint; os exemplos são reais, de uma
+execução em sample mode com `TestClient`):
+
+1. **Região e dia.** `GET /api/regioes` (enquadra o mapa pela `bbox`) e `GET /api/periodos?regiao=…` (dias com
+   dados). Para começar de um cenário pronto: `GET /api/cenarios` e `GET /api/cenarios/{nome}` (preenche a tela).
+2. **Listar as bases.** `GET /api/bases?regiao=tocantins` → quadrados no mapa e lista ao lado, cada base com o
+   selo da procedência (`oficial`, `osm`, `estimada`) e, ao abrir, `fonte`, `orgao`, `data_fonte`, `coordenada`.
+3. **Adicionar equipes numa base.** O coordenador escolhe a base e diz quantas equipes terrestres e aeronaves
+   tem ali. Cada uma vira um item de `recursos`: `{"id": "palmas-t1", "base_id": "osm_n5067657890", "tipo":
+   "terrestre", "capacidade": 1, "disponivel": true}`. O id pode ser gerado pela tela (`<base curta>-t<n>` /
+   `-a<n>`), mas tem de ser único. Uma equipe que existe mas está fora de serviço vai com `disponivel: false`.
+4. **Criar base nova clicando no mapa.** Clique → pede nome (e, opcional, de onde veio a informação) → vira um
+   item de `bases`: `{"id": "decl_novo_acordo", "nome": "Brigada municipal de Novo Acordo", "lat": -9.97,
+   "lon": -47.68, "fonte": "coordenador (tela)"}`. Ela aparece como **declarada** (cor própria) e recebe
+   equipes como as outras. A API recusa base fora da região (bbox + 1°). Se ela ficar a menos de 3 km de uma
+   base conhecida, o ciclo funde as duas e a declarada vence (CONTRATOS §16): avise na tela.
+5. **Reserva e notas.** `reserva` = quantos recursos manter sem designação (inteiro ≥ 0). `notas` = observações
+   do dia (texto livre): o ciclo as lê como notas do coordenador **só neste período** (entram em
+   `memorias_usadas` com `fonte: "cenario:<periodo>"`, sem ir ao H-MEM). Para memória que vale nos próximos
+   dias, use `POST /api/nota`.
+6. **Gerar o plano.** `POST /api/run` com o objeto em `cenario`:
+   ```json
+   {"regiao": "tocantins", "sample": true, "idioma": "en",
+    "cenario": {"regiao": "tocantins", "periodo": "2026-10-23", "simulado": true, "reserva": 1,
+                "notas": ["ponte do rio Sono interditada"],
+                "bases": [{"id": "decl_novo_acordo", "nome": "Brigada municipal de Novo Acordo", "lat": -9.97,
+                           "lon": -47.68, "fonte": "coordenador (tela)"}],
+                "recursos": [
+                  {"id": "palmas-t1", "base_id": "osm_n5067657890", "tipo": "terrestre", "capacidade": 1, "disponivel": true},
+                  {"id": "palmas-a1", "base_id": "osm_n5067657890", "tipo": "aereo", "capacidade": 1, "disponivel": true},
+                  {"id": "gurupi-t1", "base_id": "cbmto_gurupi", "tipo": "terrestre", "capacidade": 1, "disponivel": true},
+                  {"id": "novoacordo-t1", "base_id": "decl_novo_acordo", "tipo": "terrestre", "capacidade": 1, "disponivel": true}]}}
+   // 202
+   {"job_id": "21d57e93c71b", "status": "rodando", "url": "/api/jobs/21d57e93c71b"}
+   ```
+   Um 422 volta com `loc` apontando o item (`["body", "cenario", "recursos", 2, "base_id"]`): destaque a linha
+   certa na tela. Opcional: "Salvar cenário" → `POST /api/cenarios` com um nome, para reabrir depois.
+7. **Acompanhar o job.** `GET /api/jobs/21d57e93c71b` a cada 1–2 s (trecho real):
+   ```json
+   {"id": "21d57e93c71b", "status": "concluido",
+    "progresso": [{"t": "2026-10-26T18:57:01+00:00", "msg": "Verificando módulos..."},
+                  {"t": "2026-10-26T18:57:05+00:00", "msg": "AVISO: recursos SIMULADOS (cenário da tela (POST /api/run))"},
+                  {"t": "2026-10-26T18:57:05+00:00", "msg": "Região tocantins, período 2026-10-23, 4 recursos, modo offline, idioma en"},
+                  {"t": "2026-10-26T18:57:05+00:00", "msg": "  sistema: fim"}],
+    "erro": null,
+    "resultado": {"regiao": "tocantins", "periodo": "2026-10-23", "modo": "offline", "idioma": "en", "simulado": true,
+                  "aprovacao_humana": "pendente", "status": "escala", "designacoes": 3, "escalacoes": 12,
+                  "ocorrencias": 15, "rodadas": 2, "plano_url": "/api/plano/tocantins/2026-10-23", "duracao_s": 3.94}}
+   ```
+8. **Abrir o plano.** `GET` em `resultado.plano_url`. A base criada na tela volta em `bases[]` com
+   `"confianca": "declarada"`; `meta.arquivo_cenario` = `"cenário da tela (POST /api/run)"`. Com só 4 recursos
+   o exemplo acima escala 12 ocorrências: é o resultado esperado de poucos recursos, não um erro.
+
+Regras desta tela:
+- **Procedência visível em toda base**: selo `oficial`/`osm`/`estimada`/`declarada` e a fonte ao abrir. Base
+  `estimada` é sede de município **sem unidade verificada**: diga isso.
+- **A base declarada é a do coordenador**: a tela não "corrige" a posição nem a troca por uma base conhecida; a
+  procedência dela é a palavra do coordenador.
+- **A quantidade de equipes vem do coordenador.** A tela não sugere nem preenche quantidades sozinha (nada de
+  "padrão: 2 por base"); começar de um cenário salvo ou do repositório é escolha explícita dele.
+- `simulado`: mande `true` quando as quantidades são de demonstração (o plano mostra o selo "simulado") e `false`
+  quando o coordenador informa a disponibilidade real do dia. Deixe o controle visível, não escondido.
 
 ## Regras da tela (não negociáveis)
 

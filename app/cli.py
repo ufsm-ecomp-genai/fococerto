@@ -229,6 +229,13 @@ def aprender_periodo_anterior(args, regiao: str, periodo: str, repo, memoria, lo
 
 
 def cmd_run(args) -> int:
+    return rodar_cenario(args)
+
+
+def rodar_cenario(args, cenario: Cenario | None = None, origem: str | None = None) -> int:
+    """O ``run``. Sem ``cenario``, lê o arquivo de ``--recursos`` (comportamento da linha de comando). Com
+    ``cenario`` (objeto já validado, ex.: montado na tela e enviado ao ``POST /api/run``), usa-o direto, sem
+    arquivo; ``origem`` é o rótulo que vai para o log e para ``meta.arquivo_cenario``."""
     from app.output import escrever_saidas
 
     progresso("Verificando módulos...")
@@ -237,16 +244,21 @@ def cmd_run(args) -> int:
     executar_periodo = mods["executar_periodo"]
 
     regiao = carregar_regiao(args.regiao)
-    arq = resolver_recursos(args)
-    cenario = carregar_cenario(arq)
+    if cenario is None:
+        arq = resolver_recursos(args)
+        cenario = carregar_cenario(arq)
+        origem, rotulo = str(arq), arq.name
+    else:
+        origem = origem or "cenário enviado (sem arquivo)"
+        rotulo = origem
     if cenario.regiao != regiao.nome:
-        raise ErroCLI(f"O cenário {arq} é da região '{cenario.regiao}', mas --regiao é '{regiao.nome}'.")
+        raise ErroCLI(f"O cenário {origem} é da região '{cenario.regiao}', mas --regiao é '{regiao.nome}'.")
     periodo = args.periodo or cenario.periodo
     if args.periodo and args.periodo != cenario.periodo:
         progresso(f"--periodo {args.periodo} substitui o período do cenário ({cenario.periodo})")
         cenario = cenario.model_copy(update={"periodo": args.periodo})
     if cenario.simulado:
-        progresso(f"AVISO: recursos SIMULADOS ({arq.name})")
+        progresso(f"AVISO: recursos SIMULADOS ({rotulo})")
 
     modo = escolher_modo(args)
     idioma = idioma_execucao(args, regiao)
@@ -258,7 +270,7 @@ def cmd_run(args) -> int:
     log = LogComProgresso(regiao.nome, periodo, pasta=Path(args.pasta_logs))
     progresso(f"Log: {log.caminho}")
 
-    log.evento("sistema", "inicio", {"cenario": str(arq), "modo": modo, "sample": modo_sample(args),
+    log.evento("sistema", "inicio", {"cenario": origem, "modo": modo, "sample": modo_sample(args),
                                       "simulado": cenario.simulado, "idioma": idioma})
     aprender_periodo_anterior(args, regiao.nome, periodo, repo, memoria, log)
     progresso("Rodando o ciclo Planejador/Crítico/Analista (pode demorar no modo LLM)...")
@@ -274,7 +286,7 @@ def cmd_run(args) -> int:
                                               "n_consultas": len(consultas_zetaris), "sql": consultas_zetaris})
 
     pasta = pasta_saida(args, regiao.nome, periodo)
-    caminhos = escrever_saidas(resultado, regiao, cenario, pasta, modo=modo, arquivo_cenario=str(arq))
+    caminhos = escrever_saidas(resultado, regiao, cenario, pasta, modo=modo, arquivo_cenario=origem)
     log.evento("sistema", "fim", {"saidas": {k: str(v) for k, v in caminhos.items()},
                                    "designacoes": len(resultado.plano.designacoes),
                                    "escalacoes": len(resultado.escalacoes)})
