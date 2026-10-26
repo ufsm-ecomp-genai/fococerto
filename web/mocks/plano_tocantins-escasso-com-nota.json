@@ -1,0 +1,1342 @@
+{
+ "meta": {
+  "versao_formato": 1,
+  "regiao": "tocantins",
+  "periodo": "2026-10-23",
+  "idioma": "pt-BR",
+  "modo": "offline",
+  "simulado": true,
+  "arquivo_cenario": "input_examples/tocantins-escasso.yaml",
+  "gerado_em": "2026-10-26T18:14:03.199276+00:00",
+  "aprovacao_humana": "pendente"
+ },
+ "plano": {
+  "periodo": "2026-10-23",
+  "regiao": "tocantins",
+  "designacoes": [
+   {
+    "recurso_id": "palmas-a1",
+    "ocorrencia_id": "cel_-91_-474",
+    "ordem": 1,
+    "eta_h": 0.97,
+    "justificativa": "Prioridade 0.69; 2135 habitantes no raio; Centenário a 8.7 km; 2 focos, FRP somado 398 MW; palmas-a1 (aereo) chega em ETA 1.0 h saindo de CBMTO 1º BBM Palmas.",
+    "evidencias": [
+     "focos:2",
+     "eta:0.97",
+     "pop:2135",
+     "dist:Centenário:8.7",
+     "base:osm_n5067657890"
+    ]
+   },
+   {
+    "recurso_id": "portonac-t1",
+    "ocorrencia_id": "cel_-117_-491",
+    "ordem": 2,
+    "eta_h": 4.4,
+    "justificativa": "Prioridade 0.66; 87545 habitantes no raio; Gurupi a 8.8 km; 8 focos, FRP somado 24 MW; portonac-t1 (terrestre) chega em ETA 4.4 h saindo de CBMTO 5ª Cia do 1º BBM Porto Nacional.",
+    "evidencias": [
+     "focos:8",
+     "eta:4.40",
+     "pop:87545",
+     "dist:Gurupi:8.8",
+     "base:cbmto_porto_nacional"
+    ]
+   },
+   {
+    "recurso_id": "palmas-t1",
+    "ocorrencia_id": "cel_-107_-476",
+    "ordem": 3,
+    "eta_h": 3.39,
+    "justificativa": "Prioridade 0.64; 7842 habitantes no raio; Ponte Alta do Tocantins a 10.3 km; 3 focos, FRP somado 23 MW; palmas-t1 (terrestre) chega em ETA 3.4 h saindo de CBMTO 1º BBM Palmas.",
+    "evidencias": [
+     "focos:3",
+     "eta:3.39",
+     "pop:7842",
+     "dist:Ponte Alta do Tocantins:10.3",
+     "base:osm_n5067657890"
+    ]
+   },
+   {
+    "recurso_id": "dianopolis-t1",
+    "ocorrencia_id": "cel_-122_-464",
+    "ordem": 4,
+    "eta_h": 2.51,
+    "justificativa": "Prioridade 0.62; 4295 habitantes no raio; Ponte Alta do Bom Jesus a 10.0 km; 1 focos, FRP somado 38 MW; dianopolis-t1 (terrestre) chega em ETA 2.5 h saindo de CBMTO Companhia de Dianópolis.",
+    "evidencias": [
+     "focos:1",
+     "eta:2.51",
+     "pop:4295",
+     "dist:Ponte Alta do Bom Jesus:10.0",
+     "base:cbmto_dianopolis"
+    ]
+   },
+   {
+    "recurso_id": "paraiso-t1",
+    "ocorrencia_id": "cel_-113_-493",
+    "ordem": 5,
+    "eta_h": 4.55,
+    "justificativa": "Prioridade 0.62; 4321 habitantes no raio; Dueré a 7.3 km; 4 focos, FRP somado 66 MW; paraiso-t1 (terrestre) chega em ETA 4.5 h saindo de CBMTO 3ª Cia do 1º BBM Paraíso do Tocantins.",
+    "evidencias": [
+     "focos:4",
+     "eta:4.55",
+     "pop:4321",
+     "dist:Dueré:7.3",
+     "base:cbmto_paraiso"
+    ]
+   }
+  ],
+  "reserva": [
+   "saofelix-t1"
+  ],
+  "nao_atendidas": [
+   "cel_-96_-468",
+   "cel_-122_-473",
+   "cel_-105_-475",
+   "cel_-90_-486",
+   "cel_-103_-478",
+   "cel_-95_-462",
+   "cel_-121_-466",
+   "cel_-95_-468",
+   "cel_-107_-483",
+   "cel_-117_-469"
+  ],
+  "resumo": "[escala] Contra-proposta do Crítico (offline). 5 designações, 10 ocorrências sem recurso, 1 recursos em reserva.",
+  "rodada": 1
+ },
+ "status": "escala",
+ "ocorrencias": [
+  {
+   "id": "cel_-91_-474",
+   "lat": -9.02206,
+   "lon": -47.30267,
+   "n_focos": 2,
+   "frp_soma": 398.28,
+   "frp_max": 199.14,
+   "primeiro": "2026-10-23T16:37:00",
+   "ultimo": "2026-10-23T16:37:00",
+   "periodos_seguidos": 1,
+   "status": "nova",
+   "pop_raio": 2135,
+   "dist_ti_uc_km": null,
+   "vpd_kpa": 4.03,
+   "vento_kmh": 19.2,
+   "prioridade": 0.6855,
+   "componentes": {
+    "exposicao": 0.6659,
+    "intensidade": 0.9799,
+    "tempo": 0.5373,
+    "persistencia": 0.0,
+    "crescimento": 1.0
+   },
+   "localidades": [
+    {
+     "nome": "Centenário",
+     "pop": 2135,
+     "dist_km": 8.7
+    }
+   ]
+  },
+  {
+   "id": "cel_-96_-468",
+   "lat": -9.56671,
+   "lon": -46.71507,
+   "n_focos": 6,
+   "frp_soma": 63.33,
+   "frp_max": 19.96,
+   "primeiro": "2026-10-23T16:37:00",
+   "ultimo": "2026-10-23T16:37:00",
+   "periodos_seguidos": 2,
+   "status": "crescendo",
+   "pop_raio": 2991,
+   "dist_ti_uc_km": null,
+   "vpd_kpa": 5.39,
+   "vento_kmh": 22.9,
+   "prioridade": 0.6851,
+   "componentes": {
+    "exposicao": 0.6952,
+    "intensidade": 0.6812,
+    "tempo": 0.8572,
+    "persistencia": 0.3333,
+    "crescimento": 0.6667
+   },
+   "localidades": [
+    {
+     "nome": "Lizarda",
+     "pop": 2991,
+     "dist_km": 5.5
+    }
+   ]
+  },
+  {
+   "id": "cel_-117_-491",
+   "lat": -11.68047,
+   "lon": -49.00484,
+   "n_focos": 8,
+   "frp_soma": 24.48,
+   "frp_max": 4.01,
+   "primeiro": "2026-10-23T04:02:00",
+   "ultimo": "2026-10-23T05:44:00",
+   "periodos_seguidos": 1,
+   "status": "nova",
+   "pop_raio": 87545,
+   "dist_ti_uc_km": null,
+   "vpd_kpa": 4.16,
+   "vento_kmh": 13.8,
+   "prioridade": 0.6581,
+   "componentes": {
+    "exposicao": 0.9884,
+    "intensidade": 0.5297,
+    "tempo": 0.3987,
+    "persistencia": 0.0,
+    "crescimento": 1.0
+   },
+   "localidades": [
+    {
+     "nome": "Gurupi",
+     "pop": 87545,
+     "dist_km": 8.8
+    }
+   ]
+  },
+  {
+   "id": "cel_-107_-476",
+   "lat": -10.67027,
+   "lon": -47.59331,
+   "n_focos": 3,
+   "frp_soma": 23.25,
+   "frp_max": 11.33,
+   "primeiro": "2026-10-23T16:37:00",
+   "ultimo": "2026-10-23T16:37:00",
+   "periodos_seguidos": 1,
+   "status": "nova",
+   "pop_raio": 7842,
+   "dist_ti_uc_km": null,
+   "vpd_kpa": 4.86,
+   "vento_kmh": 19.7,
+   "prioridade": 0.636,
+   "componentes": {
+    "exposicao": 0.7789,
+    "intensidade": 0.5216,
+    "tempo": 0.6649,
+    "persistencia": 0.0,
+    "crescimento": 1.0
+   },
+   "localidades": [
+    {
+     "nome": "Ponte Alta do Tocantins",
+     "pop": 7842,
+     "dist_km": 10.3
+    }
+   ]
+  },
+  {
+   "id": "cel_-122_-464",
+   "lat": -12.11782,
+   "lon": -46.39112,
+   "n_focos": 1,
+   "frp_soma": 38.37,
+   "frp_max": 38.37,
+   "primeiro": "2026-10-23T16:35:00",
+   "ultimo": "2026-10-23T16:35:00",
+   "periodos_seguidos": 1,
+   "status": "nova",
+   "pop_raio": 4295,
+   "dist_ti_uc_km": null,
+   "vpd_kpa": 5.19,
+   "vento_kmh": 15.6,
+   "prioridade": 0.617,
+   "componentes": {
+    "exposicao": 0.7266,
+    "intensidade": 0.6009,
+    "tempo": 0.5623,
+    "persistencia": 0.0,
+    "crescimento": 1.0
+   },
+   "localidades": [
+    {
+     "nome": "Ponte Alta do Bom Jesus",
+     "pop": 4295,
+     "dist_km": 10.0
+    }
+   ]
+  },
+  {
+   "id": "cel_-113_-493",
+   "lat": -11.27941,
+   "lon": -49.25654,
+   "n_focos": 4,
+   "frp_soma": 66.1,
+   "frp_max": 20.38,
+   "primeiro": "2026-10-23T16:37:00",
+   "ultimo": "2026-10-23T16:37:00",
+   "periodos_seguidos": 1,
+   "status": "nova",
+   "pop_raio": 4321,
+   "dist_ti_uc_km": null,
+   "vpd_kpa": 4.38,
+   "vento_kmh": 14.6,
+   "prioridade": 0.6153,
+   "componentes": {
+    "exposicao": 0.7271,
+    "intensidade": 0.6881,
+    "tempo": 0.4441,
+    "persistencia": 0.0,
+    "crescimento": 1.0
+   },
+   "localidades": [
+    {
+     "nome": "Dueré",
+     "pop": 4321,
+     "dist_km": 7.3
+    }
+   ]
+  },
+  {
+   "id": "cel_-122_-473",
+   "lat": -12.13529,
+   "lon": -47.26468,
+   "n_focos": 2,
+   "frp_soma": 61.64,
+   "frp_max": 47.88,
+   "primeiro": "2026-10-23T16:35:00",
+   "ultimo": "2026-10-23T16:35:00",
+   "periodos_seguidos": 1,
+   "status": "nova",
+   "pop_raio": 3956,
+   "dist_ti_uc_km": null,
+   "vpd_kpa": 5.61,
+   "vento_kmh": 12.1,
+   "prioridade": 0.6153,
+   "componentes": {
+    "exposicao": 0.7195,
+    "intensidade": 0.6769,
+    "tempo": 0.4714,
+    "persistencia": 0.0,
+    "crescimento": 1.0
+   },
+   "localidades": [
+    {
+     "nome": "Conceição do Tocantins",
+     "pop": 3956,
+     "dist_km": 10.0
+    }
+   ]
+  },
+  {
+   "id": "cel_-105_-475",
+   "lat": -10.46009,
+   "lon": -47.45804,
+   "n_focos": 3,
+   "frp_soma": 19.78,
+   "frp_max": 13.96,
+   "primeiro": "2026-10-23T16:37:00",
+   "ultimo": "2026-10-23T16:37:00",
+   "periodos_seguidos": 1,
+   "status": "nova",
+   "pop_raio": 3610,
+   "dist_ti_uc_km": null,
+   "vpd_kpa": 4.86,
+   "vento_kmh": 19.7,
+   "prioridade": 0.6061,
+   "componentes": {
+    "exposicao": 0.7115,
+    "intensidade": 0.4964,
+    "tempo": 0.6649,
+    "persistencia": 0.0,
+    "crescimento": 1.0
+   },
+   "localidades": [
+    {
+     "nome": "Lagoa do Tocantins",
+     "pop": 3610,
+     "dist_km": 13.7
+    }
+   ]
+  },
+  {
+   "id": "cel_-90_-486",
+   "lat": -8.96196,
+   "lon": -48.53019,
+   "n_focos": 2,
+   "frp_soma": 16.92,
+   "frp_max": 12.1,
+   "primeiro": "2026-10-23T16:37:00",
+   "ultimo": "2026-10-23T16:37:00",
+   "periodos_seguidos": 1,
+   "status": "nova",
+   "pop_raio": 29357,
+   "dist_ti_uc_km": null,
+   "vpd_kpa": 3.64,
+   "vento_kmh": 14.7,
+   "prioridade": 0.6051,
+   "componentes": {
+    "exposicao": 0.8935,
+    "intensidade": 0.4721,
+    "tempo": 0.3716,
+    "persistencia": 0.0,
+    "crescimento": 1.0
+   },
+   "localidades": [
+    {
+     "nome": "Fortaleza do Tabocão",
+     "pop": 3676,
+     "dist_km": 10.7
+    },
+    {
+     "nome": "Guaraí",
+     "pop": 25681,
+     "dist_km": 14.4
+    }
+   ]
+  },
+  {
+   "id": "cel_-103_-478",
+   "lat": -10.22666,
+   "lon": -47.73829,
+   "n_focos": 11,
+   "frp_soma": 51.87,
+   "frp_max": 7.08,
+   "primeiro": "2026-10-23T16:37:00",
+   "ultimo": "2026-10-23T16:37:00",
+   "periodos_seguidos": 2,
+   "status": "crescendo",
+   "pop_raio": 2463,
+   "dist_ti_uc_km": null,
+   "vpd_kpa": 4.78,
+   "vento_kmh": 15.9,
+   "prioridade": 0.6022,
+   "componentes": {
+    "exposicao": 0.6783,
+    "intensidade": 0.6491,
+    "tempo": 0.5278,
+    "persistencia": 0.3333,
+    "crescimento": 0.6364
+   },
+   "localidades": [
+    {
+     "nome": "Santa Tereza do Tocantins",
+     "pop": 2463,
+     "dist_km": 9.8
+    }
+   ]
+  },
+  {
+   "id": "cel_-95_-462",
+   "lat": -9.4707,
+   "lon": -46.19405,
+   "n_focos": 1,
+   "frp_soma": 9.49,
+   "frp_max": 9.49,
+   "primeiro": "2026-10-23T16:37:00",
+   "ultimo": "2026-10-23T16:37:00",
+   "periodos_seguidos": 1,
+   "status": "nova",
+   "pop_raio": 4829,
+   "dist_ti_uc_km": null,
+   "vpd_kpa": 5.4,
+   "vento_kmh": 19.0,
+   "prioridade": 0.5965,
+   "componentes": {
+    "exposicao": 0.7368,
+    "intensidade": 0.3845,
+    "tempo": 0.7125,
+    "persistencia": 0.0,
+    "crescimento": 1.0
+   },
+   "localidades": [
+    {
+     "nome": "Morros",
+     "pop": 4829,
+     "dist_km": 12.0
+    }
+   ]
+  },
+  {
+   "id": "cel_-121_-466",
+   "lat": -12.02473,
+   "lon": -46.59017,
+   "n_focos": 4,
+   "frp_soma": 22.54,
+   "frp_max": 7.62,
+   "primeiro": "2026-10-23T16:35:00",
+   "ultimo": "2026-10-23T16:35:00",
+   "periodos_seguidos": 1,
+   "status": "nova",
+   "pop_raio": 4295,
+   "dist_ti_uc_km": null,
+   "vpd_kpa": 5.19,
+   "vento_kmh": 15.6,
+   "prioridade": 0.596,
+   "componentes": {
+    "exposicao": 0.7266,
+    "intensidade": 0.5168,
+    "tempo": 0.5623,
+    "persistencia": 0.0,
+    "crescimento": 1.0
+   },
+   "localidades": [
+    {
+     "nome": "Ponte Alta do Bom Jesus",
+     "pop": 4295,
+     "dist_km": 14.1
+    }
+   ]
+  },
+  {
+   "id": "cel_-95_-468",
+   "lat": -9.46733,
+   "lon": -46.71439,
+   "n_focos": 1,
+   "frp_soma": 6.05,
+   "frp_max": 6.05,
+   "primeiro": "2026-10-23T16:37:00",
+   "ultimo": "2026-10-23T16:37:00",
+   "periodos_seguidos": 1,
+   "status": "nova",
+   "pop_raio": 2991,
+   "dist_ti_uc_km": null,
+   "vpd_kpa": 5.39,
+   "vento_kmh": 22.9,
+   "prioridade": 0.5946,
+   "componentes": {
+    "exposicao": 0.6952,
+    "intensidade": 0.3195,
+    "tempo": 0.8572,
+    "persistencia": 0.0,
+    "crescimento": 1.0
+   },
+   "localidades": [
+    {
+     "nome": "Lizarda",
+     "pop": 2991,
+     "dist_km": 14.8
+    }
+   ]
+  },
+  {
+   "id": "cel_-107_-483",
+   "lat": -10.68088,
+   "lon": -48.291,
+   "n_focos": 1,
+   "frp_soma": 6.8,
+   "frp_max": 6.8,
+   "primeiro": "2026-10-23T16:37:00",
+   "ultimo": "2026-10-23T16:37:00",
+   "periodos_seguidos": 1,
+   "status": "nova",
+   "pop_raio": 53316,
+   "dist_ti_uc_km": null,
+   "vpd_kpa": 3.48,
+   "vento_kmh": 16.4,
+   "prioridade": 0.5941,
+   "componentes": {
+    "exposicao": 0.9454,
+    "intensidade": 0.336,
+    "tempo": 0.3963,
+    "persistencia": 0.0,
+    "crescimento": 1.0
+   },
+   "localidades": [
+    {
+     "nome": "Porto Nacional",
+     "pop": 53316,
+     "dist_km": 14.1
+    }
+   ]
+  },
+  {
+   "id": "cel_-117_-469",
+   "lat": -11.6102,
+   "lon": -46.85868,
+   "n_focos": 1,
+   "frp_soma": 8.69,
+   "frp_max": 8.69,
+   "primeiro": "2026-10-23T16:37:00",
+   "ultimo": "2026-10-23T16:37:00",
+   "periodos_seguidos": 1,
+   "status": "nova",
+   "pop_raio": 22424,
+   "dist_ti_uc_km": null,
+   "vpd_kpa": 3.88,
+   "vento_kmh": 17.7,
+   "prioridade": 0.5928,
+   "componentes": {
+    "exposicao": 0.8701,
+    "intensidade": 0.3715,
+    "tempo": 0.4769,
+    "persistencia": 0.0,
+    "crescimento": 1.0
+   },
+   "localidades": [
+    {
+     "nome": "Dianópolis",
+     "pop": 22424,
+     "dist_km": 4.6
+    }
+   ]
+  }
+ ],
+ "bases": [
+  {
+   "id": "osm_n5067657890",
+   "nome": "CBMTO 1º BBM Palmas",
+   "lat": -10.206127,
+   "lon": -48.343395,
+   "fonte": "CBMTO — https://conexaoto.com.br/2023/01/16/1o-batalhao-e-quatro-companhias-de-bombeiros-militar-com-novos-comandos (2023); coordenada: quartel mapeado no OpenStreetMap (node/5067657890); id reaproveitado do OSM, a mesma unidade; fundida com osm_n5067657890 (OpenStreetMap: OpenStreetMap node/5067657890)",
+   "simulada": false,
+   "confianca": "oficial"
+  },
+  {
+   "id": "cbmto_paraiso",
+   "nome": "CBMTO 3ª Cia do 1º BBM Paraíso do Tocantins",
+   "lat": -10.17611,
+   "lon": -48.86667,
+   "fonte": "CBMTO — https://conexaoto.com.br/2023/01/27/companhia-de-bombeiros-em-paraiso-tem-novo-comandante-que-vai-atuar-frente-a-uma-das-cidades-mais-movimentadas-do-estado (2023); coordenada: sede do município (GeoNames); endereço do quartel não georreferenciado",
+   "simulada": false,
+   "confianca": "oficial"
+  },
+  {
+   "id": "cbmto_porto_nacional",
+   "nome": "CBMTO 5ª Cia do 1º BBM Porto Nacional",
+   "lat": -10.70806,
+   "lon": -48.41722,
+   "fonte": "CBMTO — https://conexaoto.com.br/2022/02/17/governador-wanderlei-autoriza-inicio-das-obras-do-quartel-do-corpo-de-bombeiros-de-porto-nacional (2022); coordenada: sede do município (GeoNames); endereço do quartel não georreferenciado",
+   "simulada": false,
+   "confianca": "oficial"
+  },
+  {
+   "id": "cbmto_gurupi",
+   "nome": "CBMTO 3º BBM Gurupi",
+   "lat": -11.72917,
+   "lon": -49.06861,
+   "fonte": "CBMTO — https://conexaoto.com.br/2023/07/09/praias-de-palmas-e-do-interior-recebem-apoio-com-presenca-de-bombeiros-militares (2023); coordenada: sede do município (GeoNames); endereço do quartel não georreferenciado",
+   "simulada": false,
+   "confianca": "oficial"
+  },
+  {
+   "id": "cbmto_dianopolis",
+   "nome": "CBMTO Companhia de Dianópolis",
+   "lat": -11.62778,
+   "lon": -46.82056,
+   "fonte": "CBMTO — https://conexaoto.com.br/2023/01/16/1o-batalhao-e-quatro-companhias-de-bombeiros-militar-com-novos-comandos (2023); coordenada: sede do município (GeoNames); endereço do quartel não georreferenciado",
+   "simulada": false,
+   "confianca": "oficial"
+  },
+  {
+   "id": "cbmto_colinas",
+   "nome": "CBMTO Companhia de Colinas do Tocantins",
+   "lat": -8.05917,
+   "lon": -48.475,
+   "fonte": "CBMTO — https://conexaoto.com.br/2023/01/16/1o-batalhao-e-quatro-companhias-de-bombeiros-militar-com-novos-comandos (2023); coordenada: sede do município (GeoNames); endereço do quartel não georreferenciado",
+   "simulada": false,
+   "confianca": "oficial"
+  },
+  {
+   "id": "prevfogo_sao_felix",
+   "nome": "Brigada Prevfogo/Ibama São Félix do Tocantins",
+   "lat": -10.16833,
+   "lon": -46.65944,
+   "fonte": "Prevfogo/Ibama — https://sbtnews.sbt.com.br/noticia/brasil/ibama-autoriza-contratacao-de-brigadas-federais-para-combate-a-incendios-em-municipios-de-19-estados (2024); coordenada: sede do município (GeoNames); Portaria Ibama nº 114/2024",
+   "simulada": false,
+   "confianca": "oficial"
+  },
+  {
+   "id": "prevfogo_santa_tereza",
+   "nome": "Brigada Prevfogo/Ibama Santa Tereza do Tocantins",
+   "lat": -10.28222,
+   "lon": -47.80833,
+   "fonte": "Prevfogo/Ibama — https://sbtnews.sbt.com.br/noticia/brasil/ibama-autoriza-contratacao-de-brigadas-federais-para-combate-a-incendios-em-municipios-de-19-estados (2024); coordenada: sede do município (GeoNames); Portaria Ibama nº 114/2024",
+   "simulada": false,
+   "confianca": "oficial"
+  },
+  {
+   "id": "prevfogo_itacaja",
+   "nome": "Brigada Prevfogo/Ibama Itacajá",
+   "lat": -8.39167,
+   "lon": -47.76778,
+   "fonte": "Prevfogo/Ibama — https://sbtnews.sbt.com.br/noticia/brasil/ibama-autoriza-contratacao-de-brigadas-federais-para-combate-a-incendios-em-municipios-de-19-estados (2024); coordenada: sede do município (GeoNames); Portaria Ibama nº 114/2024",
+   "simulada": false,
+   "confianca": "oficial"
+  },
+  {
+   "id": "prevfogo_goiatins",
+   "nome": "Brigada Prevfogo/Ibama Goiatins",
+   "lat": -7.71,
+   "lon": -47.31417,
+   "fonte": "Prevfogo/Ibama — https://sbtnews.sbt.com.br/noticia/brasil/ibama-autoriza-contratacao-de-brigadas-federais-para-combate-a-incendios-em-municipios-de-19-estados (2024); coordenada: sede do município (GeoNames); Portaria Ibama nº 114/2024",
+   "simulada": false,
+   "confianca": "oficial"
+  },
+  {
+   "id": "prevfogo_arraias",
+   "nome": "Brigada Prevfogo/Ibama Arraias",
+   "lat": -12.93139,
+   "lon": -46.93833,
+   "fonte": "Prevfogo/Ibama — https://sbtnews.sbt.com.br/noticia/brasil/ibama-autoriza-contratacao-de-brigadas-federais-para-combate-a-incendios-em-municipios-de-19-estados (2024); coordenada: sede do município (GeoNames); Portaria Ibama nº 114/2024",
+   "simulada": false,
+   "confianca": "oficial"
+  },
+  {
+   "id": "icmbio_rio_conceicao",
+   "nome": "ICMBio Esec Serra Geral do Tocantins em Rio da Conceição",
+   "lat": -11.40028,
+   "lon": -46.88333,
+   "fonte": "ICMBio — https://folha.qconcursos.com/n/icmbio-concurso-abre-cadastro-reserva-para-agentes-temporarios-em-rio-da-conceicao-to (2026); coordenada: sede do município (GeoNames); brigada temporária da Esec Serra Geral do Tocantins",
+   "simulada": false,
+   "confianca": "oficial"
+  },
+  {
+   "id": "osm_n3165869368",
+   "nome": "Bombeiros (perto de Porangatu, 1 km)",
+   "lat": -13.445225,
+   "lon": -49.136863,
+   "fonte": "OpenStreetMap node/3165869368",
+   "simulada": false,
+   "confianca": "osm"
+  },
+  {
+   "id": "osm_w1022455273",
+   "nome": "SCI (Palmas)",
+   "lat": -10.293075,
+   "lon": -48.360013,
+   "fonte": "OpenStreetMap way/1022455273",
+   "simulada": false,
+   "confianca": "osm"
+  },
+  {
+   "id": "osm_w365506007",
+   "nome": "Corpo de Bombeiros Militar",
+   "lat": -13.274527,
+   "lon": -50.167664,
+   "fonte": "OpenStreetMap way/365506007",
+   "simulada": false,
+   "confianca": "osm"
+  },
+  {
+   "id": "osm_w412958353",
+   "nome": "Bombeiros (perto de Barreiras, 1 km)",
+   "lat": -12.15074,
+   "lon": -44.998205,
+   "fonte": "OpenStreetMap way/412958353",
+   "simulada": false,
+   "confianca": "osm"
+  }
+ ],
+ "recursos": [
+  {
+   "id": "palmas-t1",
+   "base_id": "osm_n5067657890",
+   "tipo": "terrestre",
+   "capacidade": 1,
+   "disponivel": true
+  },
+  {
+   "id": "palmas-a1",
+   "base_id": "osm_n5067657890",
+   "tipo": "aereo",
+   "capacidade": 1,
+   "disponivel": true
+  },
+  {
+   "id": "portonac-t1",
+   "base_id": "cbmto_porto_nacional",
+   "tipo": "terrestre",
+   "capacidade": 1,
+   "disponivel": true
+  },
+  {
+   "id": "paraiso-t1",
+   "base_id": "cbmto_paraiso",
+   "tipo": "terrestre",
+   "capacidade": 1,
+   "disponivel": true
+  },
+  {
+   "id": "dianopolis-t1",
+   "base_id": "cbmto_dianopolis",
+   "tipo": "terrestre",
+   "capacidade": 1,
+   "disponivel": true
+  },
+  {
+   "id": "saofelix-t1",
+   "base_id": "prevfogo_sao_felix",
+   "tipo": "terrestre",
+   "capacidade": 1,
+   "disponivel": true
+  }
+ ],
+ "escalacoes": [
+  {
+   "ocorrencia_id": "cel_-103_-478",
+   "motivo": "Escalação: cel_-103_-478 tem 2463 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
+   "sugestao": "solicitar apoio externo"
+  },
+  {
+   "ocorrencia_id": "cel_-105_-475",
+   "motivo": "Escalação: cel_-105_-475 tem 3610 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
+   "sugestao": "solicitar apoio externo"
+  },
+  {
+   "ocorrencia_id": "cel_-107_-483",
+   "motivo": "Escalação: cel_-107_-483 tem 53316 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
+   "sugestao": "solicitar apoio externo"
+  },
+  {
+   "ocorrencia_id": "cel_-117_-469",
+   "motivo": "Escalação: cel_-117_-469 tem 22424 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
+   "sugestao": "solicitar apoio externo"
+  },
+  {
+   "ocorrencia_id": "cel_-121_-466",
+   "motivo": "Escalação: cel_-121_-466 tem 4295 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
+   "sugestao": "solicitar apoio externo"
+  },
+  {
+   "ocorrencia_id": "cel_-122_-473",
+   "motivo": "Escalação: cel_-122_-473 tem 3956 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
+   "sugestao": "solicitar apoio externo"
+  },
+  {
+   "ocorrencia_id": "cel_-90_-486",
+   "motivo": "Escalação: cel_-90_-486 tem 29357 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
+   "sugestao": "solicitar apoio externo"
+  },
+  {
+   "ocorrencia_id": "cel_-95_-462",
+   "motivo": "Escalação: cel_-95_-462 tem 4829 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
+   "sugestao": "solicitar apoio externo"
+  },
+  {
+   "ocorrencia_id": "cel_-95_-468",
+   "motivo": "Escalação: cel_-95_-468 tem 2991 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
+   "sugestao": "solicitar apoio externo"
+  },
+  {
+   "ocorrencia_id": "cel_-96_-468",
+   "motivo": "Escalação: respeitar a memória deixa cel_-96_-468 (com população) sem recurso viável; decisão humana sobre usar a rota.",
+   "sugestao": "solicitar apoio externo"
+  }
+ ],
+ "pareceres": [],
+ "memorias_usadas": [
+  {
+   "id": "tocantins:mem-1",
+   "regiao": "tocantins",
+   "texto": "estrada para São Félix alagada, sem acesso",
+   "tipo": "nota",
+   "fonte": "coordenador:enzo",
+   "confianca": 1.0,
+   "supersedes": null,
+   "criada_em": "2026-10-26T18:13:58.891000Z"
+  }
+ ],
+ "historico": [
+  {
+   "rodada": 1,
+   "plano": {
+    "periodo": "2026-10-23",
+    "regiao": "tocantins",
+    "designacoes": [
+     {
+      "recurso_id": "palmas-a1",
+      "ocorrencia_id": "cel_-91_-474",
+      "ordem": 1,
+      "eta_h": 0.97,
+      "justificativa": "Prioridade 0.69; 2135 habitantes no raio; Centenário a 8.7 km; 2 focos, FRP somado 398 MW; palmas-a1 (aereo) chega em ETA 1.0 h saindo de CBMTO 1º BBM Palmas.",
+      "evidencias": [
+       "focos:2",
+       "eta:0.97",
+       "pop:2135",
+       "dist:Centenário:8.7",
+       "base:osm_n5067657890"
+      ]
+     },
+     {
+      "recurso_id": "saofelix-t1",
+      "ocorrencia_id": "cel_-96_-468",
+      "ordem": 2,
+      "eta_h": 2.35,
+      "justificativa": "Prioridade 0.69; 2991 habitantes no raio; Lizarda a 5.5 km; 6 focos, FRP somado 63 MW; saofelix-t1 (terrestre) chega em ETA 2.4 h saindo de Brigada Prevfogo/Ibama São Félix do Tocantins.",
+      "evidencias": [
+       "focos:6",
+       "eta:2.35",
+       "pop:2991",
+       "dist:Lizarda:5.5",
+       "base:prevfogo_sao_felix"
+      ]
+     },
+     {
+      "recurso_id": "portonac-t1",
+      "ocorrencia_id": "cel_-117_-491",
+      "ordem": 3,
+      "eta_h": 4.4,
+      "justificativa": "Prioridade 0.66; 87545 habitantes no raio; Gurupi a 8.8 km; 8 focos, FRP somado 24 MW; portonac-t1 (terrestre) chega em ETA 4.4 h saindo de CBMTO 5ª Cia do 1º BBM Porto Nacional.",
+      "evidencias": [
+       "focos:8",
+       "eta:4.40",
+       "pop:87545",
+       "dist:Gurupi:8.8",
+       "base:cbmto_porto_nacional"
+      ]
+     },
+     {
+      "recurso_id": "palmas-t1",
+      "ocorrencia_id": "cel_-107_-476",
+      "ordem": 4,
+      "eta_h": 3.39,
+      "justificativa": "Prioridade 0.64; 7842 habitantes no raio; Ponte Alta do Tocantins a 10.3 km; 3 focos, FRP somado 23 MW; palmas-t1 (terrestre) chega em ETA 3.4 h saindo de CBMTO 1º BBM Palmas.",
+      "evidencias": [
+       "focos:3",
+       "eta:3.39",
+       "pop:7842",
+       "dist:Ponte Alta do Tocantins:10.3",
+       "base:osm_n5067657890"
+      ]
+     },
+     {
+      "recurso_id": "dianopolis-t1",
+      "ocorrencia_id": "cel_-122_-464",
+      "ordem": 5,
+      "eta_h": 2.51,
+      "justificativa": "Prioridade 0.62; 4295 habitantes no raio; Ponte Alta do Bom Jesus a 10.0 km; 1 focos, FRP somado 38 MW; dianopolis-t1 (terrestre) chega em ETA 2.5 h saindo de CBMTO Companhia de Dianópolis.",
+      "evidencias": [
+       "focos:1",
+       "eta:2.51",
+       "pop:4295",
+       "dist:Ponte Alta do Bom Jesus:10.0",
+       "base:cbmto_dianopolis"
+      ]
+     },
+     {
+      "recurso_id": "paraiso-t1",
+      "ocorrencia_id": "cel_-113_-493",
+      "ordem": 6,
+      "eta_h": 4.55,
+      "justificativa": "Prioridade 0.62; 4321 habitantes no raio; Dueré a 7.3 km; 4 focos, FRP somado 66 MW; paraiso-t1 (terrestre) chega em ETA 4.5 h saindo de CBMTO 3ª Cia do 1º BBM Paraíso do Tocantins.",
+      "evidencias": [
+       "focos:4",
+       "eta:4.55",
+       "pop:4321",
+       "dist:Dueré:7.3",
+       "base:cbmto_paraiso"
+      ]
+     }
+    ],
+    "reserva": [],
+    "nao_atendidas": [
+     "cel_-122_-473",
+     "cel_-105_-475",
+     "cel_-90_-486",
+     "cel_-103_-478",
+     "cel_-95_-462",
+     "cel_-121_-466",
+     "cel_-95_-468",
+     "cel_-107_-483",
+     "cel_-117_-469"
+    ],
+    "resumo": "Planejador offline (determinístico): população exposta primeiro; igual ao baseline. 6 designações, 9 ocorrências sem recurso, 0 recursos em reserva.",
+    "rodada": 1
+   },
+   "violacoes": [
+    {
+     "regra": "restricao_memoria",
+     "ocorrencia_id": "cel_-96_-468",
+     "recurso_id": "saofelix-t1",
+     "evidencia": {
+      "memoria_id": "tocantins:mem-1",
+      "texto": "estrada para São Félix alagada, sem acesso",
+      "fonte": "coordenador:enzo",
+      "confianca": 1.0,
+      "base": "prevfogo_sao_felix"
+     },
+     "sugestao": "avaliar se a rota está mesmo bloqueada; usar outra base ou aéreo",
+     "rigida": false
+    },
+    {
+     "regra": "exposta_nao_atendida",
+     "ocorrencia_id": "cel_-122_-473",
+     "recurso_id": null,
+     "evidencia": {
+      "pop_raio": 3956,
+      "viaveis": [
+       "palmas-a1",
+       "dianopolis-t1"
+      ],
+      "sem_exposicao_atendidas": []
+     },
+     "sugestao": "os recursos viáveis estão em ocorrências com exposição ou na reserva (os que estão em ocorrências sem exposição não chegam aqui no ETA máximo): avaliar escalação",
+     "rigida": false
+    },
+    {
+     "regra": "exposta_nao_atendida",
+     "ocorrencia_id": "cel_-105_-475",
+     "recurso_id": null,
+     "evidencia": {
+      "pop_raio": 3610,
+      "viaveis": [
+       "palmas-a1",
+       "saofelix-t1",
+       "palmas-t1",
+       "portonac-t1",
+       "dianopolis-t1",
+       "paraiso-t1"
+      ],
+      "sem_exposicao_atendidas": []
+     },
+     "sugestao": "os recursos viáveis estão em ocorrências com exposição ou na reserva (os que estão em ocorrências sem exposição não chegam aqui no ETA máximo): avaliar escalação",
+     "rigida": false
+    },
+    {
+     "regra": "exposta_nao_atendida",
+     "ocorrencia_id": "cel_-90_-486",
+     "recurso_id": null,
+     "evidencia": {
+      "pop_raio": 29357,
+      "viaveis": [
+       "palmas-a1",
+       "palmas-t1",
+       "paraiso-t1"
+      ],
+      "sem_exposicao_atendidas": []
+     },
+     "sugestao": "os recursos viáveis estão em ocorrências com exposição ou na reserva (os que estão em ocorrências sem exposição não chegam aqui no ETA máximo): avaliar escalação",
+     "rigida": false
+    },
+    {
+     "regra": "troca_recurso_local",
+     "ocorrencia_id": "cel_-103_-478",
+     "recurso_id": "palmas-a1",
+     "evidencia": {
+      "pop_raio": 2463,
+      "recurso_id": "palmas-a1",
+      "de_ocorrencia": "cel_-91_-474",
+      "pop_de": 2135,
+      "eta_atual_h": 0.97,
+      "eta_para_exposta_h": 0.37,
+      "ganho_eta_h": 0.6,
+      "candidatos": [
+       {
+        "recurso_id": "palmas-a1",
+        "de_ocorrencia": "cel_-91_-474",
+        "pop_de": 2135,
+        "eta_atual_h": 0.97,
+        "eta_para_exposta_h": 0.37,
+        "ganho_eta_h": 0.6
+       }
+      ]
+     },
+     "sugestao": "trocar: palmas-a1 sai de cel_-91_-474 (2135 hab., ETA 0.97 h) e vai para cel_-103_-478 (2463 hab., ETA 0.37 h); cel_-91_-474 fica sem recurso e deve ser escalada",
+     "rigida": false
+    },
+    {
+     "regra": "exposta_nao_atendida",
+     "ocorrencia_id": "cel_-103_-478",
+     "recurso_id": null,
+     "evidencia": {
+      "pop_raio": 2463,
+      "viaveis": [
+       "palmas-a1",
+       "palmas-t1",
+       "portonac-t1",
+       "saofelix-t1",
+       "paraiso-t1"
+      ],
+      "sem_exposicao_atendidas": []
+     },
+     "sugestao": "os recursos viáveis estão em ocorrências com exposição ou na reserva (os que estão em ocorrências sem exposição não chegam aqui no ETA máximo): avaliar escalação",
+     "rigida": false
+    },
+    {
+     "regra": "exposta_nao_atendida",
+     "ocorrencia_id": "cel_-95_-462",
+     "recurso_id": null,
+     "evidencia": {
+      "pop_raio": 4829,
+      "viaveis": [
+       "palmas-a1",
+       "saofelix-t1"
+      ],
+      "sem_exposicao_atendidas": []
+     },
+     "sugestao": "os recursos viáveis estão em ocorrências com exposição ou na reserva (os que estão em ocorrências sem exposição não chegam aqui no ETA máximo): avaliar escalação",
+     "rigida": false
+    },
+    {
+     "regra": "troca_recurso_local",
+     "ocorrencia_id": "cel_-121_-466",
+     "recurso_id": "dianopolis-t1",
+     "evidencia": {
+      "pop_raio": 4295,
+      "recurso_id": "dianopolis-t1",
+      "de_ocorrencia": "cel_-122_-464",
+      "pop_de": 4295,
+      "eta_atual_h": 2.51,
+      "eta_para_exposta_h": 1.78,
+      "ganho_eta_h": 0.74,
+      "candidatos": [
+       {
+        "recurso_id": "dianopolis-t1",
+        "de_ocorrencia": "cel_-122_-464",
+        "pop_de": 4295,
+        "eta_atual_h": 2.51,
+        "eta_para_exposta_h": 1.78,
+        "ganho_eta_h": 0.74
+       }
+      ]
+     },
+     "sugestao": "trocar: dianopolis-t1 sai de cel_-122_-464 (4295 hab., ETA 2.51 h) e vai para cel_-121_-466 (4295 hab., ETA 1.78 h); cel_-122_-464 fica sem recurso e deve ser escalada",
+     "rigida": false
+    },
+    {
+     "regra": "exposta_nao_atendida",
+     "ocorrencia_id": "cel_-121_-466",
+     "recurso_id": null,
+     "evidencia": {
+      "pop_raio": 4295,
+      "viaveis": [
+       "palmas-a1",
+       "dianopolis-t1"
+      ],
+      "sem_exposicao_atendidas": []
+     },
+     "sugestao": "os recursos viáveis estão em ocorrências com exposição ou na reserva (os que estão em ocorrências sem exposição não chegam aqui no ETA máximo): avaliar escalação",
+     "rigida": false
+    },
+    {
+     "regra": "exposta_nao_atendida",
+     "ocorrencia_id": "cel_-95_-468",
+     "recurso_id": null,
+     "evidencia": {
+      "pop_raio": 2991,
+      "viaveis": [
+       "palmas-a1",
+       "saofelix-t1"
+      ],
+      "sem_exposicao_atendidas": []
+     },
+     "sugestao": "os recursos viáveis estão em ocorrências com exposição ou na reserva (os que estão em ocorrências sem exposição não chegam aqui no ETA máximo): avaliar escalação",
+     "rigida": false
+    },
+    {
+     "regra": "troca_recurso_local",
+     "ocorrencia_id": "cel_-107_-483",
+     "recurso_id": "paraiso-t1",
+     "evidencia": {
+      "pop_raio": 53316,
+      "recurso_id": "paraiso-t1",
+      "de_ocorrencia": "cel_-113_-493",
+      "pop_de": 4321,
+      "eta_atual_h": 4.55,
+      "eta_para_exposta_h": 2.95,
+      "ganho_eta_h": 1.59,
+      "candidatos": [
+       {
+        "recurso_id": "paraiso-t1",
+        "de_ocorrencia": "cel_-113_-493",
+        "pop_de": 4321,
+        "eta_atual_h": 4.55,
+        "eta_para_exposta_h": 2.95,
+        "ganho_eta_h": 1.59
+       },
+       {
+        "recurso_id": "palmas-t1",
+        "de_ocorrencia": "cel_-107_-476",
+        "pop_de": 7842,
+        "eta_atual_h": 3.39,
+        "eta_para_exposta_h": 1.86,
+        "ganho_eta_h": 1.53
+       },
+       {
+        "recurso_id": "palmas-a1",
+        "de_ocorrencia": "cel_-91_-474",
+        "pop_de": 2135,
+        "eta_atual_h": 0.97,
+        "eta_para_exposta_h": 0.3,
+        "ganho_eta_h": 0.67
+       }
+      ]
+     },
+     "sugestao": "trocar: paraiso-t1 sai de cel_-113_-493 (4321 hab., ETA 4.55 h) e vai para cel_-107_-483 (53316 hab., ETA 2.95 h); cel_-113_-493 fica sem recurso e deve ser escalada",
+     "rigida": false
+    },
+    {
+     "regra": "exposta_nao_atendida",
+     "ocorrencia_id": "cel_-107_-483",
+     "recurso_id": null,
+     "evidencia": {
+      "pop_raio": 53316,
+      "viaveis": [
+       "palmas-a1",
+       "portonac-t1",
+       "palmas-t1",
+       "paraiso-t1"
+      ],
+      "sem_exposicao_atendidas": []
+     },
+     "sugestao": "os recursos viáveis estão em ocorrências com exposição ou na reserva (os que estão em ocorrências sem exposição não chegam aqui no ETA máximo): avaliar escalação",
+     "rigida": false
+    },
+    {
+     "regra": "troca_recurso_local",
+     "ocorrencia_id": "cel_-117_-469",
+     "recurso_id": "dianopolis-t1",
+     "evidencia": {
+      "pop_raio": 22424,
+      "recurso_id": "dianopolis-t1",
+      "de_ocorrencia": "cel_-122_-464",
+      "pop_de": 4295,
+      "eta_atual_h": 2.51,
+      "eta_para_exposta_h": 0.16,
+      "ganho_eta_h": 2.35,
+      "candidatos": [
+       {
+        "recurso_id": "dianopolis-t1",
+        "de_ocorrencia": "cel_-122_-464",
+        "pop_de": 4295,
+        "eta_atual_h": 2.51,
+        "eta_para_exposta_h": 0.16,
+        "ganho_eta_h": 2.35
+       }
+      ]
+     },
+     "sugestao": "trocar: dianopolis-t1 sai de cel_-122_-464 (4295 hab., ETA 2.51 h) e vai para cel_-117_-469 (22424 hab., ETA 0.16 h); cel_-122_-464 fica sem recurso e deve ser escalada",
+     "rigida": false
+    },
+    {
+     "regra": "exposta_nao_atendida",
+     "ocorrencia_id": "cel_-117_-469",
+     "recurso_id": null,
+     "evidencia": {
+      "pop_raio": 22424,
+      "viaveis": [
+       "dianopolis-t1",
+       "palmas-a1",
+       "saofelix-t1"
+      ],
+      "sem_exposicao_atendidas": []
+     },
+     "sugestao": "os recursos viáveis estão em ocorrências com exposição ou na reserva (os que estão em ocorrências sem exposição não chegam aqui no ETA máximo): avaliar escalação",
+     "rigida": false
+    }
+   ],
+   "citacoes_corrigidas": [],
+   "veredicto": {
+    "decisao": "escala",
+    "motivos": [
+     "Exceção aceita: memória tocantins:mem-1 (\"estrada para São Félix alagada, sem acesso\", confiança 1.00) vale sobre a regra da base mais próxima; saofelix-t1 não deve ir por terra a cel_-96_-468.",
+     "Troca de recurso local: dianopolis-t1 chega a cel_-117_-469 (22424 hab.) em 0.16 h, mas foi para cel_-122_-464 (4295 hab.) a 2.51 h; troco e cel_-122_-464 fica sem recurso (escalação).",
+     "Troca de recurso local: paraiso-t1 chega a cel_-107_-483 (53316 hab.) em 2.95 h, mas foi para cel_-113_-493 (4321 hab.) a 4.55 h; troco e cel_-113_-493 fica sem recurso (escalação).",
+     "Troca de recurso local: palmas-a1 chega a cel_-103_-478 (2463 hab.) em 0.37 h, mas foi para cel_-91_-474 (2135 hab.) a 0.97 h; troco e cel_-91_-474 fica sem recurso (escalação).",
+     "Escalação: respeitar a memória deixa cel_-96_-468 (com população) sem recurso viável; decisão humana sobre usar a rota.",
+     "Escalação: cel_-122_-473 tem 3956 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
+     "Escalação: cel_-105_-475 tem 3610 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
+     "Escalação: cel_-90_-486 tem 29357 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
+     "Escalação: cel_-103_-478 tem 2463 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
+     "Escalação: cel_-95_-462 tem 4829 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
+     "Escalação: cel_-121_-466 tem 4295 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
+     "Escalação: cel_-95_-468 tem 2991 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
+     "Escalação: cel_-107_-483 tem 53316 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
+     "Escalação: cel_-117_-469 tem 22424 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva."
+    ],
+    "contra_proposta": {
+     "periodo": "2026-10-23",
+     "regiao": "tocantins",
+     "designacoes": [
+      {
+       "recurso_id": "palmas-a1",
+       "ocorrencia_id": "cel_-91_-474",
+       "ordem": 1,
+       "eta_h": 0.97,
+       "justificativa": "Prioridade 0.69; 2135 habitantes no raio; Centenário a 8.7 km; 2 focos, FRP somado 398 MW; palmas-a1 (aereo) chega em ETA 1.0 h saindo de CBMTO 1º BBM Palmas.",
+       "evidencias": [
+        "focos:2",
+        "eta:0.97",
+        "pop:2135",
+        "dist:Centenário:8.7",
+        "base:osm_n5067657890"
+       ]
+      },
+      {
+       "recurso_id": "portonac-t1",
+       "ocorrencia_id": "cel_-117_-491",
+       "ordem": 2,
+       "eta_h": 4.4,
+       "justificativa": "Prioridade 0.66; 87545 habitantes no raio; Gurupi a 8.8 km; 8 focos, FRP somado 24 MW; portonac-t1 (terrestre) chega em ETA 4.4 h saindo de CBMTO 5ª Cia do 1º BBM Porto Nacional.",
+       "evidencias": [
+        "focos:8",
+        "eta:4.40",
+        "pop:87545",
+        "dist:Gurupi:8.8",
+        "base:cbmto_porto_nacional"
+       ]
+      },
+      {
+       "recurso_id": "palmas-t1",
+       "ocorrencia_id": "cel_-107_-476",
+       "ordem": 3,
+       "eta_h": 3.39,
+       "justificativa": "Prioridade 0.64; 7842 habitantes no raio; Ponte Alta do Tocantins a 10.3 km; 3 focos, FRP somado 23 MW; palmas-t1 (terrestre) chega em ETA 3.4 h saindo de CBMTO 1º BBM Palmas.",
+       "evidencias": [
+        "focos:3",
+        "eta:3.39",
+        "pop:7842",
+        "dist:Ponte Alta do Tocantins:10.3",
+        "base:osm_n5067657890"
+       ]
+      },
+      {
+       "recurso_id": "dianopolis-t1",
+       "ocorrencia_id": "cel_-122_-464",
+       "ordem": 4,
+       "eta_h": 2.51,
+       "justificativa": "Prioridade 0.62; 4295 habitantes no raio; Ponte Alta do Bom Jesus a 10.0 km; 1 focos, FRP somado 38 MW; dianopolis-t1 (terrestre) chega em ETA 2.5 h saindo de CBMTO Companhia de Dianópolis.",
+       "evidencias": [
+        "focos:1",
+        "eta:2.51",
+        "pop:4295",
+        "dist:Ponte Alta do Bom Jesus:10.0",
+        "base:cbmto_dianopolis"
+       ]
+      },
+      {
+       "recurso_id": "paraiso-t1",
+       "ocorrencia_id": "cel_-113_-493",
+       "ordem": 5,
+       "eta_h": 4.55,
+       "justificativa": "Prioridade 0.62; 4321 habitantes no raio; Dueré a 7.3 km; 4 focos, FRP somado 66 MW; paraiso-t1 (terrestre) chega em ETA 4.5 h saindo de CBMTO 3ª Cia do 1º BBM Paraíso do Tocantins.",
+       "evidencias": [
+        "focos:4",
+        "eta:4.55",
+        "pop:4321",
+        "dist:Dueré:7.3",
+        "base:cbmto_paraiso"
+       ]
+      }
+     ],
+     "reserva": [
+      "saofelix-t1"
+     ],
+     "nao_atendidas": [
+      "cel_-96_-468",
+      "cel_-122_-473",
+      "cel_-105_-475",
+      "cel_-90_-486",
+      "cel_-103_-478",
+      "cel_-95_-462",
+      "cel_-121_-466",
+      "cel_-95_-468",
+      "cel_-107_-483",
+      "cel_-117_-469"
+     ],
+     "resumo": "Contra-proposta do Crítico (offline). 5 designações, 10 ocorrências sem recurso, 1 recursos em reserva.",
+     "rodada": 1
+    },
+    "pedir_analista": []
+   },
+   "origem_critico": "offline_deterministico"
+  }
+ ],
+ "rodadas": 1,
+ "log_path": "output_examples/tocantins-escasso-com-nota/trace.jsonl"
+}

@@ -1,0 +1,86 @@
+[
+ {
+  "caminho": "cenarios/tocantins-escasso.yaml",
+  "nome": "tocantins-escasso",
+  "origem": "repositorio",
+  "regiao": "tocantins",
+  "periodo": "2026-10-23",
+  "simulado": true,
+  "recursos": 6,
+  "bases_declaradas": 0,
+  "reserva": 0,
+  "notas": []
+ },
+ {
+  "caminho": "cenarios/tocantins-folgado.yaml",
+  "nome": "tocantins-folgado",
+  "origem": "repositorio",
+  "regiao": "tocantins",
+  "periodo": "2026-10-23",
+  "simulado": true,
+  "recursos": 16,
+  "bases_declaradas": 0,
+  "reserva": 2,
+  "notas": []
+ },
+ {
+  "caminho": "cenarios/tocantins-medio.yaml",
+  "nome": "tocantins-medio",
+  "origem": "repositorio",
+  "regiao": "tocantins",
+  "periodo": "2026-10-23",
+  "simulado": true,
+  "recursos": 10,
+  "bases_declaradas": 0,
+  "reserva": 1,
+  "notas": []
+ },
+ {
+  "caminho": "input_examples/tocantins-escasso.yaml",
+  "nome": "tocantins-escasso",
+  "origem": "repositorio",
+  "regiao": "tocantins",
+  "periodo": "2026-10-23",
+  "simulado": true,
+  "recursos": 6,
+  "bases_declaradas": 0,
+  "reserva": 0,
+  "notas": []
+ },
+ {
+  "caminho": "input_examples/tocantins-folgado.yaml",
+  "nome": "tocantins-folgado",
+  "origem": "repositorio",
+  "regiao": "tocantins",
+  "periodo": "2026-10-23",
+  "simulado": true,
+  "recursos": 16,
+  "bases_declaradas": 0,
+  "reserva": 2,
+  "notas": []
+ },
+ {
+  "caminho": "input_examples/tocantins-medio.yaml",
+  "nome": "tocantins-medio",
+  "origem": "repositorio",
+  "regiao": "tocantins",
+  "periodo": "2026-10-23",
+  "simulado": true,
+  "recursos": 10,
+  "bases_declaradas": 0,
+  "reserva": 1,
+  "notas": []
+ },
+ {
+  "caminho": "input_examples/tocantins-parana-analista.yaml",
+  "nome": "tocantins-parana-analista",
+  "origem": "repositorio",
+  "regiao": "tocantins",
+  "periodo": "2026-10-24",
+  "simulado": true,
+  "recursos": 5,
+  "bases_declaradas": 5,
+  "reserva": 0,
+  "notas": []
+ }
+]

@@ -1,0 +1,253 @@
+{
+ "id": "132bd37e7259",
+ "status": "concluido",
+ "pedido": {
+  "regiao": "tocantins",
+  "periodo": "2026-10-23",
+  "recursos": null,
+  "cenario": {
+   "regiao": "tocantins",
+   "periodo": "2026-10-23",
+   "recursos": [
+    {
+     "id": "palmas-t1",
+     "base_id": "osm_n5067657890",
+     "tipo": "terrestre",
+     "capacidade": 1,
+     "disponivel": true
+    },
+    {
+     "id": "palmas-a1",
+     "base_id": "osm_n5067657890",
+     "tipo": "aereo",
+     "capacidade": 1,
+     "disponivel": true
+    },
+    {
+     "id": "portonac-t1",
+     "base_id": "cbmto_porto_nacional",
+     "tipo": "terrestre",
+     "capacidade": 1,
+     "disponivel": true
+    },
+    {
+     "id": "paraiso-t1",
+     "base_id": "cbmto_paraiso",
+     "tipo": "terrestre",
+     "capacidade": 1,
+     "disponivel": true
+    },
+    {
+     "id": "dianopolis-t1",
+     "base_id": "cbmto_dianopolis",
+     "tipo": "terrestre",
+     "capacidade": 1,
+     "disponivel": true
+    },
+    {
+     "id": "saofelix-t1",
+     "base_id": "prevfogo_sao_felix",
+     "tipo": "terrestre",
+     "capacidade": 1,
+     "disponivel": true
+    }
+   ],
+   "bases": [],
+   "reserva": 0,
+   "notas": [],
+   "simulado": true
+  },
+  "sample": true,
+  "idioma": "en"
+ },
+ "criado_em": "2026-10-26T20:27:37+00:00",
+ "iniciado_em": "2026-10-26T20:27:37+00:00",
+ "terminado_em": "2026-10-26T20:27:39+00:00",
+ "progresso": [
+  {
+   "t": "2026-10-26T20:27:37+00:00",
+   "msg": "Verificando módulos..."
+  },
+  {
+   "t": "2026-10-26T20:27:38+00:00",
+   "msg": "AVISO: recursos SIMULADOS (cenário da tela (POST /api/run))"
+  },
+  {
+   "t": "2026-10-26T20:27:38+00:00",
+   "msg": "Região tocantins, período 2026-10-23, 6 recursos, modo offline, idioma en"
+  },
+  {
+   "t": "2026-10-26T20:27:38+00:00",
+   "msg": "Dados: cache local (data/cache/) [--sample/SAMPLE_MODE]"
+  },
+  {
+   "t": "2026-10-26T20:27:38+00:00",
+   "msg": "Memória: MemoriaLocal persistida em data/estado/memoria_tocantins.json [--sample/SAMPLE_MODE]"
+  },
+  {
+   "t": "2026-10-26T20:27:38+00:00",
+   "msg": "Log: logs/20261026T202738-d13401.jsonl"
+  },
+  {
+   "t": "2026-10-26T20:27:38+00:00",
+   "msg": "  sistema: inicio"
+  },
+  {
+   "t": "2026-10-26T20:27:38+00:00",
+   "msg": "Aprendizado: sem plano do período anterior; nenhuma memória derivada nova"
+  },
+  {
+   "t": "2026-10-26T20:27:38+00:00",
+   "msg": "Rodando o ciclo Planejador/Crítico/Analista (pode demorar no modo LLM)..."
+  },
+  {
+   "t": "2026-10-26T20:27:38+00:00",
+   "msg": "  sistema: inicio"
+  },
+  {
+   "t": "2026-10-26T20:27:38+00:00",
+   "msg": "  ferramenta: consulta"
+  },
+  {
+   "t": "2026-10-26T20:27:38+00:00",
+   "msg": "  sistema: memoria_lida"
+  },
+  {
+   "t": "2026-10-26T20:27:38+00:00",
+   "msg": "  ferramenta: proposta"
+  },
+  {
+   "t": "2026-10-26T20:27:38+00:00",
+   "msg": "  planejador: proposta rodada=1"
+  },
+  {
+   "t": "2026-10-26T20:27:39+00:00",
+   "msg": "  ferramenta: violacao regra=exposta_nao_atendida ocorrencia_id=cel_-122_-473 rodada=1"
+  },
+  {
+   "t": "2026-10-26T20:27:39+00:00",
+   "msg": "  ferramenta: violacao regra=exposta_nao_atendida ocorrencia_id=cel_-105_-475 rodada=1"
+  },
+  {
+   "t": "2026-10-26T20:27:39+00:00",
+   "msg": "  ferramenta: violacao regra=exposta_nao_atendida ocorrencia_id=cel_-90_-486 rodada=1"
+  },
+  {
+   "t": "2026-10-26T20:27:39+00:00",
+   "msg": "  ferramenta: violacao regra=troca_recurso_local ocorrencia_id=cel_-103_-478 rodada=1"
+  },
+  {
+   "t": "2026-10-26T20:27:39+00:00",
+   "msg": "  ferramenta: violacao regra=exposta_nao_atendida ocorrencia_id=cel_-103_-478 rodada=1"
+  },
+  {
+   "t": "2026-10-26T20:27:39+00:00",
+   "msg": "  ferramenta: violacao regra=exposta_nao_atendida ocorrencia_id=cel_-95_-462 rodada=1"
+  },
+  {
+   "t": "2026-10-26T20:27:39+00:00",
+   "msg": "  ferramenta: violacao regra=troca_recurso_local ocorrencia_id=cel_-121_-466 rodada=1"
+  },
+  {
+   "t": "2026-10-26T20:27:39+00:00",
+   "msg": "  ferramenta: violacao regra=exposta_nao_atendida ocorrencia_id=cel_-121_-466 rodada=1"
+  },
+  {
+   "t": "2026-10-26T20:27:39+00:00",
+   "msg": "  ferramenta: violacao regra=exposta_nao_atendida ocorrencia_id=cel_-95_-468 rodada=1"
+  },
+  {
+   "t": "2026-10-26T20:27:39+00:00",
+   "msg": "  ferramenta: violacao regra=troca_recurso_local ocorrencia_id=cel_-107_-483 rodada=1"
+  },
+  {
+   "t": "2026-10-26T20:27:39+00:00",
+   "msg": "  ferramenta: violacao regra=exposta_nao_atendida ocorrencia_id=cel_-107_-483 rodada=1"
+  },
+  {
+   "t": "2026-10-26T20:27:39+00:00",
+   "msg": "  ferramenta: violacao regra=troca_recurso_local ocorrencia_id=cel_-117_-469 rodada=1"
+  },
+  {
+   "t": "2026-10-26T20:27:39+00:00",
+   "msg": "  ferramenta: violacao regra=exposta_nao_atendida ocorrencia_id=cel_-117_-469 rodada=1"
+  },
+  {
+   "t": "2026-10-26T20:27:39+00:00",
+   "msg": "  critico: rejeita decisao=rejeita rodada=1"
+  },
+  {
+   "t": "2026-10-26T20:27:39+00:00",
+   "msg": "  planejador: proposta rodada=2"
+  },
+  {
+   "t": "2026-10-26T20:27:39+00:00",
+   "msg": "  ferramenta: violacao regra=exposta_nao_atendida ocorrencia_id=cel_-91_-474 rodada=2"
+  },
+  {
+   "t": "2026-10-26T20:27:39+00:00",
+   "msg": "  ferramenta: violacao regra=exposta_nao_atendida ocorrencia_id=cel_-122_-464 rodada=2"
+  },
+  {
+   "t": "2026-10-26T20:27:39+00:00",
+   "msg": "  ferramenta: violacao regra=exposta_nao_atendida ocorrencia_id=cel_-113_-493 rodada=2"
+  },
+  {
+   "t": "2026-10-26T20:27:39+00:00",
+   "msg": "  ferramenta: violacao regra=exposta_nao_atendida ocorrencia_id=cel_-122_-473 rodada=2"
+  },
+  {
+   "t": "2026-10-26T20:27:39+00:00",
+   "msg": "  ferramenta: violacao regra=exposta_nao_atendida ocorrencia_id=cel_-105_-475 rodada=2"
+  },
+  {
+   "t": "2026-10-26T20:27:39+00:00",
+   "msg": "  ferramenta: violacao regra=exposta_nao_atendida ocorrencia_id=cel_-90_-486 rodada=2"
+  },
+  {
+   "t": "2026-10-26T20:27:39+00:00",
+   "msg": "  ferramenta: violacao regra=exposta_nao_atendida ocorrencia_id=cel_-95_-462 rodada=2"
+  },
+  {
+   "t": "2026-10-26T20:27:39+00:00",
+   "msg": "  ferramenta: violacao regra=exposta_nao_atendida ocorrencia_id=cel_-121_-466 rodada=2"
+  },
+  {
+   "t": "2026-10-26T20:27:39+00:00",
+   "msg": "  ferramenta: violacao regra=exposta_nao_atendida ocorrencia_id=cel_-95_-468 rodada=2"
+  },
+  {
+   "t": "2026-10-26T20:27:39+00:00",
+   "msg": "  critico: escala decisao=escala rodada=2"
+  },
+  {
+   "t": "2026-10-26T20:27:39+00:00",
+   "msg": "  sistema: fim"
+  },
+  {
+   "t": "2026-10-26T20:27:39+00:00",
+   "msg": "Ciclo terminou em 0.2s, 2 rodada(s)"
+  },
+  {
+   "t": "2026-10-26T20:27:39+00:00",
+   "msg": "  sistema: fim"
+  }
+ ],
+ "erro": null,
+ "resultado": {
+  "regiao": "tocantins",
+  "periodo": "2026-10-23",
+  "modo": "offline",
+  "idioma": "en",
+  "simulado": true,
+  "gerado_em": "2026-10-26T20:27:39.079601+00:00",
+  "aprovacao_humana": "pendente",
+  "status": "escala",
+  "designacoes": 6,
+  "escalacoes": 9,
+  "ocorrencias": 15,
+  "rodadas": 2,
+  "plano_url": "/api/plano/tocantins/2026-10-23",
+  "duracao_s": 1.47
+ }
+}

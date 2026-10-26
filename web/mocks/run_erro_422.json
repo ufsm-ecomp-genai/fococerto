@@ -1,0 +1,15 @@
+{
+ "detail": [
+  {
+   "loc": [
+    "body",
+    "cenario",
+    "recursos",
+    6,
+    "id"
+   ],
+   "msg": "Id de recurso repetido: 'palmas-t1'.",
+   "type": "value_error"
+  }
+ ]
+}

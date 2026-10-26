@@ -1,0 +1,57 @@
+{
+ "nome": "tocantins-escasso",
+ "origem": "repositorio",
+ "caminho": "cenarios/tocantins-escasso.yaml",
+ "cenario": {
+  "regiao": "tocantins",
+  "periodo": "2026-10-23",
+  "recursos": [
+   {
+    "id": "palmas-t1",
+    "base_id": "osm_n5067657890",
+    "tipo": "terrestre",
+    "capacidade": 1,
+    "disponivel": true
+   },
+   {
+    "id": "palmas-a1",
+    "base_id": "osm_n5067657890",
+    "tipo": "aereo",
+    "capacidade": 1,
+    "disponivel": true
+   },
+   {
+    "id": "portonac-t1",
+    "base_id": "cbmto_porto_nacional",
+    "tipo": "terrestre",
+    "capacidade": 1,
+    "disponivel": true
+   },
+   {
+    "id": "paraiso-t1",
+    "base_id": "cbmto_paraiso",
+    "tipo": "terrestre",
+    "capacidade": 1,
+    "disponivel": true
+   },
+   {
+    "id": "dianopolis-t1",
+    "base_id": "cbmto_dianopolis",
+    "tipo": "terrestre",
+    "capacidade": 1,
+    "disponivel": true
+   },
+   {
+    "id": "saofelix-t1",
+    "base_id": "prevfogo_sao_felix",
+    "tipo": "terrestre",
+    "capacidade": 1,
+    "disponivel": true
+   }
+  ],
+  "bases": [],
+  "reserva": 0,
+  "notas": [],
+  "simulado": true
+ }
+}
