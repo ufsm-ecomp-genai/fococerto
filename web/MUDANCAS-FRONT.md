@@ -11,6 +11,18 @@ coordenador precisa responder em 5 segundos "o que eu tenho que decidir agora", 
 
 Ordem de prioridade: faça de cima para baixo e pare onde o tempo acabar.
 
+> **Antes de começar: façam merge da `main` nesta branch** (`git merge origin/main`). Ela trouxe duas mudanças na
+> API (commit `55dd783`) que ajudam aqui; nada quebra, são campos a mais:
+> - **`escalacoes[].alcance`**: quem chegaria à ocorrência dentro do ETA máximo e para onde cada um foi, já
+>   estruturado: `[{recurso_id, eta_h, situacao: "designado"|"reserva"|"livre", destinos: [{ocorrencia_id,
+>   localidade, pop_raio}]}]` (lista vazia = ninguém chega a tempo). Usem isso na lista compacta do item 1 em vez
+>   de cortar o texto do `motivo`. Exemplo e detalhes em `web/README.md` ("Campos que podem faltar"). Os exemplos
+>   de amostra já vêm com o campo; as duas execuções reais (`tocantins-escasso-real*`) não, então tratem como
+>   opcional.
+> - **Aprovação gravada no plano**: depois de `POST /api/aprovar`, `GET /api/plano/...` devolve
+>   `meta.aprovacao_humana: "aprovado"`, `meta.aprovado_por` e `meta.aprovado_em`. O estado de aprovação guardado
+>   só na sessão (descrito no `RUNNING.md`) pode sair: leiam do plano.
+
 ---
 
 ## 1. Visão geral em uma tela (o mais importante, ~2–3 h)
