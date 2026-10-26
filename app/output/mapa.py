@@ -79,6 +79,7 @@ def _dados_mapa(resultado: ResultadoPeriodo, regiao: RegiaoCfg, cenario: Cenario
         "procedencias": {k: T["procedencias"][k] for k in ESTILO_BASE},
         "procedencias_presentes": sorted({b["procedencia"] for b in bs}, key=list(ESTILO_BASE).index),
         "t": {k: T[k] for k in ("mapa_legenda", "mapa_ocorrencia", "mapa_base", "mapa_designacao", "mapa_escalada",
+                                 "mapa_designacao_aerea", "mapa_base_vazia", "mapa_tamanho",
                                  "mapa_motivo", "mapa_recursos_na_base", "col_prioridade", "col_status", "col_focos",
                                  "col_frp", "col_pop", "col_localidade", "col_eta", "justificativa", "evidencias",
                                  "faixa_alta", "faixa_media", "faixa_baixa", "nao_atendida", "col_ordem", "h",
@@ -187,7 +188,11 @@ _JS = r"""
         return '<br><span class="base-q inl" style="background:' + e.cor + ';outline:2px ' + e.borda + ' ' + e.cor +
                '"></span>' + T.mapa_base + ' ' + esc(D.procedencias[p]);
       }).join('') +
-      '<br><span class="ln"></span>' + T.mapa_designacao;
+      '<br><span class="base-q inl vazia" style="background:' + D.estilo_base[D.procedencias_presentes[0] || 'oficial'].cor +
+        '"></span>' + T.mapa_base_vazia +
+      '<br><span class="ln"></span>' + T.mapa_designacao +
+      '<br><span class="ln trac"></span>' + T.mapa_designacao_aerea +
+      '<br><i>' + T.mapa_tamanho + '</i>';
     return div;
   };
   legenda.addTo(mapa);
@@ -206,6 +211,7 @@ html, body { height: 100%; margin: 0; font-family: system-ui, sans-serif; backgr
 .base-q.vazia { opacity: 0.55; }
 .base-q.inl { display: inline-block; margin-right: 6px; vertical-align: middle; width: 8px; height: 8px; }
 .ln { display: inline-block; width: 18px; height: 3px; background: #1565c0; margin-right: 6px; vertical-align: middle; }
+.ln.trac { background: repeating-linear-gradient(90deg, #1565c0 0 2px, transparent 2px 8px); }
 .esc { margin-top: 4px; padding: 4px 6px; background: #000; color: #fff; font-weight: 600; }
 """
 
