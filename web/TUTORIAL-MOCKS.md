@@ -24,6 +24,18 @@ npm install leaflet react-leaflet
 npm install -D @types/leaflet
 ```
 
+Ainda em `web/app/`, faça o build sair em `web/dist/`, que é a pasta que a API serve no fim
+(assim um único `uvicorn` entrega API + tela). Troque o `vite.config.ts` por:
+```ts
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+
+export default defineConfig({
+  plugins: [react()],
+  build: { outDir: "../dist", emptyOutDir: true },
+});
+```
+
 ## 3. Copiar os mocks para dentro do app
 Tudo que está em `public/` é servido pelo Vite como arquivo estático:
 ```bash

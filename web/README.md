@@ -1,5 +1,26 @@
 # FocoCerto: contrato da API para o front-end
 
+## Comece por aqui
+
+| Quero... | Leia / use |
+|---|---|
+| Começar a tela **hoje, sem rodar o back-end** | [`TUTORIAL-MOCKS.md`](TUTORIAL-MOCKS.md) (setup em ~10 min, primeiro componente pronto) |
+| Ver quais dados mock existem e de qual endpoint cada um vem | [`mocks/README.md`](mocks/README.md) |
+| Saber o formato exato de cada endpoint | este documento (abaixo) |
+
+Pasta `web/`:
+```
+web/
+├── README.md            este contrato
+├── TUTORIAL-MOCKS.md    passo a passo para começar com os mocks
+├── mocks/               respostas REAIS da API (sample mode), para desenvolver sem back-end
+├── api.yaml             configuração da API (pastas de exemplos e de cenários)
+├── app/                 o app React + Vite (criado pelo tutorial)
+└── dist/                o build do app (npm run build); a API serve esta pasta em "/"
+```
+As duas telas: **"Recursos do dia"** (montar bases, equipes, reserva e notas → gerar plano) e **plano** (escalações,
+ordem de recursos, mapa, justificativas, "como chegamos aqui"). A versão final e o vídeo usam a API, nunca os mocks.
+
 Este documento é para quem vai escrever a tela. Ele cobre os conceitos, cada endpoint com request e response
 **reais** (tirados de `output_examples/` e de uma execução em sample mode) e as regras de interface que não são
 negociáveis.
