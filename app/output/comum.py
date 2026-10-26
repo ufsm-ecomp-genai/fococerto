@@ -1,10 +1,12 @@
 """Funções compartilhadas pelos renderizadores (Markdown, JSON e mapa)."""
 from __future__ import annotations
 
-from typing import Any
+import re
+from typing import Any, NamedTuple
 
 from pydantic import BaseModel
 
+from app.core.mensagens import IDIOMAS, msg
 from app.core.models import ResultadoPeriodo
 
 
@@ -84,3 +86,51 @@ def aviso_bases(resultado: ResultadoPeriodo, cenario: Any, T: dict) -> str | Non
         return T["aviso_bases_reais"]
     return T["aviso_bases_mistas"].format(n_reais=len(usadas) - len(outras), n_outras=len(outras),
                                           ids=", ".join(b.id for b in outras))
+
+
+class PartesResumo(NamedTuple):
+    texto: str
+    desvios: list[str]
+    respostas: list[str]
+
+
+def _marcas(chave: str) -> list[str]:
+    return [m for m in dict.fromkeys(msg(chave, i).strip() for i in IDIOMAS) if m]
+
+
+def _achar(texto: str, chave: str) -> tuple[int, int]:
+    """(início, fim) da primeira marca de ``chave`` em qualquer idioma; (-1, -1) se não houver."""
+    achados = [(i, i + len(m)) for m in _marcas(chave) if (i := texto.find(m)) >= 0]
+    return min(achados) if achados else (-1, -1)
+
+
+def _itens(trecho: str) -> list[str]:
+    return [p.strip() for p in trecho.split(" | ") if p.strip()]
+
+
+def dividir_resumo(resumo: str | None) -> PartesResumo:
+    """Separa o ``plano.resumo`` nas marcas que base.plano_de_saida acrescenta (``sufixo_desvios`` e
+    ``sufixo_respostas`` de app/core/mensagens.py, em qualquer idioma, para ler planos antigos): o resumo em si,
+    os desvios do baseline e as respostas ao Crítico (ambos unidos por " | "). Sem marca, tudo fica no texto."""
+    t = (resumo or "").strip()
+    respostas: list[str] = []
+    ini, fim = _achar(t, "sufixo_respostas")
+    if ini >= 0:
+        t, respostas = t[:ini], _itens(t[fim:])
+    desvios: list[str] = []
+    ini, fim = _achar(t, "sufixo_desvios")
+    if ini >= 0:
+        t, desvios = t[:ini], _itens(t[fim:])
+    return PartesResumo(t.strip(), desvios, respostas)
+
+
+RE_RESPOSTA = re.compile(r"(?P<ponto>.*?)\s+->\s+(?P<acao>(?:(?!->)[^()])+?)(?:\s+\((?P<motivo>.*)\))?\s*$", re.S)
+
+
+def partes_resposta(resposta: str) -> tuple[str, str | None, str | None]:
+    """"<ponto> -> <ação> (<motivo>)" (base.texto_respostas) -> (ponto, ação, motivo). Fora do formato:
+    (texto, None, None)."""
+    m = RE_RESPOSTA.match(resposta.strip())
+    if not m:
+        return resposta.strip(), None, None
+    return m["ponto"].strip(), m["acao"].strip(), (m["motivo"] or "").strip() or None

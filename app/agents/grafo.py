@@ -21,12 +21,12 @@ from app.data.bases import fundir_bases_com_apelidos
 from app.core.config import RAIZ
 from app.core.logging import LogExecucao
 from app.core.mensagens import msg, normalizar_idioma, prefixos_escalacao, rotulo
-from app.core.models import (Base, Cenario, Memoria, Ocorrencia, ParecerAnalista, Plano, RegiaoCfg,
+from app.core.models import (Base, Cenario, Memoria, Ocorrencia, ParecerAnalista, Plano, Recurso, RegiaoCfg,
                              ResultadoPeriodo, VeredictoCritico, Violacao)
 from app.tools.alocador import alocador_simples
 from app.tools.citacoes import checar_citacoes, problemas_texto
 from app.tools.consultar import Consultor
-from app.tools.geo import exposta
+from app.tools.geo import etas_disponiveis, exposta, viaveis
 from app.tools.memorias import REFORCO, interpretar_memorias, tokens_distintivos
 from app.tools.texto import contem_termo, norm, sem_sufixo_simulada, tokens_nome
 from app.tools.monitor import monitor
@@ -177,13 +177,60 @@ def _puxar_por_memoria(memoria: ClienteMemoria, regiao: str, repo: Repositorio, 
 SUGESTAO_APOIO_EXTERNO = msg("sugestao_apoio_externo", "pt-BR")   # em inglês: "request external support"
 
 
+MAX_ALCANCE_LISTADOS = 5
+
+
+def _localidade_proxima(o: Ocorrencia | None) -> str | None:
+    if o is None or not o.localidades:
+        return None
+    loc = min(o.localidades, key=lambda l: l.get("dist_km") if l.get("dist_km") is not None else 1e9)
+    return loc.get("nome") or None
+
+
+def _texto_alcance(o: Ocorrencia, plano: Plano, por_occ: dict[str, Ocorrencia], recursos: list[Recurso],
+                   bases: list[Base], regiao: RegiaoCfg, idioma: str | None) -> str:
+    """Quem chegaria a ``o`` dentro do ETA máximo (mesmo cálculo da regra de exposição) e onde está no plano final:
+    designado a outra ocorrência (localidade mais próxima e população, sem o id da célula), em reserva ou sem
+    designação."""
+    alcance = viaveis(etas_disponiveis(o, recursos, {b.id: b for b in bases}, regiao), regiao)
+    eta_max = f"{regiao.eta_max_h:g}"
+    if not alcance:
+        return msg("esc_sem_alcance", idioma, eta_max=eta_max)
+    itens = []
+    for eta, rid in alcance[:MAX_ALCANCE_LISTADOS]:
+        alvos = []
+        for d in sorted((d for d in plano.designacoes if d.recurso_id == rid), key=lambda d: d.ordem):
+            # sem o id da célula: o avaliador (eval/checagem.py) conta como escalada toda célula citada no motivo
+            alvo = por_occ.get(d.ocorrencia_id)
+            pop = alvo.pop_raio if alvo is not None else 0
+            loc = _localidade_proxima(alvo)
+            alvos.append(msg("esc_alvo_loc", idioma, loc=loc, pop=pop) if loc
+                         else msg("esc_alvo_sem_loc", idioma, pop=pop))
+        if alvos:
+            destino = msg("esc_destino_designado", idioma, alvos=" + ".join(alvos))
+        elif rid in plano.reserva:
+            destino = msg("esc_destino_reserva", idioma)
+        else:
+            destino = msg("esc_destino_livre", idioma)
+        itens.append(msg("esc_alcance_item", idioma, rid=rid, eta=eta, destino=destino))
+    if len(alcance) > MAX_ALCANCE_LISTADOS:
+        itens.append(msg("esc_alcance_mais", idioma, n=len(alcance) - MAX_ALCANCE_LISTADOS))
+    return msg("esc_alcance", idioma, eta_max=eta_max, lista=", ".join(itens))
+
+
 def escalar_expostas_sem_recurso(plano: Plano, ocorrencias: list[Ocorrencia], esc: list[dict],
-                                 idioma: str | None = None) -> tuple[list[dict], list[dict]]:
+                                 idioma: str | None = None, recursos: list[Recurso] | None = None,
+                                 bases: list[Base] | None = None,
+                                 regiao: RegiaoCfg | None = None) -> tuple[list[dict], list[dict]]:
     """Escalação obrigatória determinística: cada ocorrência com ``pop_raio > 0`` sem designação no plano final
     ganha uma escalação com motivo e ``sugestao`` "solicitar apoio externo" (no idioma da execução). As escalações
-    já existentes ficam (a da mesma ocorrência só ganha a ``sugestao``). Devolve (todas, novas)."""
+    já existentes ficam (a da mesma ocorrência só ganha a ``sugestao``). Devolve (todas, novas).
+    Com ``recursos``, ``bases`` e ``regiao``, o motivo diz quais recursos chegariam a tempo e onde cada um ficou
+    no plano final (ou que nenhum chega dentro do ETA máximo). Só muda o texto: a decisão é a mesma."""
     sugestao = msg("sugestao_apoio_externo", idioma)
     designadas = {d.ocorrencia_id for d in plano.designacoes}
+    por_occ = {o.id: o for o in ocorrencias}
+    detalhar = recursos is not None and bases is not None and regiao is not None
     saida = [dict(e) for e in esc]
     novas = []
     for o in ocorrencias:
@@ -193,8 +240,12 @@ def escalar_expostas_sem_recurso(plano: Plano, ocorrencias: list[Ocorrencia], es
         for e in existentes:
             e.setdefault("sugestao", sugestao)
         if not existentes:
-            nova = {"ocorrencia_id": o.id, "motivo": msg("esc_guarda_corpo", idioma, pop=o.pop_raio, sug=sugestao),
-                    "sugestao": sugestao}
+            if detalhar:
+                motivo = msg("esc_guarda_corpo_alcance", idioma, pop=o.pop_raio, sug=sugestao,
+                             alcance=_texto_alcance(o, plano, por_occ, recursos, bases, regiao, idioma))
+            else:
+                motivo = msg("esc_guarda_corpo", idioma, pop=o.pop_raio, sug=sugestao)
+            nova = {"ocorrencia_id": o.id, "motivo": motivo, "sugestao": sugestao}
             saida.append(nova)
             novas.append(nova)
     return saida, novas
@@ -463,7 +514,8 @@ def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, mem
             log.evento("sistema", "escala", {"rodada": rodada, "motivo": "impasse", "escalacoes": esc})
         # guarda-corpo (decisão do time, 25/10): toda ocorrência com população exposta que termina sem recurso no
         # plano final vira escalação com sugestão de apoio externo, mesmo que o Crítico (LLM ou não) tenha aprovado.
-        esc, novas = escalar_expostas_sem_recurso(plano, ocorrencias, esc, idioma)
+        esc, novas = escalar_expostas_sem_recurso(plano, ocorrencias, esc, idioma,
+                                                  recursos=recursos, bases=bases, regiao=regiao)
         if novas:
             log.evento("sistema", "escala", {"rodada": rodada, "motivo": "exposta_sem_recurso_no_plano_final",
                                              "decisao_critico": v.decisao if v else None, "escalacoes": novas})

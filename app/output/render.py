@@ -12,8 +12,8 @@ from pathlib import Path
 
 from app.core.config import RAIZ
 from app.core.models import Cenario, RegiaoCfg, ResultadoPeriodo
-from app.output.comum import (aviso_bases, bases_usadas, campo, faixas_prioridade, ids_escalados,
-                               localidade_proxima, procedencia_base)
+from app.output.comum import (aviso_bases, bases_usadas, campo, dividir_resumo, faixas_prioridade, ids_escalados,
+                               localidade_proxima, partes_resposta, procedencia_base)
 from app.output.textos import textos
 
 VERSAO_FORMATO = 1
@@ -150,8 +150,25 @@ def render_markdown(resultado: ResultadoPeriodo, regiao: RegiaoCfg, cenario: Cen
     if plano.resumo:
         L.append(f"## {T['resumo']}")
         L.append("")
-        L.append(plano.resumo.strip())
-        L.append("")
+        partes = dividir_resumo(plano.resumo)
+        if partes.texto:
+            L.append(partes.texto)
+            L.append("")
+        if partes.desvios:
+            L.append(f"**{T['resumo_desvios']}:**")
+            L.append("")
+            L.extend(f"- {d}" for d in partes.desvios)
+            L.append("")
+        if partes.respostas:
+            L.append(f"**{T['resumo_respostas']}:**")
+            L.append("")
+            for r in partes.respostas:
+                ponto, acao, motivo = partes_resposta(r)
+                if acao is None:
+                    L.append(f"- {ponto}")
+                else:
+                    L.append(f"- {ponto} → **{acao}**" + (f": {motivo}" if motivo else ""))
+            L.append("")
 
     # 3. Lista de prioridades.
     L.append(f"## {T['lista_prioridades']}")

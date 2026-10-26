@@ -53,6 +53,15 @@ def progresso(msg: str) -> None:
     print(f"[fococerto] {msg}", file=sys.stderr, flush=True)
 
 
+# Idioma das mensagens de terminal do ``run`` (o plano tem o seu, em meta.idioma); definido por rodar_cenario.
+_IDIOMA_CONSOLE = {"valor": "pt-BR"}
+
+
+def tr(pt: str, en: str) -> str:
+    """Mensagem de terminal no idioma da execução atual."""
+    return en if _IDIOMA_CONSOLE["valor"] == "en" else pt
+
+
 def importar(modulo: str, *nomes: str):
     """Importa `nomes` de `modulo`. Se o módulo (ou um nome) não existir, levanta ErroDependencia clara."""
     try:
@@ -125,19 +134,20 @@ def resolver_recursos(args) -> Path:
     candidatos = sorted((RAIZ / "cenarios").glob(f"{args.regiao}-*.yaml"))
     if not candidatos:
         raise ErroCLI(f"Informe --recursos: não há cenarios/{args.regiao}-*.yaml.")
-    progresso(f"--recursos não informado; usando {candidatos[0].relative_to(RAIZ)}")
+    progresso(tr(f"--recursos não informado; usando {candidatos[0].relative_to(RAIZ)}",
+                  f"--recursos not given; using {candidatos[0].relative_to(RAIZ)}"))
     return candidatos[0]
 
 
 def criar_repositorio(args):
     """RepositorioCache em --sample ou sem ZETARIS_API_KEY; senão RepositorioZetaris."""
     if modo_sample(args) or not config.env("ZETARIS_API_KEY"):
-        motivo = "--sample/SAMPLE_MODE" if modo_sample(args) else "ZETARIS_API_KEY ausente"
+        motivo = "--sample/SAMPLE_MODE" if modo_sample(args) else tr("ZETARIS_API_KEY ausente", "no ZETARIS_API_KEY")
         classe = importar("app.data.repositorio", "RepositorioCache")
-        progresso(f"Dados: cache local (data/cache/) [{motivo}]")
+        progresso(tr("Dados: cache local", "Data: local cache") + f" (data/cache/) [{motivo}]")
     else:
         classe = importar("app.data.repositorio", "RepositorioZetaris")
-        progresso("Dados: Zetaris")
+        progresso(tr("Dados: Zetaris", "Data: Zetaris"))
     return classe()
 
 
@@ -145,13 +155,14 @@ def criar_memoria(args):
     """MemoriaLocal em --sample ou sem HMEM_URL; senão ClienteHMEM(HMEM_URL)."""
     url = config.env("HMEM_URL")
     if modo_sample(args) or not url:
-        motivo = "--sample/SAMPLE_MODE" if modo_sample(args) else "HMEM_URL ausente"
+        motivo = "--sample/SAMPLE_MODE" if modo_sample(args) else tr("HMEM_URL ausente", "no HMEM_URL")
         classe = importar("app.memory_client", "MemoriaLocal")
         caminho = config.RAIZ / "data" / "estado" / f"memoria_{getattr(args, 'regiao', None) or 'geral'}.json"
-        progresso(f"Memória: MemoriaLocal persistida em {caminho.relative_to(config.RAIZ)} [{motivo}]")
+        progresso(tr("Memória: MemoriaLocal persistida em", "Memory: MemoriaLocal stored in")
+                  + f" {caminho.relative_to(config.RAIZ)} [{motivo}]")
         return classe(caminho=caminho)
     classe = importar("app.memory_client", "ClienteHMEM")
-    progresso(f"Memória: H-MEM em {url}")
+    progresso(tr("Memória: H-MEM em", "Memory: H-MEM at") + f" {url}")
     return classe(url)
 
 
@@ -214,17 +225,21 @@ def aprender_periodo_anterior(args, regiao: str, periodo: str, repo, memoria, lo
         plano_anterior, aprender = importar("app.agents.aprendizado", "plano_anterior", "aprender_entre_periodos")
         plano, origem = plano_anterior(regiao, periodo, repo, Path(args.saida))
         if plano is None:
-            progresso("Aprendizado: sem plano do período anterior; nenhuma memória derivada nova")
+            progresso(tr("Aprendizado: sem plano do período anterior; nenhuma memória derivada nova",
+                          "Learning: no plan for the previous period; no new derived memory"))
             return []
         gravadas = aprender(regiao, periodo, plano, repo, memoria, log)
-        progresso(f"Aprendizado {plano.periodo} -> {periodo} (plano de {origem}): "
-                  f"{len(gravadas)} memória(s) derivada(s) gravada(s)")
+        progresso(tr(f"Aprendizado {plano.periodo} -> {periodo} (plano de {origem}): "
+                     f"{len(gravadas)} memória(s) derivada(s) gravada(s)",
+                     f"Learning {plano.periodo} -> {periodo} (plan from {origem}): "
+                     f"{len(gravadas)} derived memory(ies) stored"))
         for m in gravadas:
             progresso(f"  + {m.id}: {m.texto}")
         return gravadas
     except Exception as e:  # noqa: BLE001
         log.evento("sistema", "memoria_gravada", {"erro": f"{type(e).__name__}: {e}", "aprendizado": True})
-        progresso(f"Aprendizado falhou ({type(e).__name__}: {e}); o período segue sem ele")
+        progresso(tr(f"Aprendizado falhou ({type(e).__name__}: {e}); o período segue sem ele",
+                     f"Learning failed ({type(e).__name__}: {e}); the period continues without it"))
         return []
 
 
@@ -238,7 +253,8 @@ def rodar_cenario(args, cenario: Cenario | None = None, origem: str | None = Non
     arquivo; ``origem`` é o rótulo que vai para o log e para ``meta.arquivo_cenario``."""
     from app.output import escrever_saidas
 
-    progresso("Verificando módulos...")
+    _IDIOMA_CONSOLE["valor"] = resolver_idioma(getattr(args, "idioma", None), config.env("FOCOCERTO_IDIOMA"))
+    progresso(tr("Verificando módulos...", "Checking modules..."))
     mods = verificar_modulos({"app.agents.grafo": ("executar_periodo",),
                               "app.data.repositorio": (), "app.memory_client": ()})
     executar_periodo = mods["executar_periodo"]
@@ -255,16 +271,20 @@ def rodar_cenario(args, cenario: Cenario | None = None, origem: str | None = Non
         raise ErroCLI(f"O cenário {origem} é da região '{cenario.regiao}', mas --regiao é '{regiao.nome}'.")
     periodo = args.periodo or cenario.periodo
     if args.periodo and args.periodo != cenario.periodo:
-        progresso(f"--periodo {args.periodo} substitui o período do cenário ({cenario.periodo})")
+        progresso(tr(f"--periodo {args.periodo} substitui o período do cenário ({cenario.periodo})",
+                     f"--periodo {args.periodo} overrides the scenario period ({cenario.periodo})"))
         cenario = cenario.model_copy(update={"periodo": args.periodo})
     if cenario.simulado:
-        progresso(f"AVISO: recursos SIMULADOS ({rotulo})")
+        progresso(tr("AVISO: recursos SIMULADOS", "WARNING: SIMULATED resources") + f" ({rotulo})")
 
     modo = escolher_modo(args)
     idioma = idioma_execucao(args, regiao)
     regiao = regiao.model_copy(update={"idioma": idioma})  # plano.md, mapa e meta.idioma usam o idioma efetivo
-    progresso(f"Região {regiao.nome}, período {periodo}, {len(cenario.recursos)} recursos, modo {modo}, "
-              f"idioma {idioma}")
+    _IDIOMA_CONSOLE["valor"] = idioma
+    progresso(tr(f"Região {regiao.nome}, período {periodo}, {len(cenario.recursos)} recursos, modo {modo}, "
+                 f"idioma {idioma}",
+                 f"Region {regiao.nome}, period {periodo}, {len(cenario.recursos)} resources, mode {modo}, "
+                 f"language {idioma}"))
     repo = criar_repositorio(args)
     memoria = criar_memoria(args)
     log = LogComProgresso(regiao.nome, periodo, pasta=Path(args.pasta_logs))
@@ -273,12 +293,14 @@ def rodar_cenario(args, cenario: Cenario | None = None, origem: str | None = Non
     log.evento("sistema", "inicio", {"cenario": origem, "modo": modo, "sample": modo_sample(args),
                                       "simulado": cenario.simulado, "idioma": idioma})
     aprender_periodo_anterior(args, regiao.nome, periodo, repo, memoria, log)
-    progresso("Rodando o ciclo Planejador/Crítico/Analista (pode demorar no modo LLM)...")
+    progresso(tr("Rodando o ciclo Planejador/Crítico/Analista (pode demorar no modo LLM)...",
+                 "Running the Planner/Critic/Analyst loop (slow in LLM mode)..."))
     t0 = time.monotonic()
     resultado = executar_periodo(regiao, cenario, repo, memoria, log, modo=modo, idioma=idioma)
     if not resultado.log_path:
         resultado = resultado.model_copy(update={"log_path": caminho_log(log.caminho)})
-    progresso(f"Ciclo terminou em {time.monotonic() - t0:.1f}s, {resultado.rodadas} rodada(s)")
+    progresso(tr(f"Ciclo terminou em {time.monotonic() - t0:.1f}s, {resultado.rodadas} rodada(s)",
+                 f"Loop finished in {time.monotonic() - t0:.1f}s, {resultado.rodadas} round(s)"))
     consultas_zetaris = getattr(repo, "consultas", None)
     if consultas_zetaris is not None:
         # evidência exigida pelas regras: as consultas feitas à camada de dados (Zetaris)
@@ -291,13 +313,14 @@ def rodar_cenario(args, cenario: Cenario | None = None, origem: str | None = Non
                                    "designacoes": len(resultado.plano.designacoes),
                                    "escalacoes": len(resultado.escalacoes)})
 
-    print(f"Plano: {len(resultado.plano.designacoes)} designação(ões), {len(resultado.escalacoes)} escalação(ões).")
+    nd, ne = len(resultado.plano.designacoes), len(resultado.escalacoes)
+    print(tr(f"Plano: {nd} designação(ões), {ne} escalação(ões).", f"Plan: {nd} assignment(s), {ne} escalation(s)."))
     for e in resultado.escalacoes:
-        print(f"  ESCALADO {e.get('ocorrencia_id') or '-'}: {e.get('motivo', '')}")
+        print(f"  {tr('ESCALADO', 'ESCALATED')} {e.get('ocorrencia_id') or '-'}: {e.get('motivo', '')}")
     for nome, c in caminhos.items():
         print(f"  {nome}: {c}")
     print(f"  log: {log.caminho}")
-    print(f"Para aprovar: python -m app.cli aprovar --regiao {regiao.nome} --periodo {periodo}")
+    print(tr("Para aprovar", "To approve") + f": python -m app.cli aprovar --regiao {regiao.nome} --periodo {periodo}")
     return 0
 
 

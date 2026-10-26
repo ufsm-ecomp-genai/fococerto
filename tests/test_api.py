@@ -179,7 +179,7 @@ def test_run_com_cenario_da_tela_em_ingles(cliente):
     j = esperar(cliente, r.json()["job_id"])
     assert j["status"] == "concluido", j.get("erro")
     assert j["resultado"]["idioma"] == "en" and j["resultado"]["designacoes"] > 0
-    assert any("4 recursos" in p["msg"] for p in j["progresso"])
+    assert any("4 resources" in p["msg"] for p in j["progresso"])
     plano = cliente.get(j["resultado"]["plano_url"]).json()
     assert plano["meta"]["idioma"] == "en" and plano["meta"]["simulado"] is True
     assert "POST /api/run" in plano["meta"]["arquivo_cenario"]

@@ -26,4 +26,4 @@ COPY . .
 RUN mkdir -p logs out data/estado
 
 ENTRYPOINT ["python", "-m", "app.cli"]
-CMD ["run", "--sample", "--regiao", "tocantins", "--recursos", "cenarios/tocantins-escasso.yaml"]
+CMD ["run", "--sample", "--regiao", "tocantins", "--recursos", "cenarios/tocantins-escasso.yaml", "--idioma", "en"]

@@ -149,6 +149,17 @@ MENSAGENS: dict[str, dict] = {
         "sugestao_apoio_externo": "solicitar apoio externo",
         "esc_guarda_corpo": ("Obrigatória: {pop} hab. expostos e nenhum recurso designado no plano final. "
                              "Sugestão: {sug}."),
+        "esc_guarda_corpo_alcance": ("Obrigatória: {pop} hab. expostos e nenhum recurso designado no plano final. "
+                                     "{alcance} Sugestão: {sug}."),
+        "esc_alcance": "Chegariam dentro do limite de {eta_max} h: {lista}.",
+        "esc_alcance_item": "{rid} ({eta:.1f} h; {destino})",
+        "esc_alcance_mais": "e mais {n}",
+        "esc_destino_designado": "designado {alvos}",
+        "esc_destino_reserva": "em reserva",
+        "esc_alvo_loc": "à ocorrência perto de {loc} ({pop} hab.)",
+        "esc_alvo_sem_loc": "a outra ocorrência ({pop} hab.)",
+        "esc_destino_livre": "sem designação",
+        "esc_sem_alcance": "Nenhum recurso disponível chega dentro do limite de {eta_max} h.",
         "esc_insoluvel": "Obrigatória: população exposta sem recurso viável dentro do ETA máximo.",
         "esc_impasse": ("Impasse: {n} rodadas sem aprovação, com regra rígida aberta ({regras}). "
                         "Último parecer: {parecer}"),
@@ -291,6 +302,17 @@ MENSAGENS: dict[str, dict] = {
         "sugestao_apoio_externo": "request external support",
         "esc_guarda_corpo": ("Mandatory: {pop} people exposed and no crew/aircraft assigned in the final plan. "
                              "Suggested action: {sug}."),
+        "esc_guarda_corpo_alcance": ("Mandatory: {pop} people exposed and no crew/aircraft assigned in the final "
+                                     "plan. {alcance} Suggested action: {sug}."),
+        "esc_alcance": "Could reach it within the {eta_max} h limit: {lista}.",
+        "esc_alcance_item": "{rid} ({eta:.1f} h; {destino})",
+        "esc_alcance_mais": "and {n} more",
+        "esc_destino_designado": "assigned to {alvos}",
+        "esc_destino_reserva": "in reserve",
+        "esc_alvo_loc": "the incident near {loc} ({pop} people)",
+        "esc_alvo_sem_loc": "another incident ({pop} people)",
+        "esc_destino_livre": "unassigned",
+        "esc_sem_alcance": "No available crew/aircraft can reach it within the {eta_max} h limit.",
         "esc_insoluvel": "Mandatory: exposed population with no viable crew/aircraft within the maximum ETA.",
         "esc_impasse": ("Deadlock: {n} rounds without approval, with a hard rule still open ({regras}). "
                         "Last opinion: {parecer}"),

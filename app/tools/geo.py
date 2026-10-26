@@ -34,6 +34,17 @@ def eta_recurso(recurso: Recurso, base: Base | None, oc: Ocorrencia, regiao_cfg:
     return eta_h(base.lat, base.lon, oc.lat, oc.lon, regiao_cfg, recurso.tipo)
 
 
+def etas_disponiveis(oc: Ocorrencia, recursos: list[Recurso], por_base: dict[str, Base],
+                     regiao_cfg: RegiaoCfg) -> dict[str, float]:
+    """{recurso_id: ETA até ``oc``} dos recursos disponíveis (sem arredondar)."""
+    return {r.id: eta_recurso(r, por_base.get(r.base_id), oc, regiao_cfg) for r in recursos if r.disponivel}
+
+
+def viaveis(etas: dict[str, float], regiao_cfg: RegiaoCfg) -> list[tuple[float, str]]:
+    """(ETA, recurso_id) dos que chegam dentro de ``regiao_cfg.eta_max_h``, do mais rápido ao mais lento."""
+    return sorted((e, rid) for rid, e in etas.items() if e <= regiao_cfg.eta_max_h)
+
+
 def matriz_eta(recursos: list[Recurso], bases: list[Base], ocorrencias: list[Ocorrencia],
                regiao_cfg: RegiaoCfg) -> dict[str, dict[str, float]]:
     """{recurso_id: {ocorrencia_id: eta_h}} para os recursos disponíveis."""
