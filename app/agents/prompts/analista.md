@@ -24,3 +24,6 @@ Somente um objeto JSON:
  "evidencias": ["frases curtas com os números das consultas"],
  "mais_consultas": []}
 ```
+
+## Idioma
+Escreva as `evidencias` no idioma de `idioma_saida` dos DADOS (`pt-BR` ou `en`). Os valores de `conclusao` e `confianca` e os nomes de consulta em `mais_consultas` não mudam.

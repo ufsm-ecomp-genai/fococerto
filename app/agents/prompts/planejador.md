@@ -21,3 +21,6 @@ Somente um objeto JSON:
  "respostas_ao_critico": [{"ponto": "motivo do Crítico (resumido)", "acao": "adotado|recusado", "justificativa": "por quê, com fatos dos DADOS"}]}
 ```
 `respostas_ao_critico` só é obrigatório a partir da rodada 2 (na rodada 1, use `[]`). A ordem da lista é a ordem de despacho. Ocorrências não designadas e recursos livres são derivados automaticamente.
+
+## Idioma
+Escreva todo o texto livre (`justificativa`, `resumo`, `desvios`, `respostas_ao_critico`) no idioma de `idioma_saida` dos DADOS (`pt-BR` = português do Brasil, `en` = inglês). Nomes de lugares, bases e ids ficam exatamente como nos DADOS; as chaves do JSON e os tokens de `evidencias` (`pop:`, `eta:`, `dist:`, `base:`) não mudam. Em inglês, cite fatos assim: "2463 inhabitants", "ETA 0.4 h (limit 6 h)", "9.8 km".

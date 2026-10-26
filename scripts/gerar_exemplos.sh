@@ -23,8 +23,12 @@ md = pasta / "plano.md"
 md.write_text(re.sub(r"\]\([^)]*\.jsonl\)", "](trace.jsonl)", md.read_text(encoding="utf-8")), encoding="utf-8")
 PYEOF
 }
-# only the folders this script regenerates (output_examples/ also holds hand-published traces, e.g. nemotron-trace/)
-rm -rf input_examples output_examples/tocantins-*
+# only the folders this script regenerates (output_examples/ also holds hand-published runs that must stay:
+# nemotron-trace/ and tocantins-escasso-real/)
+GERADOS="tocantins-escasso tocantins-medio tocantins-folgado tocantins-escasso-com-nota tocantins-parana-analista
+         tocantins-escasso-en"
+rm -rf input_examples
+for g in $GERADOS; do rm -rf "output_examples/$g"; done
 mkdir -p input_examples output_examples
 for c in cenarios/tocantins-escasso.yaml cenarios/tocantins-medio.yaml cenarios/tocantins-folgado.yaml; do
   nome=$(basename "$c" .yaml)
@@ -72,5 +76,17 @@ cp "$TMP/out-$nome/tocantins/2026-10-24/"{plano.json,plano.md,mapa.html} "output
 cp "$TMP"/logs-"$nome"/*.jsonl "output_examples/$nome/trace.jsonl"
 fix_log "output_examples/$nome"
 grep -q '"agente": "analista"' "output_examples/$nome/trace.jsonl" || { echo "erro: o Analista não foi chamado em $nome" >&2; exit 1; }
+# English example: the same scarce scenario with --idioma en (labels AND content: justifications, Critic reasons,
+# escalations, summary). Same input file as tocantins-escasso; only the language changes, not the decision.
+rm -rf data/estado
+nome=tocantins-escasso-en
+"$PY" -m app.cli run --sample --regiao tocantins --recursos input_examples/tocantins-escasso.yaml --idioma en \
+      --saida "$TMP/out-$nome" --pasta-logs "$TMP/logs-$nome" > /dev/null 2>&1
+mkdir -p "output_examples/$nome"
+cp "$TMP/out-$nome/tocantins/2026-10-23/"{plano.json,plano.md,mapa.html} "output_examples/$nome/"
+cp "$TMP"/logs-"$nome"/*.jsonl "output_examples/$nome/trace.jsonl"
+fix_log "output_examples/$nome"
+grep -q '"idioma": "en"' "output_examples/$nome/plano.json" || { echo "erro: $nome não saiu em inglês" >&2; exit 1; }
 rm -rf data/estado "$TMP"
-echo "ok: $(ls input_examples | wc -l) inputs, $(ls -d output_examples/tocantins-* | wc -l) outputs"
+n_out=0; for g in $GERADOS; do [ -f "output_examples/$g/plano.json" ] && n_out=$((n_out + 1)); done
+echo "ok: $(ls input_examples | wc -l) inputs, $n_out generated outputs (kept: nemotron-trace, tocantins-escasso-real)"

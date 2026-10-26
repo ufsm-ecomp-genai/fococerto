@@ -115,7 +115,7 @@ As bases vêm em camadas (seção 16). Os cenários da demo do Tocantins não de
 
 ## 9. CLI
 ```
-python -m app.cli run --regiao R --periodo P --recursos cenarios/X.yaml [--sample]
+python -m app.cli run --regiao R --periodo P --recursos cenarios/X.yaml [--sample] [--idioma pt-BR|en]
 python -m app.cli nota --regiao R [--periodo P] [--autor A] "texto"
 python -m app.cli aprovar --regiao R --periodo P
 python -m app.cli avaliar --regiao R
@@ -129,8 +129,10 @@ Construtores usados pela CLI: `RepositorioCache()`, `RepositorioZetaris()` (conf
 def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio,
                      memoria: ClienteMemoria, log: LogExecucao,
                      modo: Literal["llm", "offline"] = "llm",
-                     usar_critico_llm: bool = True, usar_memoria: bool = True) -> ResultadoPeriodo
+                     usar_critico_llm: bool = True, usar_memoria: bool = True,
+                     idioma: str | None = None) -> ResultadoPeriodo
 ```
+- `idioma` (seção 19): `pt-BR` ou `en` (aceita `pt`, `en-US`...), idioma de todo o texto do plano. `None` = `regiao.idioma`.
 - `usar_critico_llm` e `usar_memoria` existem para a ablação: a variante B usa `usar_critico_llm=False`, e a D usa `usar_memoria=False`.
 - `ResultadoPeriodo` está em `app/core/models.py`. `executar_periodo` deve preencher `log_path` com `str(log.caminho)`.
 
@@ -203,3 +205,12 @@ Uma base é a localização de uma unidade de combate. A quantidade de equipes e
 - Planejador: `SaidaPlano.respostas_ao_critico` (opcional); na rodada ≥ 2 recebe os pontos do Crítico e a contra-proposta.
 - Última rodada rejeitada sem violação rígida aberta → `divergencia_zona_cinzenta`: status `aprova` (salvo o guarda-corpo das expostas), com a contra-proposta do Crítico se ela não violar regra rígida. Impasse só com regra rígida aberta.
 - Aprendizado também grava derivada de reignição a partir do `historico_celula` (queima atual ≤ 2 dias, depois de ≥ 1 dia sem foco, com ≥ 3 focos antes na janela de 7 dias).
+
+## 19. Idioma por execução (25/10)
+- O plano inteiro (rótulos **e** conteúdo) sai no idioma da execução: `pt-BR` ou `en`. Precedência: `run --idioma` na CLI (no `POST /api/run`, o campo `idioma`, que chega no mesmo argumento) > variável `FOCOCERTO_IDIOMA` > `RegiaoCfg.idioma` > `pt-BR`. Normalização em `app.core.mensagens.normalizar_idioma`: `en`, `en-US`, `en_GB` → `en`; `pt`, `pt-BR`, `pt_PT` → `pt-BR`. Valor explícito não suportado (CLI/API) é erro; no ambiente ou no YAML da região, é ignorado.
+- O idioma efetivo vai em `meta.idioma` do `plano.json`, no `lang` do `mapa.html`, no evento `sistema/inicio` do log (`idioma`) e em `executar_periodo(..., idioma=...)`. O grafo troca `regiao.idioma` pelo idioma efetivo antes de chamar ferramentas e agentes, que leem o idioma de `RegiaoCfg.idioma` (`alocar`, `checar_regras`, `checar_citacoes`) ou de `ctx.regiao.idioma`.
+- Rótulos de interface: `app/output/textos.py` (inclui os valores enumerados mostrados na tela: `status_ocorrencia`, `tipos_recurso`, `decisoes`). Frases de conteúdo: **`app/core/mensagens.py`** (`msg(chave, idioma, **campos)`, `rotulo(grupo, valor, idioma)`): justificativa do alocador, sugestões de `checar_regras` e `checar_citacoes`, motivos do Crítico offline, escalações (guarda-corpo, insolúvel, impasse, divergência), pareceres e pergunta do Analista, resumos do Planejador offline, sufixos de reescrita/troca e o prefixo de status do resumo (`[aprova]`/`[escala]` em pt, `[approved]`/`[escalated]` em en). O texto pt-BR é o mesmo de antes.
+- **Os valores do contrato não mudam com o idioma:** chaves do JSON, `status`, `decisao`, `conclusao`, `confianca`, `Recurso.tipo`, `Ocorrencia.status`, `Violacao.regra`, ids e os tokens de `evidencias` (`pop:`, `eta:`, `dist:`, `loc:`, `base:`, `focos:`, `frp:`, `ti_uc:`). Só a tela (plano.md, mapa) traduz os enumerados. `escalacoes[].sugestao` é texto no idioma (`solicitar apoio externo` / `request external support`).
+- LLM: `chamar_json(..., idioma=...)` acrescenta `idioma_saida` aos DADOS e um bloco "idioma da saída" ao fim do prompt de sistema; os prompts pedem justificativas, motivos, resumos e evidências nesse idioma, com nomes de lugares e ids como estão nos DADOS. O grafo aceita motivo de escalação do Crítico que começa com `Escalação:` ou `Escalation:`.
+- `checar_citacoes` lê texto livre em pt-BR e em inglês: "N habitantes/pessoas/moradores" e "N people/inhabitants/residents" (milhar com `.` ou `,`), "ETA X h"/"chega em X h"/"arrives in X h", "X km", e reconhece o limite da região em "ETA ≤ 6 h", "limite de 6 h", "within the 6 h limit", "limit 6 h", "up to 6 h".
+- Fora do escopo do idioma: textos de dados de entrada (nomes e `fonte` das bases, nomes de localidades, notas do coordenador e memórias do H-MEM, inclusive as derivadas do aprendizado, que ficam em pt-BR porque a leitura de memórias casa palavras em português) e as mensagens de progresso da CLI.

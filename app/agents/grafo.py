@@ -20,6 +20,7 @@ from app.agents.base import Contexto, reescrever_citacoes, resumo_memoria, resum
 from app.data.bases import fundir_bases_com_apelidos
 from app.core.config import RAIZ
 from app.core.logging import LogExecucao
+from app.core.mensagens import msg, normalizar_idioma, prefixos_escalacao, rotulo
 from app.core.models import (Base, Cenario, Memoria, Ocorrencia, ParecerAnalista, Plano, RegiaoCfg,
                              ResultadoPeriodo, VeredictoCritico, Violacao)
 from app.tools.alocador import alocador_simples
@@ -173,14 +174,15 @@ def _puxar_por_memoria(memoria: ClienteMemoria, regiao: str, repo: Repositorio, 
     return [(o, por_cel[o.id]) for o in candidatas[:MAX_PUXADAS]]
 
 
-SUGESTAO_APOIO_EXTERNO = "solicitar apoio externo"
+SUGESTAO_APOIO_EXTERNO = msg("sugestao_apoio_externo", "pt-BR")   # em inglês: "request external support"
 
 
-def escalar_expostas_sem_recurso(plano: Plano, ocorrencias: list[Ocorrencia], esc: list[dict]
-                                 ) -> tuple[list[dict], list[dict]]:
+def escalar_expostas_sem_recurso(plano: Plano, ocorrencias: list[Ocorrencia], esc: list[dict],
+                                 idioma: str | None = None) -> tuple[list[dict], list[dict]]:
     """Escalação obrigatória determinística: cada ocorrência com ``pop_raio > 0`` sem designação no plano final
-    ganha uma escalação com motivo e ``sugestao`` "solicitar apoio externo". As escalações já existentes ficam
-    (a da mesma ocorrência só ganha a ``sugestao``). Devolve (todas, novas)."""
+    ganha uma escalação com motivo e ``sugestao`` "solicitar apoio externo" (no idioma da execução). As escalações
+    já existentes ficam (a da mesma ocorrência só ganha a ``sugestao``). Devolve (todas, novas)."""
+    sugestao = msg("sugestao_apoio_externo", idioma)
     designadas = {d.ocorrencia_id for d in plano.designacoes}
     saida = [dict(e) for e in esc]
     novas = []
@@ -189,11 +191,10 @@ def escalar_expostas_sem_recurso(plano: Plano, ocorrencias: list[Ocorrencia], es
             continue
         existentes = [e for e in saida if e.get("ocorrencia_id") == o.id]
         for e in existentes:
-            e.setdefault("sugestao", SUGESTAO_APOIO_EXTERNO)
+            e.setdefault("sugestao", sugestao)
         if not existentes:
-            nova = {"ocorrencia_id": o.id, "motivo": f"Obrigatória: {o.pop_raio} hab. expostos e nenhum recurso "
-                                                     f"designado no plano final. Sugestão: {SUGESTAO_APOIO_EXTERNO}.",
-                    "sugestao": SUGESTAO_APOIO_EXTERNO}
+            nova = {"ocorrencia_id": o.id, "motivo": msg("esc_guarda_corpo", idioma, pop=o.pop_raio, sug=sugestao),
+                    "sugestao": sugestao}
             saida.append(nova)
             novas.append(nova)
     return saida, novas
@@ -211,12 +212,18 @@ def caminho_log(caminho) -> str:
 
 def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, memoria: ClienteMemoria,
                      log: LogExecucao, modo: Literal["llm", "offline"] = "llm",
-                     usar_critico_llm: bool = True, usar_memoria: bool = True) -> ResultadoPeriodo:
+                     usar_critico_llm: bool = True, usar_memoria: bool = True,
+                     idioma: str | None = None) -> ResultadoPeriodo:
+    """``idioma`` (pt-BR ou en; "en-US", "pt"... são normalizados): idioma de todo o texto que o sistema e os agentes
+    escrevem no plano. None = ``regiao.idioma`` (idioma não suportado cai no pt-BR). CONTRATOS, seções 10 e 19."""
+    idioma = normalizar_idioma(idioma) or normalizar_idioma(regiao.idioma) or "pt-BR"
+    regiao = regiao.model_copy(update={"idioma": idioma})  # ferramentas e agentes leem o idioma de regiao_cfg
     periodo = cenario.periodo
     rotulo_modo = "llm" if modo == "llm" else "offline_deterministico"
     log.evento("sistema", "inicio", {"regiao": regiao.nome, "periodo": periodo, "modo": rotulo_modo,
                                      "usar_critico_llm": usar_critico_llm, "usar_memoria": usar_memoria,
-                                     "cenario_simulado": cenario.simulado, "max_rodadas": MAX_RODADAS})
+                                     "cenario_simulado": cenario.simulado, "max_rodadas": MAX_RODADAS,
+                                     "idioma": idioma})
 
     # ------------------------------------------------------------ preparação (ferramentas, sem LLM)
     # O período anterior é consultado ANTES do atual: o RepositorioCache/Zetaris usa o último período consultado
@@ -357,12 +364,11 @@ def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, mem
         rig = [x for x in vs if x.rigida and x.regra not in INSOLUVEIS]
         if v.decisao == "aprova" and rig:
             v = v.model_copy(update={"decisao": "rejeita", "motivos": v.motivos + [
-                "Sistema: aprovação recusada, há regra rígida violada: " + ", ".join(sorted({x.regra for x in rig}))]})
+                msg("sis_aprovacao_recusada", idioma, regras=", ".join(sorted({x.regra for x in rig})))]})
         insol = [x for x in vs if x.regra in INSOLUVEIS]
         if v.decisao == "aprova" and insol:
             v = v.model_copy(update={"decisao": "escala", "motivos": v.motivos + [
-                f"Sistema: escalação obrigatória, {x.ocorrencia_id} com população exposta sem recurso viável."
-                for x in insol]})
+                msg("sis_escalacao_obrigatoria", idioma, oid=x.ocorrencia_id) for x in insol]})
         evento = "consulta" if v.pedir_analista else v.decisao
         log.evento("critico", evento, {"rodada": rodada, "origem": origem, "decisao": v.decisao,
                                        "motivos": v.motivos, "pedir_analista": v.pedir_analista,
@@ -379,7 +385,7 @@ def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, mem
         for oid in v.pedir_analista:
             if oid in pareceres or oid not in ctx.occ:
                 continue
-            log.evento("analista", "inicio", {"ocorrencia_id": oid, "pergunta": analista.PERGUNTA,
+            log.evento("analista", "inicio", {"ocorrencia_id": oid, "pergunta": analista.pergunta_padrao(idioma),
                                               "pedido_por": "critico", "rodada": s["rodada"]})
             antes = len(consultor.consultas)
             if modo == "llm":
@@ -413,29 +419,27 @@ def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, mem
             status = "aprova"
             divergencia = {"motivo": "divergencia_zona_cinzenta", "plano_escolhido": escolhido,
                            "motivos_critico": list(v.motivos)}
-            plano = plano.model_copy(update={"resumo": (
-                f"Divergência do Crítico em zona cinzenta após {rodada} rodada(s) (não bloqueia; plano adotado: "
-                f"{'contra-proposta do Crítico' if escolhido == 'contra_proposta_critico' else 'última proposta do Planejador'}). "
-                f"Motivos do Crítico: {' | '.join(v.motivos)[:800]} || {plano.resumo}")})
+            plano = plano.model_copy(update={"resumo": msg(
+                "resumo_divergencia", idioma, n=rodada,
+                plano=msg("plano_cp_critico" if escolhido == "contra_proposta_critico" else "plano_ultima", idioma),
+                motivos=" | ".join(v.motivos)[:800], resumo=plano.resumo)})
             for oid in sorted({x.ocorrencia_id for x in checar(plano) if x.regra in INSOLUVEIS}):
-                esc.append({"ocorrencia_id": oid, "motivo": "Obrigatória: população exposta sem recurso viável "
-                                                            "dentro do ETA máximo."})
+                esc.append({"ocorrencia_id": oid, "motivo": msg("esc_insoluvel", idioma)})
             log.evento("sistema", "aprova", {"rodada": rodada, **divergencia,
                                              "obs": "rejeição do Crítico sem violação rígida aberta na última "
                                                     "rodada: não é impasse"})
         elif impasse:
             status = "escala"
-            esc.append({"ocorrencia_id": None, "motivo": f"Impasse: {MAX_RODADAS} rodadas sem aprovação, com regra "
-                                                         f"rígida aberta ({', '.join(sorted({x.regra for x in rig_abertas}))}). "
-                                                         f"Último parecer: {' | '.join(v.motivos)[:600]}"})
+            esc.append({"ocorrencia_id": None, "motivo": msg(
+                "esc_impasse", idioma, n=MAX_RODADAS, regras=", ".join(sorted({x.regra for x in rig_abertas})),
+                parecer=" | ".join(v.motivos)[:600])})
         elif status == "escala":
             if v is not None and v.contra_proposta is not None:
                 plano = v.contra_proposta
             insol = {x.ocorrencia_id for x in s["violacoes"] if x.regra in INSOLUVEIS}
             for oid in sorted(insol):
-                esc.append({"ocorrencia_id": oid, "motivo": "Obrigatória: população exposta sem recurso viável "
-                                                            "dentro do ETA máximo."})
-            outros = [m for m in (v.motivos if v else []) if m.startswith("Escalação:")]
+                esc.append({"ocorrencia_id": oid, "motivo": msg("esc_insoluvel", idioma)})
+            outros = [m for m in (v.motivos if v else []) if m.startswith(prefixos_escalacao())]
             ids = [i for i in _ids_cel(outros) if i not in insol] or ([None] if outros else [])
             for oid in ids:
                 esc.append({"ocorrencia_id": oid, "motivo": " ".join(m for m in outros if oid is None or oid in m)[:600]})
@@ -445,7 +449,7 @@ def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, mem
             log.evento("sistema", "escala", {"rodada": rodada, "motivo": "impasse", "escalacoes": esc})
         # guarda-corpo (decisão do time, 25/10): toda ocorrência com população exposta que termina sem recurso no
         # plano final vira escalação com sugestão de apoio externo, mesmo que o Crítico (LLM ou não) tenha aprovado.
-        esc, novas = escalar_expostas_sem_recurso(plano, ocorrencias, esc)
+        esc, novas = escalar_expostas_sem_recurso(plano, ocorrencias, esc, idioma)
         if novas:
             log.evento("sistema", "escala", {"rodada": rodada, "motivo": "exposta_sem_recurso_no_plano_final",
                                              "decisao_critico": v.decisao if v else None, "escalacoes": novas})
@@ -486,7 +490,8 @@ def executar_periodo(regiao: RegiaoCfg, cenario: Cenario, repo: Repositorio, mem
                                                {"recursion_limit": 60})
 
     plano: Plano = final["plano"]
-    plano = plano.model_copy(update={"resumo": f"[{final['status']}] {plano.resumo}"})
+    prefixo = rotulo("prefixo_status", final["status"], idioma)
+    plano = plano.model_copy(update={"resumo": f"{prefixo} {plano.resumo}"})
     log.evento("sistema", "fim", {"status": final["status"], "rodadas": final["rodada"],
                                   "designacoes": len(plano.designacoes), "escalacoes": final["escalacoes"],
                                   "pareceres": sorted(pareceres), "modo": rotulo_modo,

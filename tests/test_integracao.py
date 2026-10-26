@@ -404,7 +404,7 @@ def test_contrato_executar_periodo():
     from app.agents.grafo import executar_periodo
     assert _params(executar_periodo) == [
         ("regiao", VAZIO), ("cenario", VAZIO), ("repo", VAZIO), ("memoria", VAZIO), ("log", VAZIO),
-        ("modo", "llm"), ("usar_critico_llm", True), ("usar_memoria", True)]
+        ("modo", "llm"), ("usar_critico_llm", True), ("usar_memoria", True), ("idioma", None)]  # §10/§19
 
 
 def test_contrato_chat_e_llmresult():

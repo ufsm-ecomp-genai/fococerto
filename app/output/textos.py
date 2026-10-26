@@ -1,4 +1,7 @@
-"""Textos de interface por idioma. O idioma vem de RegiaoCfg.idioma (YAML da região).
+"""Textos de interface por idioma. O idioma é o da execução (docs/CONTRATOS.md, seção 19): --idioma da CLI ou
+``idioma`` do POST /api/run > FOCOCERTO_IDIOMA > RegiaoCfg.idioma (YAML da região). A CLI passa aos renderizadores
+um RegiaoCfg com o idioma efetivo. As frases de CONTEÚDO (justificativas, motivos, escalações) ficam em
+app/core/mensagens.py.
 
 Para traduzir: copie o bloco "pt-BR", troque os valores e registre a chave do idioma.
 Chaves ausentes num idioma caem no pt-BR.
@@ -60,6 +63,10 @@ TEXTOS: dict[str, dict] = {
             "indeterminado": "indeterminado",
         },
         "confiancas": {"baixa": "baixa", "media": "média", "alta": "alta"},
+        # valores enumerados mostrados na tela (pt: o valor cru, como sempre foi)
+        "status_ocorrencia": {"nova": "nova", "crescendo": "crescendo", "estavel": "estavel", "diminuindo": "diminuindo"},
+        "tipos_recurso": {"terrestre": "terrestre", "aereo": "aereo"},
+        "decisoes": {"aprova": "aprova", "rejeita": "rejeita", "escala": "escala"},
         "memorias": "Memórias que influenciaram o plano (H-MEM)",
         "sem_memorias": "Nenhuma memória foi usada neste período.",
         "memoria_tipo": {"derivada": "derivada dos dados", "nota": "nota do coordenador"},
@@ -166,6 +173,9 @@ TEXTOS: dict[str, dict] = {
             "indeterminado": "undetermined",
         },
         "confiancas": {"baixa": "low", "media": "medium", "alta": "high"},
+        "status_ocorrencia": {"nova": "new", "crescendo": "growing", "estavel": "stable", "diminuindo": "shrinking"},
+        "tipos_recurso": {"terrestre": "ground", "aereo": "air"},
+        "decisoes": {"aprova": "approve", "rejeita": "reject", "escala": "escalate"},
         "memorias": "Memories that influenced the plan (H-MEM)",
         "sem_memorias": "No memories were used in this period.",
         "memoria_tipo": {"derivada": "derived from data", "nota": "coordinator note"},

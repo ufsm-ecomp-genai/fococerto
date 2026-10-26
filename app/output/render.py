@@ -30,7 +30,7 @@ def render_json(resultado: ResultadoPeriodo, regiao: RegiaoCfg, cenario: Cenario
         "versao_formato": VERSAO_FORMATO,
         "regiao": regiao.nome,
         "periodo": resultado.plano.periodo,
-        "idioma": regiao.idioma,
+        "idioma": regiao.idioma,   # o idioma efetivo da execução (a CLI passa o RegiaoCfg já com ele)
         "modo": modo,
         "simulado": bool(cenario.simulado) if cenario else None,
         "arquivo_cenario": arquivo_cenario,
@@ -84,15 +84,18 @@ def render_markdown(resultado: ResultadoPeriodo, regiao: RegiaoCfg, cenario: Cen
         perto = f" ({loc.get('nome', '?')}, {_num(loc.get('dist_km'))} {T['km']})" if loc else ""
         return f"`{oid}`{perto}"
 
+    def tipo(t: str) -> str:
+        return T["tipos_recurso"].get(t, t)
+
     def rot_recurso(rid: str) -> str:
         r = recursos.get(rid)
         if r is None:
             return f"`{rid}`"
         b = bases.get(r.base_id)
         if b is None:
-            return f"`{rid}` ({r.tipo}, {r.base_id})"
+            return f"`{rid}` ({tipo(r.tipo)}, {r.base_id})"
         proc = T["procedencias"].get(procedencia_base(b, cenario), procedencia_base(b, cenario))
-        return f"`{rid}` ({r.tipo}, {b.nome}, {T['base_rotulo'].format(procedencia=proc)})"
+        return f"`{rid}` ({tipo(r.tipo)}, {b.nome}, {T['base_rotulo'].format(procedencia=proc)})"
 
     L: list[str] = []
     L.append(f"# {T['titulo'].format(periodo=plano.periodo, regiao=regiao.nome)}")
@@ -170,7 +173,8 @@ def render_markdown(resultado: ResultadoPeriodo, regiao: RegiaoCfg, cenario: Cen
             atend = T["nao_atendida"]
         if o.id in escalados:
             atend = f"**{T['escalada']}**; {atend}"
-        L.append(f"| {i} | `{o.id}` | {_num(o.prioridade, 2)} ({nome_faixa[faixas[o.id]]}) | {o.status or '-'} | "
+        L.append(f"| {i} | `{o.id}` | {_num(o.prioridade, 2)} ({nome_faixa[faixas[o.id]]}) | "
+                 f"{T['status_ocorrencia'].get(o.status, o.status) if o.status else '-'} | "
                  f"{o.n_focos} | {_num(o.frp_max)} | {o.pop_raio} | {_cel(loc_txt)} | {_cel(atend)} |")
     L.append("")
 
@@ -247,7 +251,8 @@ def render_markdown(resultado: ResultadoPeriodo, regiao: RegiaoCfg, cenario: Cen
             motivos = campo(veredicto, "motivos", []) or []
             violacoes = campo(h, "violacoes", []) or []
             regras = sorted({str(campo(v, "regra", "?")) for v in violacoes})
-            linha = (f"- **{T['rodada'].format(n=campo(h, 'rodada', '?'))}:** {T['veredicto']} `{decisao}`; "
+            linha = (f"- **{T['rodada'].format(n=campo(h, 'rodada', '?'))}:** {T['veredicto']} "
+                     f"`{T['decisoes'].get(decisao, decisao)}`; "
                      f"{len(violacoes)} {T['violacoes']}")
             if regras:
                 linha += f" ({', '.join(regras)})"

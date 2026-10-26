@@ -35,6 +35,7 @@ from pydantic import BaseModel, Field
 from app import cli
 from app.core import config
 from app.core.config import RAIZ
+from app.core.mensagens import IDIOMAS, normalizar_idioma
 
 RE_REGIAO = re.compile(r"^[a-z0-9_-]{1,64}$")
 RE_PERIODO = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -62,6 +63,8 @@ class PedidoRun(BaseModel):
     periodo: str | None = Field(None, description="AAAA-MM-DD; padrão: o período do cenário")
     recursos: str = Field(..., description="caminho do cenário, relativo à raiz (lista em GET /api/cenarios)")
     sample: bool = Field(False, description="igual ao --sample da CLI: cache local, MemoriaLocal, agentes offline")
+    idioma: str | None = Field(None, description="idioma do plano inteiro: pt-BR ou en (aceita pt, en-US...); "
+                                                 "padrão: FOCOCERTO_IDIOMA ou o idioma da região")
 
 
 class PedidoNota(BaseModel):
@@ -106,7 +109,8 @@ def _resumo_plano(d: dict) -> dict:
     meta = d.get("meta") or {}
     plano = d.get("plano") or {}
     return {"regiao": meta.get("regiao") or plano.get("regiao"), "periodo": meta.get("periodo") or plano.get("periodo"),
-            "modo": meta.get("modo"), "simulado": meta.get("simulado"), "gerado_em": meta.get("gerado_em"),
+            "modo": meta.get("modo"), "idioma": meta.get("idioma"), "simulado": meta.get("simulado"),
+            "gerado_em": meta.get("gerado_em"),
             "aprovacao_humana": meta.get("aprovacao_humana"), "status": d.get("status"),
             "designacoes": len(plano.get("designacoes") or []), "escalacoes": len(d.get("escalacoes") or []),
             "ocorrencias": len(d.get("ocorrencias") or []), "rodadas": d.get("rodadas")}
@@ -167,7 +171,8 @@ class Jobs:
         with self._trava:
             self._atualizar(jid, status="rodando", iniciado_em=_agora())
             args = argparse.Namespace(comando="run", regiao=pedido.regiao, periodo=pedido.periodo, recursos=str(arq),
-                                      sample=pedido.sample, saida=str(saida), pasta_logs=str(pasta_logs))
+                                      sample=pedido.sample, saida=str(saida), pasta_logs=str(pasta_logs),
+                                      idioma=pedido.idioma)
             original = cli.progresso
             llm_provider = os.environ.get("LLM_PROVIDER")
 
@@ -343,6 +348,9 @@ def criar_app(saida: str | Path | None = None, exemplos: str | Path | None = Non
     def run(pedido: PedidoRun) -> dict:
         _validar_regiao(pedido.regiao)
         _validar_periodo(pedido.periodo, obrigatorio=False)
+        if pedido.idioma and not normalizar_idioma(pedido.idioma):
+            raise HTTPException(400, f"Idioma não suportado: {pedido.idioma!r}. Use um de {', '.join(IDIOMAS)} "
+                                     f"(ex.: en, en-US, pt, pt-BR).")
         arq = _resolver_cenario(pedido.recursos, pastas_cenarios)
         job = jobs.criar(pedido, arq, saida, pasta_logs)
         return {"job_id": job["id"], "status": job["status"], "url": f"/api/jobs/{job['id']}"}

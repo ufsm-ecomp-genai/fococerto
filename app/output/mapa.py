@@ -43,7 +43,8 @@ def _dados_mapa(resultado: ResultadoPeriodo, regiao: RegiaoCfg, cenario: Cenario
         oc.append({
             "id": o.id, "lat": o.lat, "lon": o.lon, "prioridade": round(o.prioridade, 3),
             "faixa": faixas[o.id], "faixa_nome": nome_faixa[faixas[o.id]], "cor": CORES[faixas[o.id]],
-            "status": o.status, "n_focos": o.n_focos, "frp_max": o.frp_max, "pop_raio": o.pop_raio,
+            "status": T["status_ocorrencia"].get(o.status, o.status) if o.status else None,
+            "n_focos": o.n_focos, "frp_max": o.frp_max, "pop_raio": o.pop_raio,
             "localidade": (f"{loc.get('nome', '?')} ({loc.get('dist_km', '?')} km)" if loc else None),
             "escalada": o.id in escalados, "motivo_escalacao": escalados.get(o.id),
             "designacoes": [
@@ -58,7 +59,7 @@ def _dados_mapa(resultado: ResultadoPeriodo, regiao: RegiaoCfg, cenario: Cenario
         bs.append({"id": b.id, "nome": b.nome, "lat": b.lat, "lon": b.lon, "procedencia": proc,
                    "procedencia_nome": T["procedencias"].get(proc, proc),
                    "procedencia_desc": T["procedencia_desc"].get(proc, ""), "fonte": b.fonte or "",
-                   "recursos": [f"{r.id} ({r.tipo})" for r in resultado.recursos if r.base_id == b.id]})
+                   "recursos": [f"{r.id} ({T['tipos_recurso'].get(r.tipo, r.tipo)})" for r in resultado.recursos if r.base_id == b.id]})
     linhas = []
     for d in designacoes:
         r = recursos.get(d.recurso_id)

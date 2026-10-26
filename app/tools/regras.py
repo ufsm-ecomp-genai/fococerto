@@ -32,6 +32,7 @@ from __future__ import annotations
 
 from collections import Counter
 
+from app.core.mensagens import msg
 from app.core.models import Base, Memoria, Ocorrencia, Plano, Recurso, RegiaoCfg, Violacao
 from app.tools.geo import eta_recurso, exposta
 from app.tools.memorias import interpretar_memorias
@@ -69,47 +70,48 @@ def checar_regras(plano: Plano, ocorrencias: list[Ocorrencia], recursos: list[Re
     rec = {r.id: r for r in recursos}
     por_base = {b.id: b for b in bases}
     leitura = interpretar_memorias(memorias, bases, ocorrencias, regiao=regiao_cfg.nome)
+    idioma = regiao_cfg.idioma  # sugestões no idioma da execução (app/core/mensagens.py)
     vs: list[Violacao] = []
 
     pares = Counter((d.recurso_id, d.ocorrencia_id) for d in plano.designacoes)
     for (rid, oid), n in pares.items():
         if n > 1:
             vs.append(Violacao(regra="recurso_duplicado", recurso_id=rid, ocorrencia_id=oid,
-                               evidencia={"vezes": n}, sugestao="remover a designação repetida"))
+                               evidencia={"vezes": n}, sugestao=msg("sug_duplicado", idioma)))
 
     por_recurso = Counter(d.recurso_id for d in plano.designacoes)
     for d in plano.designacoes:
         o, r = occ.get(d.ocorrencia_id), rec.get(d.recurso_id)
         if o is None:
             vs.append(Violacao(regra="ocorrencia_inexistente", ocorrencia_id=d.ocorrencia_id, recurso_id=d.recurso_id,
-                               evidencia={}, sugestao="usar só ocorrências do top do período"))
+                               evidencia={}, sugestao=msg("sug_ocorrencia_inexistente", idioma)))
             continue
         if r is None:
             vs.append(Violacao(regra="recurso_inexistente", ocorrencia_id=o.id, recurso_id=d.recurso_id,
-                               evidencia={}, sugestao="usar só recursos do cenário"))
+                               evidencia={}, sugestao=msg("sug_recurso_inexistente", idioma)))
             continue
         if not r.disponivel:
             vs.append(Violacao(regra="recurso_indisponivel", ocorrencia_id=o.id, recurso_id=r.id,
-                               evidencia={"disponivel": False}, sugestao="trocar por um recurso disponível"))
+                               evidencia={"disponivel": False}, sugestao=msg("sug_indisponivel", idioma)))
         eta = eta_recurso(r, por_base.get(r.base_id), o, regiao_cfg)
         if eta > regiao_cfg.eta_max_h:
             vs.append(Violacao(regra="eta_acima_limite", ocorrencia_id=o.id, recurso_id=r.id,
                                evidencia={"eta_h": round(eta, 2), "eta_max_h": regiao_cfg.eta_max_h,
                                           "base": r.base_id},
-                               sugestao="usar um recurso de base mais próxima ou aéreo"))
+                               sugestao=msg("sug_eta", idioma)))
         if r.tipo == "terrestre":
             m = leitura.bases_bloqueadas.get(r.base_id) or leitura.ocorrencias_bloqueadas.get(o.id)
             if m is not None:
                 vs.append(Violacao(regra="restricao_memoria", ocorrencia_id=o.id, recurso_id=r.id, rigida=False,
                                    evidencia={"memoria_id": m.id, "texto": m.texto, "fonte": m.fonte,
                                               "confianca": m.confianca, "base": r.base_id},
-                                   sugestao="avaliar se a rota está mesmo bloqueada; usar outra base ou aéreo"))
+                                   sugestao=msg("sug_memoria", idioma)))
     for rid, n in por_recurso.items():
         r = rec.get(rid)
         if r is not None and n > max(r.capacidade, 1):
             vs.append(Violacao(regra="capacidade_excedida", recurso_id=rid,
                                evidencia={"designacoes": n, "capacidade": r.capacidade},
-                               sugestao="liberar o recurso de alguma ocorrência"))
+                               sugestao=msg("sug_capacidade", idioma)))
 
     # reserva
     pedida = max(reserva_minima, leitura.reserva_minima)
@@ -120,7 +122,7 @@ def checar_regras(plano: Plano, ocorrencias: list[Ocorrencia], recursos: list[Re
         if leitura.memoria_reserva is not None and leitura.reserva_minima == pedida:
             ev.update(memoria_id=leitura.memoria_reserva.id, texto=leitura.memoria_reserva.texto)
         vs.append(Violacao(regra="reserva_nao_mantida", evidencia=ev,
-                           sugestao=f"manter {pedida} recurso(s) sem designação"))
+                           sugestao=msg("sug_reserva", idioma, n=pedida)))
 
     # prioridade da vida e escalação
     designadas = {d.ocorrencia_id for d in plano.designacoes if d.ocorrencia_id in occ}
@@ -141,7 +143,7 @@ def checar_regras(plano: Plano, ocorrencias: list[Ocorrencia], recursos: list[Re
                                evidencia={"pop_raio": o.pop_raio,
                                           "eta_min_h": round(min(etas.values()), 2) if etas else None,
                                           "eta_max_h": regiao_cfg.eta_max_h},
-                               sugestao="escalar: nenhum recurso chega dentro do limite"))
+                               sugestao=msg("sug_sem_viavel", idioma)))
             continue
         viaveis_ids = [rid for _, rid in viaveis]
         liberaveis = [rid for rid in viaveis_ids if rid in em_sem_exposicao]
@@ -150,22 +152,18 @@ def checar_regras(plano: Plano, ocorrencias: list[Ocorrencia], recursos: list[Re
                                evidencia={"pop_raio": o.pop_raio, "sem_exposicao_atendidas": sem_exposicao_atendidas,
                                           "viaveis": viaveis_ids, "liberaveis": liberaveis,
                                           "liberaveis_em": {rid: em_sem_exposicao[rid] for rid in liberaveis}},
-                               sugestao="realocar para esta um recurso que está em ocorrência sem exposição: "
-                                        + ", ".join(liberaveis)))
+                               sugestao=msg("sug_exposta_sem_recurso", idioma, ids=", ".join(liberaveis))))
         else:
             trocas = _trocas_locais(o, plano, occ, rec, por_base, regiao_cfg, leitura)
             if trocas:
                 t = trocas[0]
                 vs.append(Violacao(regra="troca_recurso_local", ocorrencia_id=o.id, recurso_id=t["recurso_id"],
                                    rigida=False, evidencia={"pop_raio": o.pop_raio, **t, "candidatos": trocas},
-                                   sugestao=f"trocar: {t['recurso_id']} sai de {t['de_ocorrencia']} "
-                                            f"({t['pop_de']} hab., ETA {t['eta_atual_h']} h) e vai para "
-                                            f"{o.id} ({o.pop_raio} hab., ETA {t['eta_para_exposta_h']} h); "
-                                            f"{t['de_ocorrencia']} fica sem recurso e deve ser escalada"))
+                                   sugestao=msg("sug_troca", idioma, rid=t["recurso_id"], de=t["de_ocorrencia"],
+                                               pop_de=t["pop_de"], eta_de=t["eta_atual_h"], para=o.id,
+                                               pop_para=o.pop_raio, eta_para=t["eta_para_exposta_h"])))
             vs.append(Violacao(regra="exposta_nao_atendida", ocorrencia_id=o.id, rigida=False,
                                evidencia={"pop_raio": o.pop_raio, "viaveis": viaveis_ids,
                                           "sem_exposicao_atendidas": sem_exposicao_atendidas},
-                               sugestao="os recursos viáveis estão em ocorrências com exposição ou na reserva (os que "
-                                        "estão em ocorrências sem exposição não chegam aqui no ETA máximo): avaliar "
-                                        "escalação"))
+                               sugestao=msg("sug_exposta_nao_atendida", idioma)))
     return vs

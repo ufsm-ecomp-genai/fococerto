@@ -132,8 +132,10 @@ def _stubs(monkeypatch, chamadas):
     """Módulos falsos com a assinatura dos contratos (seções 3, 10 e 11), só para o teste."""
     grafo = types.ModuleType("app.agents.grafo")
 
-    def executar_periodo(regiao, cenario, repo, memoria, log, modo="llm", usar_critico_llm=True, usar_memoria=True):
+    def executar_periodo(regiao, cenario, repo, memoria, log, modo="llm", usar_critico_llm=True, usar_memoria=True,
+                         idioma=None):
         chamadas["executar"] = {"modo": modo, "repo": type(repo).__name__, "memoria": type(memoria).__name__}
+        chamadas["idioma"] = idioma
         log.evento("planejador", "proposta", {"rodada": 1})
         return resultado_teste().model_copy(update={"log_path": ""})
 
@@ -173,6 +175,7 @@ def test_cli_run_aprovar_nota_com_stubs(monkeypatch, tmp_path, capsys):
     rc = cli.main(["run", "--regiao", "tocantins", "--recursos", str(RAIZ / "cenarios/tocantins-escasso.yaml"), *comum])
     assert rc == 0, capsys.readouterr().err
     assert chamadas["executar"] == {"modo": "offline", "repo": "RepositorioCache", "memoria": "MemoriaLocal"}
+    assert chamadas["idioma"] == "pt-BR"   # sem --idioma nem FOCOCERTO_IDIOMA: o da região
     periodo = ler_cenario(RAIZ / "cenarios/tocantins-escasso.yaml").periodo
     pasta = tmp_path / "out" / "tocantins" / periodo
     assert {p.name for p in pasta.iterdir()} == {"plano.json", "plano.md", "mapa.html"}

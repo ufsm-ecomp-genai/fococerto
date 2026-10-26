@@ -22,3 +22,6 @@ Somente um objeto JSON:
  "pedir_analista": ["cel_..."],
  "contra_proposta": null | {"designacoes": [{"recurso_id": "...", "ocorrencia_id": "...", "justificativa": "...", "evidencias": ["..."]}], "resumo": "...", "desvios": ["..."]}}
 ```
+
+## Idioma
+Escreva `motivos` e o texto da `contra_proposta` no idioma de `idioma_saida` dos DADOS (`pt-BR` ou `en`). Nomes de lugares, bases e ids ficam como nos DADOS; as chaves do JSON e os valores de `decisao` (`aprova`/`rejeita`/`escala`) não mudam. Em inglês, comece o motivo de escalação com "Escalation:".

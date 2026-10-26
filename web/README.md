@@ -87,7 +87,7 @@ Arquivos de recursos que o `POST /api/run` aceita (as duas primeiras pastas de `
 A lista traz o cabeçalho de cada exemplo. O detalhe devolve o `plano.json` inteiro (mesmo formato do
 `GET /api/plano`).
 ```json
-[{"nome": "tocantins-escasso", "regiao": "tocantins", "periodo": "2026-10-23", "modo": "offline",
+[{"nome": "tocantins-escasso", "regiao": "tocantins", "periodo": "2026-10-23", "modo": "offline", "idioma": "pt-BR",
   "simulado": true, "gerado_em": "2026-10-25T20:12:03.215163+00:00", "aprovacao_humana": "pendente",
   "status": "escala", "designacoes": 6, "escalacoes": 9, "ocorrencias": 15, "rodadas": 2, "tem_trace": true}]
 ```
@@ -192,7 +192,8 @@ no sample mode, 1 a 2 s.
 
 ```json
 // request
-{"regiao": "tocantins", "periodo": "2026-10-23", "recursos": "cenarios/tocantins-medio.yaml", "sample": true}
+{"regiao": "tocantins", "periodo": "2026-10-23", "recursos": "cenarios/tocantins-medio.yaml", "sample": true,
+ "idioma": "en"}
 // response 202
 {"job_id": "61db0e96f557", "status": "rodando", "url": "/api/jobs/61db0e96f557"}
 ```
@@ -200,7 +201,13 @@ no sample mode, 1 a 2 s.
   `input_examples/`, `eval/cenarios/`, `eval/cenarios_2periodos/`; lista em `GET /api/cenarios`). Outro caminho → 400; arquivo inexistente → 404.
 - `periodo` é opcional (padrão: o do cenário). `sample` é opcional (padrão `false`, como a CLI: sem
   `ZETARIS_API_KEY` usa o cache, sem `HMEM_URL` usa a memória local, e o LLM segue `LLM_PROVIDER`).
-- O plano é salvo em `out/<regiao>/<periodo>/` e **substitui** o anterior do mesmo período.
+- `idioma` é opcional: `"pt-BR"` ou `"en"` (aceita `"pt"`, `"en-US"`...; vazio ou `null` = padrão). É o idioma do
+  plano **inteiro**: rótulos do `plano.md`/`mapa.html` e o conteúdo (justificativas, motivos do Crítico,
+  escalações, pareceres, resumo; no modo LLM o modelo também escreve nesse idioma). Padrão: `FOCOCERTO_IDIOMA` do
+  servidor, senão o `idioma` da região. Idioma não suportado → 400. O idioma efetivo volta em `meta.idioma` do
+  plano e em `resultado.idioma` do job. A tela pode ter um seletor PT/EN que manda este campo.
+- O plano é salvo em `out/<regiao>/<periodo>/` e **substitui** o anterior do mesmo período (rodar o mesmo
+  período em outro idioma também substitui).
 
 ### `GET /api/jobs/{id}` (e `GET /api/jobs` para a lista)
 Faça polling a cada 1 a 2 s até `status` ser `concluido` ou `erro`. `progresso` são as mesmas mensagens que a CLI
@@ -209,16 +216,17 @@ de rodadas não é conhecido antes. Os jobs ficam só na memória do servidor (r
 ```json
 {
   "id": "61db0e96f557", "status": "concluido",
-  "pedido": {"regiao": "tocantins", "periodo": "2026-10-23", "recursos": "cenarios/tocantins-medio.yaml", "sample": true},
+  "pedido": {"regiao": "tocantins", "periodo": "2026-10-23", "recursos": "cenarios/tocantins-medio.yaml", "sample": true,
+             "idioma": null},
   "criado_em": "2026-10-25T20:12:24+00:00", "iniciado_em": "2026-10-25T20:12:24+00:00", "terminado_em": "2026-10-25T20:12:26+00:00",
   "progresso": [
     {"t": "2026-10-25T20:12:24+00:00", "msg": "Verificando módulos..."},
     {"t": "2026-10-25T20:12:25+00:00", "msg": "AVISO: recursos SIMULADOS (tocantins-medio.yaml)"},
-    {"t": "2026-10-25T20:12:25+00:00", "msg": "Região tocantins, período 2026-10-23, 10 recursos, modo offline"},
+    {"t": "2026-10-25T20:12:25+00:00", "msg": "Região tocantins, período 2026-10-23, 10 recursos, modo offline, idioma pt-BR"},
     {"t": "2026-10-25T20:12:26+00:00", "msg": "  sistema: fim"}
   ],
   "erro": null,
-  "resultado": {"regiao": "tocantins", "periodo": "2026-10-23", "modo": "offline", "simulado": true,
+  "resultado": {"regiao": "tocantins", "periodo": "2026-10-23", "modo": "offline", "idioma": "pt-BR", "simulado": true,
                 "gerado_em": "2026-10-25T20:12:26.046871+00:00", "aprovacao_humana": "pendente", "status": "escala",
                 "designacoes": 8, "escalacoes": 7, "ocorrencias": 15, "rodadas": 2,
                 "plano_url": "/api/plano/tocantins/2026-10-23", "duracao_s": 1.3}
@@ -285,4 +293,7 @@ aprovação **não** resolve as escalações: a mensagem avisa.
    escalações continuam abertas depois da aprovação. Notas (`POST /api/nota`) só valem a partir do próximo `run`:
    diga isso na tela.
 7. **Português primeiro, fácil de traduzir:** use `meta.idioma` e mantenha os textos da interface num arquivo de
-   tradução. Os textos que vêm da API (`justificativa`, `motivo`) são mostrados como vieram.
+   tradução. Os textos que vêm da API (`justificativa`, `motivo`, `resumo`, pareceres) já vêm no idioma do plano
+   (`meta.idioma`) e são mostrados como vieram. Os valores enumerados do JSON **não** são traduzidos pela API
+   (`status`, `decisao`, `conclusao`, `confianca`, `tipo`, `Ocorrencia.status`, `regra`): traduza-os na tela.
+   Exemplo em inglês: `output_examples/tocantins-escasso-en/` (`GET /api/exemplos/tocantins-escasso-en`).

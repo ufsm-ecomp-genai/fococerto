@@ -4,29 +4,32 @@ from __future__ import annotations
 import math
 from collections.abc import Iterable
 
+from app.core.mensagens import msg, rotulo
 from app.core.models import Base, Designacao, Ocorrencia, Plano, Recurso, RegiaoCfg
 from app.tools.geo import eta_recurso, exposta, haversine_km
 
 
 def justificar(oc: Ocorrencia, rec: Recurso, base: Base | None, eta: float, prioridade: float | None = None,
-               extra: str = "") -> tuple[str, list[str]]:
-    """Justificativa por template, com fatos verificáveis pelo checar_citacoes."""
+               extra: str = "", idioma: str | None = None) -> tuple[str, list[str]]:
+    """Justificativa por template, com fatos verificáveis pelo checar_citacoes. ``idioma``: pt-BR (padrão) ou en
+    (frases em app/core/mensagens.py); as evidências estruturadas não dependem do idioma."""
     p = oc.prioridade if prioridade is None else prioridade
-    partes = [f"Prioridade {p:.2f}"]
+    partes = [msg("jus_prioridade", idioma, p=p)]
     ev = [f"focos:{oc.n_focos}", f"eta:{eta:.2f}"]
     if oc.pop_raio > 0:
-        partes.append(f"{oc.pop_raio} habitantes no raio")
+        partes.append(msg("jus_pop", idioma, pop=oc.pop_raio))
         ev.append(f"pop:{oc.pop_raio}")
         if oc.localidades:
             loc = min(oc.localidades, key=lambda l: l.get("dist_km", math.inf))
             if loc.get("nome") and loc.get("dist_km") is not None:
-                partes.append(f"{loc['nome']} a {float(loc['dist_km']):.1f} km")
+                partes.append(msg("jus_localidade", idioma, nome=loc["nome"], km=float(loc["dist_km"])))
                 ev.append(f"dist:{loc['nome']}:{float(loc['dist_km']):.1f}")
     else:
-        partes.append("sem população no raio")
-    partes.append(f"{oc.n_focos} focos, FRP somado {oc.frp_soma:.0f} MW")
+        partes.append(msg("jus_sem_pop", idioma))
+    partes.append(msg("jus_focos", idioma, n=oc.n_focos, frp=oc.frp_soma))
     if base is not None:
-        partes.append(f"{rec.id} ({rec.tipo}) chega em ETA {eta:.1f} h saindo de {base.nome}")
+        partes.append(msg("jus_chegada", idioma, recurso=rec.id, tipo=rotulo("tipos_recurso", rec.tipo, idioma),
+                          eta=eta, base=base.nome))
         ev.append(f"base:{base.id}")
     if extra:
         partes.append(extra)
@@ -72,12 +75,13 @@ def alocar(ocorrencias: list[Ocorrencia], recursos: list[Recurso], bases: list[B
             continue
         eta, _, r = min(candidatos)
         uso[r.id] += 1
-        texto, ev = justificar(o, r, por_base.get(r.base_id), eta, pri[o.id], (extras or {}).get(o.id, ""))
+        texto, ev = justificar(o, r, por_base.get(r.base_id), eta, pri[o.id], (extras or {}).get(o.id, ""),
+                               idioma=regiao_cfg.idioma)
         designacoes.append(Designacao(recurso_id=r.id, ocorrencia_id=o.id, ordem=len(designacoes) + 1,
                                       eta_h=round(eta, 2), justificativa=texto, evidencias=ev))
     reserva_ids = [r.id for r in disp if uso[r.id] == 0]
-    resumo = (f"{len(designacoes)} designações, {len(nao_atendidas)} ocorrências sem recurso, "
-              f"{len(reserva_ids)} recursos em reserva.")
+    resumo = msg("resumo_alocador", regiao_cfg.idioma, n_desig=len(designacoes), n_sem=len(nao_atendidas),
+                 n_res=len(reserva_ids))
     return Plano(periodo=periodo, regiao=regiao or regiao_cfg.nome, designacoes=designacoes,
                  reserva=reserva_ids, nao_atendidas=nao_atendidas, resumo=resumo)
 

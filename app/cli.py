@@ -1,11 +1,12 @@
 """Ponto de entrada do FocoCerto (docs/CONTRATOS.md, seção 9).
 
-    python -m app.cli run --regiao R --periodo P --recursos cenarios/X.yaml [--sample]
+    python -m app.cli run --regiao R --periodo P --recursos cenarios/X.yaml [--sample] [--idioma pt-BR|en]
     python -m app.cli nota --regiao R "texto"
     python -m app.cli aprovar --regiao R --periodo P
     python -m app.cli avaliar [--modo offline|llm] [--repeticoes N] [--cenarios ID ...] [--sample]
 
 SAMPLE_MODE=true (variável de ambiente) equivale a --sample em todos os subcomandos.
+Idioma do plano (CONTRATOS §19): --idioma > idioma do POST /api/run > FOCOCERTO_IDIOMA > idioma do YAML da região.
 
 Os módulos de outros donos (grafo dos agentes, repositório, cliente de memória) são importados
 só quando o subcomando precisa deles. Se algum ainda não existir, a CLI diz qual e de quem é.
@@ -25,6 +26,7 @@ from pathlib import Path
 from app.core import config
 from app.core.config import RAIZ
 from app.core.logging import LogExecucao
+from app.core.mensagens import IDIOMAS, normalizar_idioma, resolver_idioma
 from app.core.models import Cenario, Plano, RegiaoCfg
 
 DONOS = {
@@ -153,6 +155,16 @@ def criar_memoria(args):
     return classe(url)
 
 
+def idioma_execucao(args, regiao: RegiaoCfg) -> str:
+    """Idioma efetivo do plano: --idioma (ou ``idioma`` do POST /api/run, que chega no mesmo campo) >
+    FOCOCERTO_IDIOMA > RegiaoCfg.idioma > pt-BR. Valor explícito não suportado é erro; no ambiente ou no YAML da
+    região, um idioma não suportado é ignorado (cai no próximo)."""
+    pedido = getattr(args, "idioma", None)
+    if pedido and not normalizar_idioma(pedido):
+        raise ErroCLI(f"Idioma não suportado: {pedido!r}. Use um de {', '.join(IDIOMAS)} (ex.: en, en-US, pt, pt-BR).")
+    return resolver_idioma(pedido, config.env("FOCOCERTO_IDIOMA"), regiao.idioma)
+
+
 def escolher_modo(args) -> str:
     if modo_sample(args):
         os.environ["LLM_PROVIDER"] = "offline"  # garante que nenhum agente chame LLM no sample mode
@@ -237,18 +249,21 @@ def cmd_run(args) -> int:
         progresso(f"AVISO: recursos SIMULADOS ({arq.name})")
 
     modo = escolher_modo(args)
-    progresso(f"Região {regiao.nome}, período {periodo}, {len(cenario.recursos)} recursos, modo {modo}")
+    idioma = idioma_execucao(args, regiao)
+    regiao = regiao.model_copy(update={"idioma": idioma})  # plano.md, mapa e meta.idioma usam o idioma efetivo
+    progresso(f"Região {regiao.nome}, período {periodo}, {len(cenario.recursos)} recursos, modo {modo}, "
+              f"idioma {idioma}")
     repo = criar_repositorio(args)
     memoria = criar_memoria(args)
     log = LogComProgresso(regiao.nome, periodo, pasta=Path(args.pasta_logs))
     progresso(f"Log: {log.caminho}")
 
     log.evento("sistema", "inicio", {"cenario": str(arq), "modo": modo, "sample": modo_sample(args),
-                                      "simulado": cenario.simulado})
+                                      "simulado": cenario.simulado, "idioma": idioma})
     aprender_periodo_anterior(args, regiao.nome, periodo, repo, memoria, log)
     progresso("Rodando o ciclo Planejador/Crítico/Analista (pode demorar no modo LLM)...")
     t0 = time.monotonic()
-    resultado = executar_periodo(regiao, cenario, repo, memoria, log, modo=modo)
+    resultado = executar_periodo(regiao, cenario, repo, memoria, log, modo=modo, idioma=idioma)
     if not resultado.log_path:
         resultado = resultado.model_copy(update={"log_path": caminho_log(log.caminho)})
     progresso(f"Ciclo terminou em {time.monotonic() - t0:.1f}s, {resultado.rodadas} rodada(s)")
@@ -356,6 +371,9 @@ def montar_parser() -> argparse.ArgumentParser:
     r.add_argument("--regiao", default=None, help="região (config/regioes/<regiao>.yaml); padrão no --sample: tocantins")
     r.add_argument("--periodo", help="YYYY-MM-DD (padrão: o período do cenário)")
     r.add_argument("--recursos", help="cenarios/<nome>.yaml (padrão: o primeiro cenarios/<regiao>-*.yaml)")
+    r.add_argument("--idioma", default=None,
+                   help="idioma do plano inteiro: pt-BR ou en (aceita pt, en-US...); padrão: FOCOCERTO_IDIOMA ou o "
+                        "idioma do YAML da região")
     r.set_defaults(func=cmd_run)
 
     n = sub.add_parser("nota", parents=[comum], help="registra uma observação do coordenador (Postgres + H-MEM)")

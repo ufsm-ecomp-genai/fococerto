@@ -11,6 +11,7 @@ from typing import TypeVar
 from pydantic import BaseModel, Field, ValidationError
 
 from app.core.logging import LogExecucao
+from app.core.mensagens import IDIOMA_PADRAO, msg, normalizar_idioma, rotulo
 from app.core.models import (Base, Designacao, Memoria, Ocorrencia, ParecerAnalista, Plano, Recurso, RegiaoCfg)
 from app.llm import client
 from app.tools.alocador import alocar, completar_plano, justificar
@@ -68,29 +69,29 @@ def prioridades_ajustadas(ctx: Contexto) -> tuple[dict[str, float], dict[str, st
 
     Devolve (prioridades, texto extra por ocorrência para a justificativa, lista de ajustes para o log)."""
     leitura = ctx.leitura()
+    idioma = ctx.regiao.idioma
     pri, extras, ajustes = {}, {}, []
     for o in ctx.ocorrencias:
         p, notas = o.prioridade, []
         m = leitura.reforcos.get(o.id)
         if m is not None:
             p += 0.15
-            notas.append(f"memória {m.id} indica que este padrão já cresceu antes (+0,15)")
+            notas.append(msg("extra_memoria_reforco", idioma, mid=m.id))
             ajustes.append({"ocorrencia_id": o.id, "memoria_id": m.id, "delta": 0.15, "texto": m.texto})
         par = ctx.pareceres.get(o.id)
         if par is not None:
             if (par.conclusao == "queima_agricola_provavel" and m is not None
                     and m.confianca >= CONFIANCA_MIN_MEMORIA and not exposta(o)):
-                notas.append(f"Analista: queima agrícola provável, mas a memória {m.id} (reignição/crescimento) "
-                             f"pesa contra rebaixar: prioridade mantida")
+                notas.append(msg("extra_analista_mantida", idioma, mid=m.id))
                 ajustes.append({"ocorrencia_id": o.id, "parecer": par.conclusao, "fator": 1.0,
                                 "memoria_contra": m.id})
             elif par.conclusao == "queima_agricola_provavel" and par.confianca in ("media", "alta") and not exposta(o):
                 p *= 0.5
-                notas.append(f"Analista: queima agrícola provável (confiança {par.confianca}), prioridade ×0,5")
+                notas.append(msg("extra_analista_agricola", idioma, conf=rotulo("confiancas", par.confianca, idioma)))
                 ajustes.append({"ocorrencia_id": o.id, "parecer": par.conclusao, "fator": 0.5})
             elif par.conclusao == "incendio_vegetacao_provavel":
                 p += 0.1
-                notas.append(f"Analista: incêndio em vegetação provável (confiança {par.confianca}), +0,1")
+                notas.append(msg("extra_analista_vegetacao", idioma, conf=rotulo("confiancas", par.confianca, idioma)))
                 ajustes.append({"ocorrencia_id": o.id, "parecer": par.conclusao, "delta": 0.1})
         pri[o.id] = round(p, 4)
         if notas:
@@ -123,10 +124,9 @@ def reescrever_citacoes(ctx: Contexto, plano: Plano, violacoes: list) -> Plano:
         if (d.recurso_id, d.ocorrencia_id) in alvo and o is not None and r is not None:
             b = ctx.base_por_id.get(r.base_id)
             eta = eta_recurso(r, b, o, ctx.regiao)
-            texto, ev = justificar(o, r, b, eta, pri.get(o.id), extras.get(o.id, ""))
-            d = d.model_copy(update={"eta_h": round(eta, 2), "evidencias": ev, "justificativa":
-                                     texto + " (Justificativa reescrita a partir dos dados: a anterior citava fato "
-                                             "que não confere.)"})
+            texto, ev = justificar(o, r, b, eta, pri.get(o.id), extras.get(o.id, ""), idioma=ctx.regiao.idioma)
+            d = d.model_copy(update={"eta_h": round(eta, 2), "evidencias": ev,
+                                     "justificativa": texto + msg("nota_reescrita", ctx.regiao.idioma)})
         ds.append(d)
     return plano.model_copy(update={"designacoes": ds})
 
@@ -229,10 +229,11 @@ def plano_de_saida(saida: SaidaPlano, ctx: Contexto, rodada: int) -> Plano:
                              eta_h=round(eta_recurso(r, ctx.base_por_id.get(r.base_id), ctx.occ[d.ocorrencia_id],
                                                      ctx.regiao), 2),
                              justificativa=d.justificativa, evidencias=ev))
-    resumo = saida.resumo + ((" Desvios do baseline: " + " | ".join(saida.desvios)) if saida.desvios else "")
+    idioma = ctx.regiao.idioma
+    resumo = saida.resumo + ((msg("sufixo_desvios", idioma) + " | ".join(saida.desvios)) if saida.desvios else "")
     resp = texto_respostas(saida.respostas_ao_critico)
     if resp:
-        resumo += " Respostas ao Crítico: " + resp
+        resumo += msg("sufixo_respostas", idioma) + resp
     p = Plano(periodo=ctx.periodo, regiao=ctx.regiao.nome, designacoes=ds, resumo=resumo, rodada=rodada)
     return completar_plano(p, ctx.ocorrencias, ctx.recursos)
 
@@ -242,13 +243,23 @@ def carregar_prompt(nome: str) -> str:
     return (PROMPTS / f"{nome}.md").read_text(encoding="utf-8")
 
 
+def instrucao_idioma(idioma: str | None) -> str:
+    """Bloco acrescentado ao prompt de sistema: o texto livre sai no idioma da execução (seção 19 do CONTRATOS)."""
+    return msg("llm_idioma", idioma)
+
+
 def chamar_json(papel: str, prompt: str, dados: dict, modelo: type[T], log: LogExecucao | None,
-                validar: Callable[[T], list[str]] | None = None, tentativas: int = 2) -> T:
+                validar: Callable[[T], list[str]] | None = None, tentativas: int = 2,
+                idioma: str | None = None) -> T:
     """Chama o LLM, extrai o JSON e valida com pydantic (+ ``validar``). Se falhar, pede a correção uma vez.
 
-    Levanta ``SaidaInvalida`` ou ``client.LLMIndisponivel``; quem chama decide o fallback."""
+    ``idioma`` (pt-BR ou en): vai em ``dados["idioma_saida"]`` e numa instrução no fim do prompt de sistema; as
+    chaves do JSON não mudam. Levanta ``SaidaInvalida`` ou ``client.LLMIndisponivel``; quem chama decide o
+    fallback."""
     schema = modelo.model_json_schema()
-    msgs = [{"role": "system", "content": carregar_prompt(prompt)},
+    dados = {"idioma_saida": normalizar_idioma(idioma) or IDIOMA_PADRAO, **dados}
+    sistema = carregar_prompt(prompt).rstrip() + "\n\n" + instrucao_idioma(idioma)
+    msgs = [{"role": "system", "content": sistema},
             {"role": "user", "content": "DADOS (JSON):\n" + json.dumps(dados, ensure_ascii=False, default=str)}]
     erro = ""
     for i in range(tentativas):
