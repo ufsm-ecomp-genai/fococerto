@@ -187,32 +187,42 @@ def _localidade_proxima(o: Ocorrencia | None) -> str | None:
     return loc.get("nome") or None
 
 
-def _texto_alcance(o: Ocorrencia, plano: Plano, por_occ: dict[str, Ocorrencia], recursos: list[Recurso],
-                   bases: list[Base], regiao: RegiaoCfg, idioma: str | None) -> str:
-    """Quem chegaria a ``o`` dentro do ETA máximo (mesmo cálculo da regra de exposição) e onde está no plano final:
-    designado a outra ocorrência (localidade mais próxima e população, sem o id da célula), em reserva ou sem
-    designação."""
-    alcance = viaveis(etas_disponiveis(o, recursos, {b.id: b for b in bases}, regiao), regiao)
+def alcance_estruturado(o: Ocorrencia, plano: Plano, por_occ: dict[str, Ocorrencia], recursos: list[Recurso],
+                        bases: list[Base], regiao: RegiaoCfg) -> list[dict]:
+    """Quem chegaria a ``o`` dentro do ETA máximo (mesmo cálculo da regra de exposição), do mais rápido ao mais
+    lento, e onde cada um ficou no plano final. Cada item: ``recurso_id``, ``eta_h``, ``situacao``
+    ("designado" | "reserva" | "livre") e ``destinos`` (ocorrência, localidade mais próxima e população de cada
+    designação desse recurso). Vai no campo ``alcance`` da escalação (CONTRATOS §22)."""
+    itens = []
+    for eta, rid in viaveis(etas_disponiveis(o, recursos, {b.id: b for b in bases}, regiao), regiao):
+        destinos = []
+        for d in sorted((d for d in plano.designacoes if d.recurso_id == rid), key=lambda d: d.ordem):
+            alvo = por_occ.get(d.ocorrencia_id)
+            destinos.append({"ocorrencia_id": d.ocorrencia_id, "localidade": _localidade_proxima(alvo),
+                             "pop_raio": alvo.pop_raio if alvo is not None else 0})
+        situacao = "designado" if destinos else ("reserva" if rid in plano.reserva else "livre")
+        itens.append({"recurso_id": rid, "eta_h": round(eta, 2), "situacao": situacao, "destinos": destinos})
+    return itens
+
+
+def _texto_alcance(alcance: list[dict], regiao: RegiaoCfg, idioma: str | None) -> str:
+    """Frase do motivo a partir de ``alcance_estruturado``: designado a outra ocorrência (localidade mais próxima e
+    população, sem o id da célula), em reserva ou sem designação."""
     eta_max = f"{regiao.eta_max_h:g}"
     if not alcance:
         return msg("esc_sem_alcance", idioma, eta_max=eta_max)
     itens = []
-    for eta, rid in alcance[:MAX_ALCANCE_LISTADOS]:
-        alvos = []
-        for d in sorted((d for d in plano.designacoes if d.recurso_id == rid), key=lambda d: d.ordem):
-            # sem o id da célula: o avaliador (eval/checagem.py) conta como escalada toda célula citada no motivo
-            alvo = por_occ.get(d.ocorrencia_id)
-            pop = alvo.pop_raio if alvo is not None else 0
-            loc = _localidade_proxima(alvo)
-            alvos.append(msg("esc_alvo_loc", idioma, loc=loc, pop=pop) if loc
-                         else msg("esc_alvo_sem_loc", idioma, pop=pop))
+    for a in alcance[:MAX_ALCANCE_LISTADOS]:
+        # sem o id da célula: o avaliador (eval/checagem.py) conta como escalada toda célula citada no motivo
+        alvos = [msg("esc_alvo_loc", idioma, loc=d["localidade"], pop=d["pop_raio"]) if d["localidade"]
+                 else msg("esc_alvo_sem_loc", idioma, pop=d["pop_raio"]) for d in a["destinos"]]
         if alvos:
             destino = msg("esc_destino_designado", idioma, alvos=" + ".join(alvos))
-        elif rid in plano.reserva:
+        elif a["situacao"] == "reserva":
             destino = msg("esc_destino_reserva", idioma)
         else:
             destino = msg("esc_destino_livre", idioma)
-        itens.append(msg("esc_alcance_item", idioma, rid=rid, eta=eta, destino=destino))
+        itens.append(msg("esc_alcance_item", idioma, rid=a["recurso_id"], eta=a["eta_h"], destino=destino))
     if len(alcance) > MAX_ALCANCE_LISTADOS:
         itens.append(msg("esc_alcance_mais", idioma, n=len(alcance) - MAX_ALCANCE_LISTADOS))
     return msg("esc_alcance", idioma, eta_max=eta_max, lista=", ".join(itens))
@@ -226,7 +236,8 @@ def escalar_expostas_sem_recurso(plano: Plano, ocorrencias: list[Ocorrencia], es
     ganha uma escalação com motivo e ``sugestao`` "solicitar apoio externo" (no idioma da execução). As escalações
     já existentes ficam (a da mesma ocorrência só ganha a ``sugestao``). Devolve (todas, novas).
     Com ``recursos``, ``bases`` e ``regiao``, o motivo diz quais recursos chegariam a tempo e onde cada um ficou
-    no plano final (ou que nenhum chega dentro do ETA máximo). Só muda o texto: a decisão é a mesma."""
+    no plano final (ou que nenhum chega dentro do ETA máximo), e toda escalação de exposta sem recurso, nova ou
+    já existente, ganha o campo ``alcance`` (lista estruturada, para a interface). A decisão é a mesma."""
     sugestao = msg("sugestao_apoio_externo", idioma)
     designadas = {d.ocorrencia_id for d in plano.designacoes}
     por_occ = {o.id: o for o in ocorrencias}
@@ -237,15 +248,20 @@ def escalar_expostas_sem_recurso(plano: Plano, ocorrencias: list[Ocorrencia], es
         if not exposta(o) or o.id in designadas:
             continue
         existentes = [e for e in saida if e.get("ocorrencia_id") == o.id]
+        alcance = alcance_estruturado(o, plano, por_occ, recursos, bases, regiao) if detalhar else None
         for e in existentes:
             e.setdefault("sugestao", sugestao)
+            if alcance is not None:
+                e.setdefault("alcance", alcance)
         if not existentes:
             if detalhar:
                 motivo = msg("esc_guarda_corpo_alcance", idioma, pop=o.pop_raio, sug=sugestao,
-                             alcance=_texto_alcance(o, plano, por_occ, recursos, bases, regiao, idioma))
+                             alcance=_texto_alcance(alcance, regiao, idioma))
             else:
                 motivo = msg("esc_guarda_corpo", idioma, pop=o.pop_raio, sug=sugestao)
             nova = {"ocorrencia_id": o.id, "motivo": motivo, "sugestao": sugestao}
+            if alcance is not None:
+                nova["alcance"] = alcance
             saida.append(nova)
             novas.append(nova)
     return saida, novas

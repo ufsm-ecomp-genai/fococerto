@@ -37,7 +37,7 @@ def _escalar(plano, recursos, idioma):
                                                 regiao=CFG)
     assert todas == novas and [e["ocorrencia_id"] for e in novas] == [X.id]
     e = novas[0]
-    assert set(e) == {"ocorrencia_id", "motivo", "sugestao"}            # contrato JSON inalterado
+    assert set(e) == {"ocorrencia_id", "motivo", "sugestao", "alcance"}  # campos antigos + alcance (CONTRATOS §22)
     assert e["sugestao"] == msg("sugestao_apoio_externo", idioma)
     return e["motivo"]
 
@@ -81,3 +81,29 @@ def test_nenhum_viavel(idioma, esperado):
 def test_sem_dados_de_recursos_mantem_texto_antigo():
     _, novas = escalar_expostas_sem_recurso(_plano(), [X], [], "pt-BR")
     assert novas[0]["motivo"] == msg("esc_guarda_corpo", "pt-BR", pop=29357, sug=msg("sugestao_apoio_externo", "pt-BR"))
+
+
+def test_alcance_estruturado_e_escalacao_existente():
+    """O campo ``alcance`` traz a mesma informação do motivo, estruturada; uma escalação que já existia (ex.: do
+    Crítico) ganha o campo sem mudar o motivo."""
+    plano = _plano([_d("a1", Y)], reserva=["t1"])
+    todas, novas = escalar_expostas_sem_recurso(plano, [X, Y], [], "en", recursos=[A1, T1, T9],
+                                                bases=[BN, LONGE], regiao=CFG)
+    alc = {a["recurso_id"]: a for a in novas[0]["alcance"]}
+    assert set(alc) == {"a1", "t1"}                                    # t9 está longe demais
+    assert alc["a1"]["situacao"] == "designado" and alc["a1"]["destinos"] == [
+        {"ocorrencia_id": Y.id, "localidade": "Santa Tereza do Tocantins", "pop_raio": 2463}]
+    assert alc["t1"]["situacao"] == "reserva" and alc["t1"]["destinos"] == []
+    etas = [a["eta_h"] for a in novas[0]["alcance"]]
+    assert etas == sorted(etas)
+
+    critico = {"ocorrencia_id": X.id, "motivo": "do Crítico"}
+    todas, novas = escalar_expostas_sem_recurso(plano, [X, Y], [critico], "en", recursos=[A1, T1, T9],
+                                                bases=[BN, LONGE], regiao=CFG)
+    assert novas == [] and todas[0]["motivo"] == "do Crítico" and len(todas[0]["alcance"]) == 2
+    assert critico == {"ocorrencia_id": X.id, "motivo": "do Crítico"}   # a entrada não é alterada
+
+
+def test_sem_dados_de_recurso_nao_tem_alcance():
+    _, novas = escalar_expostas_sem_recurso(_plano(), [X, Y], [], "en")
+    assert "alcance" not in novas[0]

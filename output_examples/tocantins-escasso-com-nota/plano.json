@@ -7,7 +7,7 @@
     "modo": "offline",
     "simulado": true,
     "arquivo_cenario": "input_examples/tocantins-escasso.yaml",
-    "gerado_em": "2026-10-26T18:14:03.199276+00:00",
+    "gerado_em": "2026-10-26T23:36:36.543355+00:00",
     "aprovacao_humana": "pendente"
   },
   "plano": {
@@ -770,52 +770,408 @@
     {
       "ocorrencia_id": "cel_-103_-478",
       "motivo": "Escalação: cel_-103_-478 tem 2463 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
-      "sugestao": "solicitar apoio externo"
+      "sugestao": "solicitar apoio externo",
+      "alcance": [
+        {
+          "recurso_id": "palmas-a1",
+          "eta_h": 0.37,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-91_-474",
+              "localidade": "Centenário",
+              "pop_raio": 2135
+            }
+          ]
+        },
+        {
+          "recurso_id": "palmas-t1",
+          "eta_h": 2.32,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-107_-476",
+              "localidade": "Ponte Alta do Tocantins",
+              "pop_raio": 7842
+            }
+          ]
+        },
+        {
+          "recurso_id": "portonac-t1",
+          "eta_h": 3.2,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-117_-491",
+              "localidade": "Gurupi",
+              "pop_raio": 87545
+            }
+          ]
+        },
+        {
+          "recurso_id": "saofelix-t1",
+          "eta_h": 4.14,
+          "situacao": "reserva",
+          "destinos": []
+        },
+        {
+          "recurso_id": "paraiso-t1",
+          "eta_h": 4.33,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-113_-493",
+              "localidade": "Dueré",
+              "pop_raio": 4321
+            }
+          ]
+        }
+      ]
     },
     {
       "ocorrencia_id": "cel_-105_-475",
       "motivo": "Escalação: cel_-105_-475 tem 3610 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
-      "sugestao": "solicitar apoio externo"
+      "sugestao": "solicitar apoio externo",
+      "alcance": [
+        {
+          "recurso_id": "palmas-a1",
+          "eta_h": 0.56,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-91_-474",
+              "localidade": "Centenário",
+              "pop_raio": 2135
+            }
+          ]
+        },
+        {
+          "recurso_id": "saofelix-t1",
+          "eta_h": 3.26,
+          "situacao": "reserva",
+          "destinos": []
+        },
+        {
+          "recurso_id": "palmas-t1",
+          "eta_h": 3.53,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-107_-476",
+              "localidade": "Ponte Alta do Tocantins",
+              "pop_raio": 7842
+            }
+          ]
+        },
+        {
+          "recurso_id": "portonac-t1",
+          "eta_h": 3.79,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-117_-491",
+              "localidade": "Gurupi",
+              "pop_raio": 87545
+            }
+          ]
+        },
+        {
+          "recurso_id": "dianopolis-t1",
+          "eta_h": 5.16,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-122_-464",
+              "localidade": "Ponte Alta do Bom Jesus",
+              "pop_raio": 4295
+            }
+          ]
+        },
+        {
+          "recurso_id": "paraiso-t1",
+          "eta_h": 5.51,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-113_-493",
+              "localidade": "Dueré",
+              "pop_raio": 4321
+            }
+          ]
+        }
+      ]
     },
     {
       "ocorrencia_id": "cel_-107_-483",
       "motivo": "Escalação: cel_-107_-483 tem 53316 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
-      "sugestao": "solicitar apoio externo"
+      "sugestao": "solicitar apoio externo",
+      "alcance": [
+        {
+          "recurso_id": "palmas-a1",
+          "eta_h": 0.3,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-91_-474",
+              "localidade": "Centenário",
+              "pop_raio": 2135
+            }
+          ]
+        },
+        {
+          "recurso_id": "portonac-t1",
+          "eta_h": 0.49,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-117_-491",
+              "localidade": "Gurupi",
+              "pop_raio": 87545
+            }
+          ]
+        },
+        {
+          "recurso_id": "palmas-t1",
+          "eta_h": 1.86,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-107_-476",
+              "localidade": "Ponte Alta do Tocantins",
+              "pop_raio": 7842
+            }
+          ]
+        },
+        {
+          "recurso_id": "paraiso-t1",
+          "eta_h": 2.95,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-113_-493",
+              "localidade": "Dueré",
+              "pop_raio": 4321
+            }
+          ]
+        }
+      ]
     },
     {
       "ocorrencia_id": "cel_-117_-469",
       "motivo": "Escalação: cel_-117_-469 tem 22424 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
-      "sugestao": "solicitar apoio externo"
+      "sugestao": "solicitar apoio externo",
+      "alcance": [
+        {
+          "recurso_id": "dianopolis-t1",
+          "eta_h": 0.16,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-122_-464",
+              "localidade": "Ponte Alta do Bom Jesus",
+              "pop_raio": 4295
+            }
+          ]
+        },
+        {
+          "recurso_id": "palmas-a1",
+          "eta_h": 1.25,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-91_-474",
+              "localidade": "Centenário",
+              "pop_raio": 2135
+            }
+          ]
+        },
+        {
+          "recurso_id": "saofelix-t1",
+          "eta_h": 5.66,
+          "situacao": "reserva",
+          "destinos": []
+        }
+      ]
     },
     {
       "ocorrencia_id": "cel_-121_-466",
       "motivo": "Escalação: cel_-121_-466 tem 4295 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
-      "sugestao": "solicitar apoio externo"
+      "sugestao": "solicitar apoio externo",
+      "alcance": [
+        {
+          "recurso_id": "palmas-a1",
+          "eta_h": 1.55,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-91_-474",
+              "localidade": "Centenário",
+              "pop_raio": 2135
+            }
+          ]
+        },
+        {
+          "recurso_id": "dianopolis-t1",
+          "eta_h": 1.78,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-122_-464",
+              "localidade": "Ponte Alta do Bom Jesus",
+              "pop_raio": 4295
+            }
+          ]
+        }
+      ]
     },
     {
       "ocorrencia_id": "cel_-122_-473",
       "motivo": "Escalação: cel_-122_-473 tem 3956 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
-      "sugestao": "solicitar apoio externo"
+      "sugestao": "solicitar apoio externo",
+      "alcance": [
+        {
+          "recurso_id": "palmas-a1",
+          "eta_h": 1.36,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-91_-474",
+              "localidade": "Centenário",
+              "pop_raio": 2135
+            }
+          ]
+        },
+        {
+          "recurso_id": "dianopolis-t1",
+          "eta_h": 2.6,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-122_-464",
+              "localidade": "Ponte Alta do Bom Jesus",
+              "pop_raio": 4295
+            }
+          ]
+        }
+      ]
     },
     {
       "ocorrencia_id": "cel_-90_-486",
       "motivo": "Escalação: cel_-90_-486 tem 29357 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
-      "sugestao": "solicitar apoio externo"
+      "sugestao": "solicitar apoio externo",
+      "alcance": [
+        {
+          "recurso_id": "palmas-a1",
+          "eta_h": 0.78,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-91_-474",
+              "localidade": "Centenário",
+              "pop_raio": 2135
+            }
+          ]
+        },
+        {
+          "recurso_id": "palmas-t1",
+          "eta_h": 4.89,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-107_-476",
+              "localidade": "Ponte Alta do Tocantins",
+              "pop_raio": 7842
+            }
+          ]
+        },
+        {
+          "recurso_id": "paraiso-t1",
+          "eta_h": 4.9,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-113_-493",
+              "localidade": "Dueré",
+              "pop_raio": 4321
+            }
+          ]
+        }
+      ]
     },
     {
       "ocorrencia_id": "cel_-95_-462",
       "motivo": "Escalação: cel_-95_-462 tem 4829 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
-      "sugestao": "solicitar apoio externo"
+      "sugestao": "solicitar apoio externo",
+      "alcance": [
+        {
+          "recurso_id": "palmas-a1",
+          "eta_h": 1.38,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-91_-474",
+              "localidade": "Centenário",
+              "pop_raio": 2135
+            }
+          ]
+        },
+        {
+          "recurso_id": "saofelix-t1",
+          "eta_h": 3.25,
+          "situacao": "reserva",
+          "destinos": []
+        }
+      ]
     },
     {
       "ocorrencia_id": "cel_-95_-468",
       "motivo": "Escalação: cel_-95_-468 tem 2991 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
-      "sugestao": "solicitar apoio externo"
+      "sugestao": "solicitar apoio externo",
+      "alcance": [
+        {
+          "recurso_id": "palmas-a1",
+          "eta_h": 1.09,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-91_-474",
+              "localidade": "Centenário",
+              "pop_raio": 2135
+            }
+          ]
+        },
+        {
+          "recurso_id": "saofelix-t1",
+          "eta_h": 2.74,
+          "situacao": "reserva",
+          "destinos": []
+        }
+      ]
     },
     {
       "ocorrencia_id": "cel_-96_-468",
       "motivo": "Escalação: respeitar a memória deixa cel_-96_-468 (com população) sem recurso viável; decisão humana sobre usar a rota.",
-      "sugestao": "solicitar apoio externo"
+      "sugestao": "solicitar apoio externo",
+      "alcance": [
+        {
+          "recurso_id": "palmas-a1",
+          "eta_h": 1.07,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-91_-474",
+              "localidade": "Centenário",
+              "pop_raio": 2135
+            }
+          ]
+        },
+        {
+          "recurso_id": "saofelix-t1",
+          "eta_h": 2.35,
+          "situacao": "reserva",
+          "destinos": []
+        }
+      ]
     }
   ],
   "pareceres": [],
@@ -828,7 +1184,7 @@
       "fonte": "coordenador:enzo",
       "confianca": 1.0,
       "supersedes": null,
-      "criada_em": "2026-10-26T18:13:58.891000Z"
+      "criada_em": "2026-10-26T23:36:34.657000Z"
     }
   ],
   "historico": [

@@ -7,7 +7,7 @@
     "modo": "offline",
     "simulado": true,
     "arquivo_cenario": "input_examples/tocantins-parana-analista.yaml",
-    "gerado_em": "2026-10-26T18:14:07.999454+00:00",
+    "gerado_em": "2026-10-26T23:36:38.871192+00:00",
     "aprovacao_humana": "pendente"
   },
   "plano": {
@@ -738,17 +738,95 @@
     {
       "ocorrencia_id": "cel_-83_-490",
       "motivo": "Escalação: cel_-83_-490 tem 2305 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
-      "sugestao": "solicitar apoio externo"
+      "sugestao": "solicitar apoio externo",
+      "alcance": [
+        {
+          "recurso_id": "guarai-t1",
+          "eta_h": 3.01,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-86_-487",
+              "localidade": "Itaporã do Tocantins",
+              "pop_raio": 2464
+            }
+          ]
+        },
+        {
+          "recurso_id": "miracema-t1",
+          "eta_h": 5.73,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-93_-486",
+              "localidade": "Rio dos Bois",
+              "pop_raio": 2833
+            }
+          ]
+        }
+      ]
     },
     {
       "ocorrencia_id": "cel_-88_-479",
       "motivo": "Escalação: cel_-88_-479 tem 2726 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
-      "sugestao": "solicitar apoio externo"
+      "sugestao": "solicitar apoio externo",
+      "alcance": [
+        {
+          "recurso_id": "guarai-t1",
+          "eta_h": 2.47,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-86_-487",
+              "localidade": "Itaporã do Tocantins",
+              "pop_raio": 2464
+            }
+          ]
+        },
+        {
+          "recurso_id": "miracema-t1",
+          "eta_h": 3.76,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-93_-486",
+              "localidade": "Rio dos Bois",
+              "pop_raio": 2833
+            }
+          ]
+        }
+      ]
     },
     {
       "ocorrencia_id": "cel_-90_-475",
       "motivo": "Escalação: cel_-90_-475 tem 2135 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
-      "sugestao": "solicitar apoio externo"
+      "sugestao": "solicitar apoio externo",
+      "alcance": [
+        {
+          "recurso_id": "guarai-t1",
+          "eta_h": 4.17,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-86_-487",
+              "localidade": "Itaporã do Tocantins",
+              "pop_raio": 2464
+            }
+          ]
+        },
+        {
+          "recurso_id": "miracema-t1",
+          "eta_h": 4.31,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-93_-486",
+              "localidade": "Rio dos Bois",
+              "pop_raio": 2833
+            }
+          ]
+        }
+      ]
     }
   ],
   "pareceres": [

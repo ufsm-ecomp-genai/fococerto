@@ -102,6 +102,8 @@ def test_run_sample_job_plano_nota_e_aprovar(cliente):
     a = cliente.post("/api/aprovar", json={"regiao": "tocantins", "periodo": "2026-10-23", "autor": "qa",
                                            "sample": True})
     assert a.status_code == 200 and a.json()["aprovado_por"] == "qa"
+    meta = cliente.get("/api/plano/tocantins/2026-10-23").json()["meta"]
+    assert meta["aprovacao_humana"] == "aprovado" and meta["aprovado_por"] == "qa" and meta["aprovado_em"]
     linhas = (cliente.tmp / "estado" / "tocantins" / "decisoes.jsonl").read_text(encoding="utf-8").splitlines()
     assert linhas
 

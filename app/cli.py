@@ -20,7 +20,7 @@ import json
 import os
 import sys
 import time
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 from app.core import config
@@ -324,6 +324,17 @@ def rodar_cenario(args, cenario: Cenario | None = None, origem: str | None = Non
     return 0
 
 
+def marcar_aprovado(arq: Path, dados: dict, autor: str) -> None:
+    """Grava a aprovação no próprio plano.json (``meta.aprovacao_humana = "aprovado"``, quem e quando), para a API
+    e a interface verem o estado depois de recarregar. Escrita atômica: arquivo temporário + rename."""
+    meta = dados.setdefault("meta", {})
+    meta.update(aprovacao_humana="aprovado", aprovado_por=autor,
+                aprovado_em=datetime.now(timezone.utc).isoformat())
+    tmp = arq.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(dados, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+    tmp.replace(arq)
+
+
 def cmd_aprovar(args) -> int:
     arq = pasta_saida(args, args.regiao, args.periodo) / "plano.json"
     if not arq.exists():
@@ -336,6 +347,7 @@ def cmd_aprovar(args) -> int:
     repo = criar_repositorio(args)
     progresso(f"Gravando {len(plano.designacoes)} designação(ões) aprovadas por {autor}...")
     repo.salvar_decisoes(plano, aprovado_por=autor)
+    marcar_aprovado(arq, dados, autor)
     LogComProgresso(args.regiao, args.periodo, pasta=Path(args.pasta_logs)).evento(
         "sistema", "aprova", {"aprovado_por": autor, "designacoes": len(plano.designacoes), "plano": str(arq)})
     print(f"Plano {args.regiao}/{args.periodo} aprovado por {autor}.")

@@ -224,7 +224,12 @@ Estrutura (trechos reais de `output_examples/tocantins-folgado/plano.json`; list
   "escalacoes": [
     {"ocorrencia_id": "cel_-121_-466",
      "motivo": "Escalação: cel_-121_-466 tem 4295 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
-     "sugestao": "solicitar apoio externo"}
+     "sugestao": "solicitar apoio externo",
+     "alcance": [
+       {"recurso_id": "palmas-a1", "eta_h": 1.5, "situacao": "designado",
+        "destinos": [{"ocorrencia_id": "cel_-103_-478", "localidade": "Santa Tereza do Tocantins", "pop_raio": 2463}]},
+       {"recurso_id": "dianopolis-t1", "eta_h": 1.8, "situacao": "designado",
+        "destinos": [{"ocorrencia_id": "cel_-117_-469", "localidade": "Dianópolis", "pop_raio": 22424}]}]}
   ],
   "pareceres": [],
   "memorias_usadas": [],
@@ -265,7 +270,15 @@ Uma memória real (`output_examples/tocantins-escasso-com-nota`):
 
 Campos que podem faltar ou vir `null`: `ocorrencia.status` (célula antiga sem par no dia anterior),
 `dist_ti_uc_km` (TI/UC ainda não ingeridos), `vpd_kpa`/`vento_kmh`, `escalacao.ocorrencia_id`,
-`escalacao.sugestao`, `base.confianca`, `base.fonte`, `veredicto.contra_proposta`. Trate todos como opcionais.
+`escalacao.sugestao`, `escalacao.alcance`, `base.confianca`, `base.fonte`, `veredicto.contra_proposta`,
+`meta.aprovado_por`, `meta.aprovado_em`. Trate todos como opcionais (planos gerados antes de 26/10 à noite não têm
+`alcance` nem os campos de aprovação).
+
+**`escalacao.alcance`** (desde 26/10): quem chegaria à ocorrência dentro do ETA máximo, do mais rápido ao mais lento,
+e onde cada um ficou no plano final. `situacao`: `designado` (foi para `destinos`), `reserva` ou `livre` (sem
+designação). Lista vazia = nenhum recurso chega a tempo. Vem em toda escalação de ocorrência exposta sem recurso;
+uma escalação sem o campo (ex.: impasse, ocorrência sem população) não tem essa informação. Use para a lista
+compacta ("quem poderia ir") sem cortar o texto do `motivo`.
 
 ### `POST /api/run` → `202`
 Roda um período em segundo plano, com o mesmo ciclo da CLI (`python -m app.cli run`). Uma execução por vez: se já
@@ -347,8 +360,10 @@ vale a partir do próximo `run`. `periodo` é opcional (padrão: hoje).
 Texto ou autor vazio → 400.
 
 ### `POST /api/aprovar`
-Grava as designações do plano salvo do período como decisões aprovadas (igual a `python -m app.cli aprovar`). A
-aprovação **não** resolve as escalações: a mensagem avisa.
+Grava as designações do plano salvo do período como decisões aprovadas (igual a `python -m app.cli aprovar`) e
+marca o próprio plano: depois disso, `GET /api/plano/{regiao}/{periodo}` devolve `meta.aprovacao_humana:
+"aprovado"`, `meta.aprovado_por` e `meta.aprovado_em` (antes de 26/10 à noite, o plano continuava "pendente"). Gerar
+um plano novo para o período volta a "pendente". A aprovação **não** resolve as escalações: a mensagem avisa.
 ```json
 // request
 {"regiao": "tocantins", "periodo": "2026-10-23", "autor": "coord", "sample": true}
