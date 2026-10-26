@@ -6,7 +6,14 @@ Open Agent Hackathon 2026 · **Track 3: Reasoning Architecture** · Team UFSM (U
 
 FocoCerto crosses NASA FIRMS heat detections with weather, nearby communities, real fire stations (each with its source) and the resources the coordinator declares. A **Planner** proposes a resource order, a **Critic** challenges it (trade-offs, exceptions from memory, when to escalate) and can call an **Analyst** to answer an open question with stated uncertainty. The output is a **priority list plus a resource order**, where every assignment carries its evidence. Nothing is dispatched without human approval.
 
-> **Status, stated plainly:** the full pipeline runs end to end in **sample mode** (real cached FIRMS data, offline deterministic agents). **Meterless Nightshift works against the real service** since 25 Oct 2026 (~01:00 UTC): Nightshift for Windows on a team machine with an NVIDIA GPU, reached over Tailscale, serving `nvidia/nemotron-3-ultra-550b-a55b`; every call returns a signed receipt that the app logs. The first LLM-mode period (scarce scenario) took ~23 s with 2 calls (Planner and Critic); with today's review loop a real period took 1.5–3 min with 4 calls in our runs. The **ablation in LLM mode is complete**: 144 runs, 450 Nemotron calls, 0 offline fallbacks; the full system passes 75.9% of the answer-key checks against 22.2% for a simple allocator, and no final plan carries a false citation; a second LLM run after the fixes (48 runs) gives 82.8% against 22.2% (see [Evaluation](#evaluation)). **Plans can be written in English or Portuguese** per run (`--idioma en`), Nemotron's own text included. **Zetaris works on a real instance** since 25 Oct 2026 (evening): Zetaris 2.4 in Docker on a team Debian server, reached over SSH/Tailscale; `scripts/setup_zetaris.py` registered the Postgres datasource, the file-store CSVs, the Open-Meteo REST table with `CACHE TABLE` and the 4 views with 0 failures, and `fococerto.ocorrencias_prioridade` returns 698 rows, the same as the Python reference. A **full real run** (data through Zetaris views, decisions by Nemotron through Nightshift, memory in the real H-MEM service) is in [`output_examples/tocantins-escasso-real/`](output_examples/tocantins-escasso-real/). See [Sponsor technology](#sponsor-technology) and [Limitations](#limitations).
+**Status, stated plainly**
+- **Everything runs for real.** Data through **Zetaris 2.4** (4 SQL views; `fococerto.ocorrencias_prioridade` returns 698 rows, the same as our Python reference), decisions by **NVIDIA Nemotron 3 Ultra through Meterless Nightshift** (every call logged with a signed receipt), memory in the **Meterless H-MEM** service. A full real run: [`output_examples/tocantins-escasso-real/`](output_examples/tocantins-escasso-real/).
+- **Runs without any service, too.** `--sample` runs the whole pipeline on cached real FIRMS data with deterministic agents, in about 2 seconds.
+- **Measured, not claimed.** Ablation with answer keys committed before any run: the full system passes 82.8% of the checks against 22.2% for a simple allocator (Nemotron, second run, 48 runs); 600+ real Nemotron calls so far. See [Evaluation](#evaluation).
+- **Model text is checked.** Wrong facts and invented ids written by the model are rewritten before the Critic sees the plan ([a real case](#when-the-model-is-wrong-a-real-case)).
+- **English or Portuguese** per run (`--idioma en`), Nemotron's own text included.
+- **What is simulated:** the number of crews per station (the stations are real, with sources). No operator has validated it yet. See [Limitations](#limitations).
+- **Where it ran:** Nightshift on a team Windows machine with an NVIDIA GPU, Zetaris in Docker on a team Debian server, both reached over Tailscale (since 25 Oct 2026). One real period takes 1.5–3 min with ~4 Nemotron calls.
 
 ---
 
@@ -179,7 +186,7 @@ The real run is in [`output_examples/nemotron-invented-id-en/`](output_examples/
 git clone <this repo> fococerto && cd fococerto
 python3.12 -m venv .venv
 .venv/bin/pip install -r requirements.txt
-.venv/bin/python -m app.cli run --sample --regiao tocantins --recursos cenarios/tocantins-escasso.yaml
+.venv/bin/python -m app.cli run --sample --regiao tocantins --recursos cenarios/tocantins-escasso.yaml --idioma en   # or --idioma pt-BR
 ```
 
 ### 2. Docker (alternative)
@@ -330,7 +337,8 @@ In LLM mode each `llm_call` line records `modelo`, `routed_model` and `receipt` 
 
 ```bash
 (cd services/hmem && npm ci)                        # first: without it the H-MEM HTTP tests below are skipped
-.venv/bin/python -m pytest -q                       # 312 passed, 1 skipped on 26 Oct (the skip needs a throwaway Postgres: POSTGRES_DSN_TESTE)
+.venv/bin/python -m pytest -q                       # 327 passed, 1 skipped on 26 Oct (the skip needs a throwaway Postgres: POSTGRES_DSN_TESTE)
+#   in a fresh clone without `npm ci` in services/hmem, the 6 H-MEM service tests are skipped too (321 passed, 7 skipped)
 (cd services/hmem && npm test)                      # H-MEM conformance: 13/13 checks passed (rewrites conformance-report.txt)
 .venv/bin/python scripts/check_submissao.py         # secrets, .env, examples, README sections, repo size, dates
 scripts/check_clean_clone.sh                        # fresh clone -> venv -> pytest -> run --sample -> npm ci && npm test
@@ -357,17 +365,21 @@ The Track 3 question: **do the agents and the memory make better decisions?** We
 **Honesty notes:** the answer keys were written by the team, there is no field ground truth, and the reservations for each case are in the key itself. The agents' code already existed when the keys were committed (commit `e06ec8d`, 28 minutes before `1d722b5`), and after the first offline runs we fixed **7 bugs** that we found because checks failed (commit `39e42d2`). The fixes are general behaviour fixes with regression tests, each one documented with how to reproduce it in `eval/RELATORIO.md`, but they were made after seeing the results, and the "before" table is kept there. In offline mode every run is deterministic and A and B tend to coincide, so offline results only validate the pipeline; **the comparison that matters is in LLM mode**. Details: `eval/README.md` and `eval/RELATORIO.md`.
 
 **Offline mode (deterministic agents).** These numbers validate the evaluation pipeline (12 scenarios × 4 variants ×
-3 repetitions, `python -m eval.run_ablacao --modo offline --repeticoes 3`, code of 24 Oct); the LLM-mode table below is
+3 repetitions, `python -m eval.run_ablacao --modo offline --repeticoes 3`, code of 26 Oct, results in
+`eval/resultados/20261026T225811Z_offline/`; the 24 Oct numbers were B 59.3%, C 79.3%, D 58.6%); the LLM-mode table below is
 the comparison that answers the Track 3 question. Offline runs are deterministic, so the variance between repetitions is zero.
 
-| Variant | Checks passed | Decision | Detection | False alarms | False citations in final plan |
+| Variant | Checks passed | Decision | Detection | False alarms | Citation flags (any round) |
 |---|---|---|---|---|---|
 | **A** simple allocator | 18/81 (22.2%) | 15/51 | 0/27 | 0/3 | 0 |
-| **B** Planner + rule checker | 48/81 (59.3%) | 27/51 | 18/27 | 0/3 | 0 |
-| **C** full (Planner ⇄ Critic ⇄ Analyst + H-MEM) | 69/87 (79.3%) | 36/51 | 27/30 | 0/6 | 0 |
-| **D** C without H-MEM | 51/87 (58.6%) | 30/51 | 15/30 | 0/6 | 0 |
+| **B** Planner + rule checker | 57/81 (70.4%) | 36/51 | 18/27 | 0/3 | 0 |
+| **C** full (Planner ⇄ Critic ⇄ Analyst + H-MEM) | 72/87 (82.8%) | 39/51 | 27/30 | 0/6 | 0 |
+| **D** C without H-MEM | 54/87 (62.1%) | 33/51 | 15/30 | 0/6 | 3 |
 
-H-MEM contribution (C − D): +18 checks (coordinator notes and data-derived reignition memories). Full table,
+H-MEM contribution (C − D): +18 checks, all in the 4 scenarios whose memories should change the decision (two blocked
+stations, two reignitions); this is the clean memory comparison (see the note on LLM mode below). The 3 flags in D are
+the coverage check catching the offline Planner's own summary (in `excecao_dianopolis_ponte_18out`) claiming an
+assignment the plan does not have; the summary is rewritten before the Critic, so no final plan carries it. Full table,
 per-scenario results and the before/after of the bug fixes: `eval/RELATORIO.md`.
 
 ### LLM mode: NVIDIA Nemotron 3 Ultra through Meterless Nightshift
@@ -392,9 +404,8 @@ What this shows, and what it does not:
   model's errors: 24 wrong facts in 48 runs.
 - **The LLM Critic catches what code cannot.** In `fato_errado_tendencia` (a false trend claim no tool checks) B fails and
   C and D pass in all repetitions; in `tradeoff_noite_gurupi` the LLM variants pass where the offline agents failed.
-- **Memory adds little in LLM mode:** C − D is +2 checks (it was +18 offline). With Nemotron, the variant without memory
-  already reasons well from the period data, and the reignition case in Conceição fails in every variant. We report this
-  as measured.
+- **Memory in LLM mode is inconclusive, because the no-memory arm was contaminated:** C − D is +2 checks here, but see
+  the note under the second run: Nemotron's text in D quotes scenario memories that the code never sent it.
 - **Stable across repetitions:** standard deviation of the accuracy between repetitions ≤ 0.018; plans differ between
   repetitions in 2 of 12 scenarios.
 - **Exposure-weighted ETA** (how long exposed people wait for a crew): 4.40 h for A, 3.77 h for C.
@@ -429,7 +440,14 @@ Critic, mandatory escalation of exposed occurrences, idle-local-crew swap, real 
   of B, C or D carries a false citation.
 - **Impasses went from 30 to 6**, and the remaining 6 are legitimate: the model kept violating a hard rule (the same
   crew assigned twice, or an arrival time above the limit) for three rounds, so the decision goes to the human.
-- **Memory made no difference in this run** (C and D are identical). We report it as measured.
+- **C and D are identical, but this does not show that memory adds nothing.** Variant D sends no memory to the model
+  (its prompts are ~200 tokens shorter than C's, no `memoria_lida` events), yet D's Nemotron output quotes the scenario
+  memories, sometimes word for word: the Dianópolis bridge, the Mateiros flooding, "13 fires, 482 MW on 22 Oct" in
+  Morros (the same happens in the first run). D ran seconds after C with the same `meterless-app`/`meterless-scope`, so
+  our hypothesis is that context or responses are kept on the Nightshift side; the logs do not store prompts, so we
+  cannot prove it. The clean memory comparison is the offline one (+18 checks). Two real gaps in C stay visible: in
+  Mateiros the Planner re-assigned the blocked crew in round 2 and the Critic approved it, because the memory
+  restriction is a soft rule; in Conceição the boosted cell was not attended.
 - **Not covered by either run:** the plan-language option and the check for invented ids and false coverage claims
   (26 Oct) came after both LLM runs, and the evaluation runs in Portuguese.
 

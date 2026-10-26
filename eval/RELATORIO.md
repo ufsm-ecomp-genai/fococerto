@@ -166,7 +166,8 @@ Leitura honesta:
   chegou ao coordenador com citação falsa (conferido rodando `checar_citacoes` sobre os 108 planos finais).
 - O Crítico com LLM pega o que o código não pega: em `fato_errado_tendencia`, B falha e C e D passam nas 3 repetições.
 - A memória acrescenta pouco no modo LLM (C − D = +2 checagens, contra +18 no offline). `reignicao_conceicao` falha em
-  todas as variantes.
+  todas as variantes. **Atenção (26/10):** a variante D estava contaminada; veja "Memória no modo LLM: o braço sem
+  memória vazou" no fim deste relatório.
 - Variação entre repetições: desvio do acerto ≤ 0,018; planos diferentes entre repetições em 2 de 12 cenários.
 - ETA ponderado por exposição: 4,40 h (A) → 3,77 h (C).
 
@@ -271,4 +272,46 @@ troca de equipe local, bases reais com fonte, fim dos impasses de zona cinzenta.
 - Impasses: de 30 para 6. Os 6 restantes têm regra rígida aberta (`capacidade_excedida`, `eta_acima_limite`) depois de
   3 rodadas, em `controle_vegetacao_parana_19out` e `excecao_dianopolis_ponte_18out`; escalar para o humano é o
   comportamento esperado. 8 divergências de zona cinzenta fecharam como `divergencia_zona_cinzenta`.
-- A memória não fez diferença nesta rodada (C e D idênticos).
+- C e D idênticos, mas isso **não** mostra que a memória não ajuda: o braço D estava contaminado (seção seguinte).
+
+
+## Offline com o código de 26/10
+
+`eval/resultados/20261026T225811Z_offline/` · `python -m eval.run_ablacao --modo offline` (3 repetições, idênticas) ·
+código depois das correções de 25/10 e da explicação das escalações (motivo cita quem chegaria e para onde foi; as
+decisões não mudam: a ablação deu o mesmo resultado antes e depois dessa mudança).
+
+| Variante | Acerto | Decisão | Detecção | Alarmes falsos | Sinalizações de citação (qualquer rodada) |
+|---|---|---|---|---|---|
+| A | 18/81 (22,2%) | 15/51 | 0/27 | 0/3 | 0 |
+| B | 57/81 (70,4%) | 36/51 | 18/27 | 0/3 | 0 |
+| C | 72/87 (82,8%) | 39/51 | 27/30 | 0/6 | 0 |
+| D | 54/87 (62,1%) | 33/51 | 15/30 | 0/6 | 3 |
+
+C − D = +18 checagens, todas nos 4 cenários em que a memória deve mudar a decisão (Dianópolis e Mateiros: base
+bloqueada; Conceição e Morros: reignição). As 3 sinalizações em D são a checagem de cobertura pegando o resumo do
+próprio Planejador offline (`excecao_dianopolis_ponte_18out`, "incluído taguatinga-t1→cel_-117_-470", designação que o
+plano não tem); o resumo é reescrito antes do Crítico, e nenhum plano final a carrega. A coluna "Citações falsas" das
+tabelas acima conta violações `citacao_incorreta` em qualquer rodada, não só no plano final.
+
+## Memória no modo LLM: o braço sem memória vazou
+
+Nas duas rodadas LLM (`20261025T015525Z_llm` e `20261025T220912Z_llm`), a variante D (`usar_memoria=False`) não recebe
+memória pelo código: nenhum evento `memoria_lida`, `memorias_usadas` vazio, prompt do Planejador ~200 tokens menor que
+o de C (ex.: Morros, 16.731 contra 16.934). Mesmo assim, o texto do Nemotron em D cita as memórias dos cenários, às
+vezes palavra por palavra:
+
+- `reignicao_morros_24out` D: "482 MW em 22/10" (números exatos da memória derivada), já na 1ª proposta do Planejador;
+- `excecao_dianopolis_ponte_18out` D: "restrição de memória (ponte caída) confirmada pelo coordenador"; o resumo da
+  rodada 1 é idêntico ao de C;
+- `excecao_mateiros_alagada_23out` D e `controle_taguatinga_liberada_21out` D também citam as notas.
+
+O caminho no código está limpo (`dados_comuns` só envia `ctx.memorias`, vazio em D; `notas` é vazio em todos os
+cenários; prompts e YAMLs não têm esses textos; o cliente não tem cache). D rodou segundos depois de C, com os mesmos
+`meterless-app: fococerto` e `meterless-scope: user`. Hipótese: contexto ou respostas guardados do lado do Nightshift.
+Os logs não guardam o prompt, então não dá para provar. Conclusão: **o modo LLM não mede o efeito da memória**; a
+comparação limpa é a offline. Para medir de verdade: rodar C e D com `METERLESS_SCOPE` diferente por execução.
+
+Duas falhas reais de C, independentes do vazamento: em Mateiros o Planejador devolveu a equipe da base bloqueada na
+rodada 2 e o Crítico aprovou (`restricao_memoria` é regra não rígida, `app/tools/regras.py`); em Conceição a célula
+reforçada pela memória não foi atendida.
