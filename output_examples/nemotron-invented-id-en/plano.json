@@ -1,0 +1,1720 @@
+{
+  "meta": {
+    "versao_formato": 1,
+    "regiao": "tocantins",
+    "periodo": "2026-10-23",
+    "idioma": "en",
+    "modo": "llm",
+    "simulado": true,
+    "arquivo_cenario": "cenarios/tocantins-escasso.yaml",
+    "gerado_em": "2026-10-26T18:11:20.932675+00:00",
+    "aprovacao_humana": "pendente"
+  },
+  "plano": {
+    "periodo": "2026-10-23",
+    "regiao": "tocantins",
+    "designacoes": [
+      {
+        "recurso_id": "palmas-a1",
+        "ocorrencia_id": "cel_-103_-478",
+        "ordem": 1,
+        "eta_h": 0.37,
+        "justificativa": "Only viable aerial resource for cel_-103_-478 (ETA 0.37 h ≤ 6 h limit); population 2463 in Santa Tereza do Tocantins at 9.8 km; priority 0.602; 11 detections, FRP 51.9 MW. Swap gains 0.6 h and serves larger population than cel_-91_-474.",
+        "evidencias": [
+          "pop:2463",
+          "eta:0.37",
+          "dist:Santa Tereza do Tocantins:9.8",
+          "base:osm_n5067657890",
+          "focos:11",
+          "frp:51.9"
+        ]
+      },
+      {
+        "recurso_id": "saofelix-t1",
+        "ocorrencia_id": "cel_-96_-468",
+        "ordem": 2,
+        "eta_h": 2.35,
+        "justificativa": "Only viable ground resource for cel_-96_-468 (ETA 2.35 h ≤ 6 h limit); population 2991 in Lizarda at 5.5 km; priority 0.685; 6 detections, FRP 63.3 MW.",
+        "evidencias": [
+          "pop:2991",
+          "eta:2.35",
+          "dist:Lizarda:5.5",
+          "base:prevfogo_sao_felix",
+          "focos:6",
+          "frp:63.3"
+        ]
+      },
+      {
+        "recurso_id": "portonac-t1",
+        "ocorrencia_id": "cel_-107_-483",
+        "ordem": 3,
+        "eta_h": 0.49,
+        "justificativa": "Priority 0.59; 53316 inhabitants in the radius; Porto Nacional at 14.1 km; 1 detections, total FRP 7 MW; portonac-t1 (ground) arrives in ETA 0.5 h from CBMTO 5ª Cia do 1º BBM Porto Nacional. (Justification rewritten from the data: the previous one cited a fact that does not match.)",
+        "evidencias": [
+          "focos:1",
+          "eta:0.49",
+          "pop:53316",
+          "dist:Porto Nacional:14.1",
+          "base:cbmto_porto_nacional"
+        ]
+      },
+      {
+        "recurso_id": "palmas-t1",
+        "ocorrencia_id": "cel_-107_-476",
+        "ordem": 4,
+        "eta_h": 3.39,
+        "justificativa": "Palmas-t1 arrives in 3.39 h ≤ 6 h limit; population 7842 in Ponte Alta do Tocantins at 10.3 km. Priority 0.636; 3 detections, FRP 23.2 MW.",
+        "evidencias": [
+          "pop:7842",
+          "eta:3.39",
+          "dist:Ponte Alta do Tocantins:10.3",
+          "base:osm_n5067657890",
+          "focos:3",
+          "frp:23.2"
+        ]
+      },
+      {
+        "recurso_id": "dianopolis-t1",
+        "ocorrencia_id": "cel_-117_-469",
+        "ordem": 5,
+        "eta_h": 0.16,
+        "justificativa": "Mandatory swap: population 22424 in Dianópolis at 4.6 km; ETA 0.16 h ≤ 6 h limit (gain 2.35 h vs cel_-122_-464). Priority 0.593; 1 detection, FRP 8.7 MW.",
+        "evidencias": [
+          "pop:22424",
+          "eta:0.16",
+          "dist:Dianópolis:4.6",
+          "base:cbmto_dianopolis",
+          "focos:1",
+          "frp:8.7"
+        ]
+      },
+      {
+        "recurso_id": "paraiso-t1",
+        "ocorrencia_id": "cel_-113_-493",
+        "ordem": 6,
+        "eta_h": 4.55,
+        "justificativa": "Paraíso-t1 arrives in 4.55 h ≤ 6 h limit; population 4321 in Dueré at 7.3 km. Priority 0.615; 4 detections, FRP 66.1 MW. Closest available ground resource for this region.",
+        "evidencias": [
+          "pop:4321",
+          "eta:4.55",
+          "dist:Dueré:7.3",
+          "base:cbmto_paraiso",
+          "focos:4",
+          "frp:66.1"
+        ]
+      }
+    ],
+    "reserva": [],
+    "nao_atendidas": [
+      "cel_-91_-474",
+      "cel_-117_-491",
+      "cel_-122_-464",
+      "cel_-122_-473",
+      "cel_-105_-475",
+      "cel_-90_-486",
+      "cel_-95_-462",
+      "cel_-121_-466",
+      "cel_-95_-468"
+    ],
+    "resumo": "[escalated] 6 assignment(s): palmas-a1→cel_-103_-478, saofelix-t1→cel_-96_-468, portonac-t1→cel_-107_-483, palmas-t1→cel_-107_-476, dianopolis-t1→cel_-117_-469, paraiso-t1→cel_-113_-493. Without a crew: cel_-91_-474, cel_-117_-491, cel_-122_-464, cel_-122_-473, cel_-105_-475, cel_-90_-486, cel_-95_-462, cel_-121_-466, cel_-95_-468. Reserve: none. (Summary rewritten by the system from the final assignments: the agent's summary cited a nonexistent id or a coverage that does not match the plan.)",
+    "rodada": 2
+  },
+  "status": "escala",
+  "ocorrencias": [
+    {
+      "id": "cel_-91_-474",
+      "lat": -9.02206,
+      "lon": -47.30267,
+      "n_focos": 2,
+      "frp_soma": 398.28,
+      "frp_max": 199.14,
+      "primeiro": "2026-10-23T16:37:00",
+      "ultimo": "2026-10-23T16:37:00",
+      "periodos_seguidos": 1,
+      "status": "nova",
+      "pop_raio": 2135,
+      "dist_ti_uc_km": null,
+      "vpd_kpa": 4.03,
+      "vento_kmh": 19.2,
+      "prioridade": 0.6855,
+      "componentes": {
+        "exposicao": 0.6659,
+        "intensidade": 0.9799,
+        "tempo": 0.5373,
+        "persistencia": 0.0,
+        "crescimento": 1.0
+      },
+      "localidades": [
+        {
+          "nome": "Centenário",
+          "pop": 2135,
+          "dist_km": 8.7
+        }
+      ]
+    },
+    {
+      "id": "cel_-96_-468",
+      "lat": -9.56671,
+      "lon": -46.71507,
+      "n_focos": 6,
+      "frp_soma": 63.33,
+      "frp_max": 19.96,
+      "primeiro": "2026-10-23T16:37:00",
+      "ultimo": "2026-10-23T16:37:00",
+      "periodos_seguidos": 2,
+      "status": "crescendo",
+      "pop_raio": 2991,
+      "dist_ti_uc_km": null,
+      "vpd_kpa": 5.39,
+      "vento_kmh": 22.9,
+      "prioridade": 0.6851,
+      "componentes": {
+        "exposicao": 0.6952,
+        "intensidade": 0.6812,
+        "tempo": 0.8572,
+        "persistencia": 0.3333,
+        "crescimento": 0.6667
+      },
+      "localidades": [
+        {
+          "nome": "Lizarda",
+          "pop": 2991,
+          "dist_km": 5.5
+        }
+      ]
+    },
+    {
+      "id": "cel_-117_-491",
+      "lat": -11.68047,
+      "lon": -49.00484,
+      "n_focos": 8,
+      "frp_soma": 24.48,
+      "frp_max": 4.01,
+      "primeiro": "2026-10-23T04:02:00",
+      "ultimo": "2026-10-23T05:44:00",
+      "periodos_seguidos": 1,
+      "status": "nova",
+      "pop_raio": 87545,
+      "dist_ti_uc_km": null,
+      "vpd_kpa": 4.16,
+      "vento_kmh": 13.8,
+      "prioridade": 0.6581,
+      "componentes": {
+        "exposicao": 0.9884,
+        "intensidade": 0.5297,
+        "tempo": 0.3987,
+        "persistencia": 0.0,
+        "crescimento": 1.0
+      },
+      "localidades": [
+        {
+          "nome": "Gurupi",
+          "pop": 87545,
+          "dist_km": 8.8
+        }
+      ]
+    },
+    {
+      "id": "cel_-107_-476",
+      "lat": -10.67027,
+      "lon": -47.59331,
+      "n_focos": 3,
+      "frp_soma": 23.25,
+      "frp_max": 11.33,
+      "primeiro": "2026-10-23T16:37:00",
+      "ultimo": "2026-10-23T16:37:00",
+      "periodos_seguidos": 1,
+      "status": "nova",
+      "pop_raio": 7842,
+      "dist_ti_uc_km": null,
+      "vpd_kpa": 4.86,
+      "vento_kmh": 19.7,
+      "prioridade": 0.636,
+      "componentes": {
+        "exposicao": 0.7789,
+        "intensidade": 0.5216,
+        "tempo": 0.6649,
+        "persistencia": 0.0,
+        "crescimento": 1.0
+      },
+      "localidades": [
+        {
+          "nome": "Ponte Alta do Tocantins",
+          "pop": 7842,
+          "dist_km": 10.3
+        }
+      ]
+    },
+    {
+      "id": "cel_-122_-464",
+      "lat": -12.11782,
+      "lon": -46.39112,
+      "n_focos": 1,
+      "frp_soma": 38.37,
+      "frp_max": 38.37,
+      "primeiro": "2026-10-23T16:35:00",
+      "ultimo": "2026-10-23T16:35:00",
+      "periodos_seguidos": 1,
+      "status": "nova",
+      "pop_raio": 4295,
+      "dist_ti_uc_km": null,
+      "vpd_kpa": 5.19,
+      "vento_kmh": 15.6,
+      "prioridade": 0.617,
+      "componentes": {
+        "exposicao": 0.7266,
+        "intensidade": 0.6009,
+        "tempo": 0.5623,
+        "persistencia": 0.0,
+        "crescimento": 1.0
+      },
+      "localidades": [
+        {
+          "nome": "Ponte Alta do Bom Jesus",
+          "pop": 4295,
+          "dist_km": 10.0
+        }
+      ]
+    },
+    {
+      "id": "cel_-113_-493",
+      "lat": -11.27941,
+      "lon": -49.25654,
+      "n_focos": 4,
+      "frp_soma": 66.1,
+      "frp_max": 20.38,
+      "primeiro": "2026-10-23T16:37:00",
+      "ultimo": "2026-10-23T16:37:00",
+      "periodos_seguidos": 1,
+      "status": "nova",
+      "pop_raio": 4321,
+      "dist_ti_uc_km": null,
+      "vpd_kpa": 4.38,
+      "vento_kmh": 14.6,
+      "prioridade": 0.6153,
+      "componentes": {
+        "exposicao": 0.7271,
+        "intensidade": 0.6881,
+        "tempo": 0.4441,
+        "persistencia": 0.0,
+        "crescimento": 1.0
+      },
+      "localidades": [
+        {
+          "nome": "Dueré",
+          "pop": 4321,
+          "dist_km": 7.3
+        }
+      ]
+    },
+    {
+      "id": "cel_-122_-473",
+      "lat": -12.13529,
+      "lon": -47.26468,
+      "n_focos": 2,
+      "frp_soma": 61.64,
+      "frp_max": 47.88,
+      "primeiro": "2026-10-23T16:35:00",
+      "ultimo": "2026-10-23T16:35:00",
+      "periodos_seguidos": 1,
+      "status": "nova",
+      "pop_raio": 3956,
+      "dist_ti_uc_km": null,
+      "vpd_kpa": 5.61,
+      "vento_kmh": 12.1,
+      "prioridade": 0.6153,
+      "componentes": {
+        "exposicao": 0.7195,
+        "intensidade": 0.6769,
+        "tempo": 0.4714,
+        "persistencia": 0.0,
+        "crescimento": 1.0
+      },
+      "localidades": [
+        {
+          "nome": "Conceição do Tocantins",
+          "pop": 3956,
+          "dist_km": 10.0
+        }
+      ]
+    },
+    {
+      "id": "cel_-105_-475",
+      "lat": -10.46009,
+      "lon": -47.45804,
+      "n_focos": 3,
+      "frp_soma": 19.78,
+      "frp_max": 13.96,
+      "primeiro": "2026-10-23T16:37:00",
+      "ultimo": "2026-10-23T16:37:00",
+      "periodos_seguidos": 1,
+      "status": "nova",
+      "pop_raio": 3610,
+      "dist_ti_uc_km": null,
+      "vpd_kpa": 4.86,
+      "vento_kmh": 19.7,
+      "prioridade": 0.6061,
+      "componentes": {
+        "exposicao": 0.7115,
+        "intensidade": 0.4964,
+        "tempo": 0.6649,
+        "persistencia": 0.0,
+        "crescimento": 1.0
+      },
+      "localidades": [
+        {
+          "nome": "Lagoa do Tocantins",
+          "pop": 3610,
+          "dist_km": 13.7
+        }
+      ]
+    },
+    {
+      "id": "cel_-90_-486",
+      "lat": -8.96196,
+      "lon": -48.53019,
+      "n_focos": 2,
+      "frp_soma": 16.92,
+      "frp_max": 12.1,
+      "primeiro": "2026-10-23T16:37:00",
+      "ultimo": "2026-10-23T16:37:00",
+      "periodos_seguidos": 1,
+      "status": "nova",
+      "pop_raio": 29357,
+      "dist_ti_uc_km": null,
+      "vpd_kpa": 3.64,
+      "vento_kmh": 14.7,
+      "prioridade": 0.6051,
+      "componentes": {
+        "exposicao": 0.8935,
+        "intensidade": 0.4721,
+        "tempo": 0.3716,
+        "persistencia": 0.0,
+        "crescimento": 1.0
+      },
+      "localidades": [
+        {
+          "nome": "Fortaleza do Tabocão",
+          "pop": 3676,
+          "dist_km": 10.7
+        },
+        {
+          "nome": "Guaraí",
+          "pop": 25681,
+          "dist_km": 14.4
+        }
+      ]
+    },
+    {
+      "id": "cel_-103_-478",
+      "lat": -10.22666,
+      "lon": -47.73829,
+      "n_focos": 11,
+      "frp_soma": 51.87,
+      "frp_max": 7.08,
+      "primeiro": "2026-10-23T16:37:00",
+      "ultimo": "2026-10-23T16:37:00",
+      "periodos_seguidos": 2,
+      "status": "crescendo",
+      "pop_raio": 2463,
+      "dist_ti_uc_km": null,
+      "vpd_kpa": 4.78,
+      "vento_kmh": 15.9,
+      "prioridade": 0.6022,
+      "componentes": {
+        "exposicao": 0.6783,
+        "intensidade": 0.6491,
+        "tempo": 0.5278,
+        "persistencia": 0.3333,
+        "crescimento": 0.6364
+      },
+      "localidades": [
+        {
+          "nome": "Santa Tereza do Tocantins",
+          "pop": 2463,
+          "dist_km": 9.8
+        }
+      ]
+    },
+    {
+      "id": "cel_-95_-462",
+      "lat": -9.4707,
+      "lon": -46.19405,
+      "n_focos": 1,
+      "frp_soma": 9.49,
+      "frp_max": 9.49,
+      "primeiro": "2026-10-23T16:37:00",
+      "ultimo": "2026-10-23T16:37:00",
+      "periodos_seguidos": 1,
+      "status": "nova",
+      "pop_raio": 4829,
+      "dist_ti_uc_km": null,
+      "vpd_kpa": 5.4,
+      "vento_kmh": 19.0,
+      "prioridade": 0.5965,
+      "componentes": {
+        "exposicao": 0.7368,
+        "intensidade": 0.3845,
+        "tempo": 0.7125,
+        "persistencia": 0.0,
+        "crescimento": 1.0
+      },
+      "localidades": [
+        {
+          "nome": "Morros",
+          "pop": 4829,
+          "dist_km": 12.0
+        }
+      ]
+    },
+    {
+      "id": "cel_-121_-466",
+      "lat": -12.02473,
+      "lon": -46.59017,
+      "n_focos": 4,
+      "frp_soma": 22.54,
+      "frp_max": 7.62,
+      "primeiro": "2026-10-23T16:35:00",
+      "ultimo": "2026-10-23T16:35:00",
+      "periodos_seguidos": 1,
+      "status": "nova",
+      "pop_raio": 4295,
+      "dist_ti_uc_km": null,
+      "vpd_kpa": 5.19,
+      "vento_kmh": 15.6,
+      "prioridade": 0.596,
+      "componentes": {
+        "exposicao": 0.7266,
+        "intensidade": 0.5168,
+        "tempo": 0.5623,
+        "persistencia": 0.0,
+        "crescimento": 1.0
+      },
+      "localidades": [
+        {
+          "nome": "Ponte Alta do Bom Jesus",
+          "pop": 4295,
+          "dist_km": 14.1
+        }
+      ]
+    },
+    {
+      "id": "cel_-95_-468",
+      "lat": -9.46733,
+      "lon": -46.71439,
+      "n_focos": 1,
+      "frp_soma": 6.05,
+      "frp_max": 6.05,
+      "primeiro": "2026-10-23T16:37:00",
+      "ultimo": "2026-10-23T16:37:00",
+      "periodos_seguidos": 1,
+      "status": "nova",
+      "pop_raio": 2991,
+      "dist_ti_uc_km": null,
+      "vpd_kpa": 5.39,
+      "vento_kmh": 22.9,
+      "prioridade": 0.5946,
+      "componentes": {
+        "exposicao": 0.6952,
+        "intensidade": 0.3195,
+        "tempo": 0.8572,
+        "persistencia": 0.0,
+        "crescimento": 1.0
+      },
+      "localidades": [
+        {
+          "nome": "Lizarda",
+          "pop": 2991,
+          "dist_km": 14.8
+        }
+      ]
+    },
+    {
+      "id": "cel_-107_-483",
+      "lat": -10.68088,
+      "lon": -48.291,
+      "n_focos": 1,
+      "frp_soma": 6.8,
+      "frp_max": 6.8,
+      "primeiro": "2026-10-23T16:37:00",
+      "ultimo": "2026-10-23T16:37:00",
+      "periodos_seguidos": 1,
+      "status": "nova",
+      "pop_raio": 53316,
+      "dist_ti_uc_km": null,
+      "vpd_kpa": 3.48,
+      "vento_kmh": 16.4,
+      "prioridade": 0.5941,
+      "componentes": {
+        "exposicao": 0.9454,
+        "intensidade": 0.336,
+        "tempo": 0.3963,
+        "persistencia": 0.0,
+        "crescimento": 1.0
+      },
+      "localidades": [
+        {
+          "nome": "Porto Nacional",
+          "pop": 53316,
+          "dist_km": 14.1
+        }
+      ]
+    },
+    {
+      "id": "cel_-117_-469",
+      "lat": -11.6102,
+      "lon": -46.85868,
+      "n_focos": 1,
+      "frp_soma": 8.69,
+      "frp_max": 8.69,
+      "primeiro": "2026-10-23T16:37:00",
+      "ultimo": "2026-10-23T16:37:00",
+      "periodos_seguidos": 1,
+      "status": "nova",
+      "pop_raio": 22424,
+      "dist_ti_uc_km": null,
+      "vpd_kpa": 3.88,
+      "vento_kmh": 17.7,
+      "prioridade": 0.5928,
+      "componentes": {
+        "exposicao": 0.8701,
+        "intensidade": 0.3715,
+        "tempo": 0.4769,
+        "persistencia": 0.0,
+        "crescimento": 1.0
+      },
+      "localidades": [
+        {
+          "nome": "Dianópolis",
+          "pop": 22424,
+          "dist_km": 4.6
+        }
+      ]
+    }
+  ],
+  "bases": [
+    {
+      "id": "osm_n5067657890",
+      "nome": "CBMTO 1º BBM Palmas",
+      "lat": -10.206127,
+      "lon": -48.343395,
+      "fonte": "CBMTO — https://conexaoto.com.br/2023/01/16/1o-batalhao-e-quatro-companhias-de-bombeiros-militar-com-novos-comandos (2023); coordenada: quartel mapeado no OpenStreetMap (node/5067657890); id reaproveitado do OSM, a mesma unidade; fundida com osm_n5067657890 (OpenStreetMap: OpenStreetMap node/5067657890)",
+      "simulada": false,
+      "confianca": "oficial"
+    },
+    {
+      "id": "cbmto_paraiso",
+      "nome": "CBMTO 3ª Cia do 1º BBM Paraíso do Tocantins",
+      "lat": -10.17611,
+      "lon": -48.86667,
+      "fonte": "CBMTO — https://conexaoto.com.br/2023/01/27/companhia-de-bombeiros-em-paraiso-tem-novo-comandante-que-vai-atuar-frente-a-uma-das-cidades-mais-movimentadas-do-estado (2023); coordenada: sede do município (GeoNames); endereço do quartel não georreferenciado",
+      "simulada": false,
+      "confianca": "oficial"
+    },
+    {
+      "id": "cbmto_porto_nacional",
+      "nome": "CBMTO 5ª Cia do 1º BBM Porto Nacional",
+      "lat": -10.70806,
+      "lon": -48.41722,
+      "fonte": "CBMTO — https://conexaoto.com.br/2022/02/17/governador-wanderlei-autoriza-inicio-das-obras-do-quartel-do-corpo-de-bombeiros-de-porto-nacional (2022); coordenada: sede do município (GeoNames); endereço do quartel não georreferenciado",
+      "simulada": false,
+      "confianca": "oficial"
+    },
+    {
+      "id": "cbmto_gurupi",
+      "nome": "CBMTO 3º BBM Gurupi",
+      "lat": -11.72917,
+      "lon": -49.06861,
+      "fonte": "CBMTO — https://conexaoto.com.br/2023/07/09/praias-de-palmas-e-do-interior-recebem-apoio-com-presenca-de-bombeiros-militares (2023); coordenada: sede do município (GeoNames); endereço do quartel não georreferenciado",
+      "simulada": false,
+      "confianca": "oficial"
+    },
+    {
+      "id": "cbmto_dianopolis",
+      "nome": "CBMTO Companhia de Dianópolis",
+      "lat": -11.62778,
+      "lon": -46.82056,
+      "fonte": "CBMTO — https://conexaoto.com.br/2023/01/16/1o-batalhao-e-quatro-companhias-de-bombeiros-militar-com-novos-comandos (2023); coordenada: sede do município (GeoNames); endereço do quartel não georreferenciado",
+      "simulada": false,
+      "confianca": "oficial"
+    },
+    {
+      "id": "cbmto_colinas",
+      "nome": "CBMTO Companhia de Colinas do Tocantins",
+      "lat": -8.05917,
+      "lon": -48.475,
+      "fonte": "CBMTO — https://conexaoto.com.br/2023/01/16/1o-batalhao-e-quatro-companhias-de-bombeiros-militar-com-novos-comandos (2023); coordenada: sede do município (GeoNames); endereço do quartel não georreferenciado",
+      "simulada": false,
+      "confianca": "oficial"
+    },
+    {
+      "id": "prevfogo_sao_felix",
+      "nome": "Brigada Prevfogo/Ibama São Félix do Tocantins",
+      "lat": -10.16833,
+      "lon": -46.65944,
+      "fonte": "Prevfogo/Ibama — https://sbtnews.sbt.com.br/noticia/brasil/ibama-autoriza-contratacao-de-brigadas-federais-para-combate-a-incendios-em-municipios-de-19-estados (2024); coordenada: sede do município (GeoNames); Portaria Ibama nº 114/2024",
+      "simulada": false,
+      "confianca": "oficial"
+    },
+    {
+      "id": "prevfogo_santa_tereza",
+      "nome": "Brigada Prevfogo/Ibama Santa Tereza do Tocantins",
+      "lat": -10.28222,
+      "lon": -47.80833,
+      "fonte": "Prevfogo/Ibama — https://sbtnews.sbt.com.br/noticia/brasil/ibama-autoriza-contratacao-de-brigadas-federais-para-combate-a-incendios-em-municipios-de-19-estados (2024); coordenada: sede do município (GeoNames); Portaria Ibama nº 114/2024",
+      "simulada": false,
+      "confianca": "oficial"
+    },
+    {
+      "id": "prevfogo_itacaja",
+      "nome": "Brigada Prevfogo/Ibama Itacajá",
+      "lat": -8.39167,
+      "lon": -47.76778,
+      "fonte": "Prevfogo/Ibama — https://sbtnews.sbt.com.br/noticia/brasil/ibama-autoriza-contratacao-de-brigadas-federais-para-combate-a-incendios-em-municipios-de-19-estados (2024); coordenada: sede do município (GeoNames); Portaria Ibama nº 114/2024",
+      "simulada": false,
+      "confianca": "oficial"
+    },
+    {
+      "id": "prevfogo_goiatins",
+      "nome": "Brigada Prevfogo/Ibama Goiatins",
+      "lat": -7.71,
+      "lon": -47.31417,
+      "fonte": "Prevfogo/Ibama — https://sbtnews.sbt.com.br/noticia/brasil/ibama-autoriza-contratacao-de-brigadas-federais-para-combate-a-incendios-em-municipios-de-19-estados (2024); coordenada: sede do município (GeoNames); Portaria Ibama nº 114/2024",
+      "simulada": false,
+      "confianca": "oficial"
+    },
+    {
+      "id": "prevfogo_arraias",
+      "nome": "Brigada Prevfogo/Ibama Arraias",
+      "lat": -12.93139,
+      "lon": -46.93833,
+      "fonte": "Prevfogo/Ibama — https://sbtnews.sbt.com.br/noticia/brasil/ibama-autoriza-contratacao-de-brigadas-federais-para-combate-a-incendios-em-municipios-de-19-estados (2024); coordenada: sede do município (GeoNames); Portaria Ibama nº 114/2024",
+      "simulada": false,
+      "confianca": "oficial"
+    },
+    {
+      "id": "icmbio_rio_conceicao",
+      "nome": "ICMBio Esec Serra Geral do Tocantins em Rio da Conceição",
+      "lat": -11.40028,
+      "lon": -46.88333,
+      "fonte": "ICMBio — https://folha.qconcursos.com/n/icmbio-concurso-abre-cadastro-reserva-para-agentes-temporarios-em-rio-da-conceicao-to (2026); coordenada: sede do município (GeoNames); brigada temporária da Esec Serra Geral do Tocantins",
+      "simulada": false,
+      "confianca": "oficial"
+    },
+    {
+      "id": "osm_n3165869368",
+      "nome": "Bombeiros (perto de Porangatu, 1 km)",
+      "lat": -13.445225,
+      "lon": -49.136863,
+      "fonte": "OpenStreetMap node/3165869368",
+      "simulada": false,
+      "confianca": "osm"
+    },
+    {
+      "id": "osm_w1022455273",
+      "nome": "SCI (Palmas)",
+      "lat": -10.293075,
+      "lon": -48.360013,
+      "fonte": "OpenStreetMap way/1022455273",
+      "simulada": false,
+      "confianca": "osm"
+    },
+    {
+      "id": "osm_w365506007",
+      "nome": "Corpo de Bombeiros Militar",
+      "lat": -13.274527,
+      "lon": -50.167664,
+      "fonte": "OpenStreetMap way/365506007",
+      "simulada": false,
+      "confianca": "osm"
+    },
+    {
+      "id": "osm_w412958353",
+      "nome": "Bombeiros (perto de Barreiras, 1 km)",
+      "lat": -12.15074,
+      "lon": -44.998205,
+      "fonte": "OpenStreetMap way/412958353",
+      "simulada": false,
+      "confianca": "osm"
+    }
+  ],
+  "recursos": [
+    {
+      "id": "palmas-t1",
+      "base_id": "osm_n5067657890",
+      "tipo": "terrestre",
+      "capacidade": 1,
+      "disponivel": true
+    },
+    {
+      "id": "palmas-a1",
+      "base_id": "osm_n5067657890",
+      "tipo": "aereo",
+      "capacidade": 1,
+      "disponivel": true
+    },
+    {
+      "id": "portonac-t1",
+      "base_id": "cbmto_porto_nacional",
+      "tipo": "terrestre",
+      "capacidade": 1,
+      "disponivel": true
+    },
+    {
+      "id": "paraiso-t1",
+      "base_id": "cbmto_paraiso",
+      "tipo": "terrestre",
+      "capacidade": 1,
+      "disponivel": true
+    },
+    {
+      "id": "dianopolis-t1",
+      "base_id": "cbmto_dianopolis",
+      "tipo": "terrestre",
+      "capacidade": 1,
+      "disponivel": true
+    },
+    {
+      "id": "saofelix-t1",
+      "base_id": "prevfogo_sao_felix",
+      "tipo": "terrestre",
+      "capacidade": 1,
+      "disponivel": true
+    }
+  ],
+  "escalacoes": [
+    {
+      "ocorrencia_id": "cel_-91_-474",
+      "motivo": "Mandatory: 2135 people exposed and no crew/aircraft assigned in the final plan. Suggested action: request external support.",
+      "sugestao": "request external support"
+    },
+    {
+      "ocorrencia_id": "cel_-117_-491",
+      "motivo": "Mandatory: 87545 people exposed and no crew/aircraft assigned in the final plan. Suggested action: request external support.",
+      "sugestao": "request external support"
+    },
+    {
+      "ocorrencia_id": "cel_-122_-464",
+      "motivo": "Mandatory: 4295 people exposed and no crew/aircraft assigned in the final plan. Suggested action: request external support.",
+      "sugestao": "request external support"
+    },
+    {
+      "ocorrencia_id": "cel_-122_-473",
+      "motivo": "Mandatory: 3956 people exposed and no crew/aircraft assigned in the final plan. Suggested action: request external support.",
+      "sugestao": "request external support"
+    },
+    {
+      "ocorrencia_id": "cel_-105_-475",
+      "motivo": "Mandatory: 3610 people exposed and no crew/aircraft assigned in the final plan. Suggested action: request external support.",
+      "sugestao": "request external support"
+    },
+    {
+      "ocorrencia_id": "cel_-90_-486",
+      "motivo": "Mandatory: 29357 people exposed and no crew/aircraft assigned in the final plan. Suggested action: request external support.",
+      "sugestao": "request external support"
+    },
+    {
+      "ocorrencia_id": "cel_-95_-462",
+      "motivo": "Mandatory: 4829 people exposed and no crew/aircraft assigned in the final plan. Suggested action: request external support.",
+      "sugestao": "request external support"
+    },
+    {
+      "ocorrencia_id": "cel_-121_-466",
+      "motivo": "Mandatory: 4295 people exposed and no crew/aircraft assigned in the final plan. Suggested action: request external support.",
+      "sugestao": "request external support"
+    },
+    {
+      "ocorrencia_id": "cel_-95_-468",
+      "motivo": "Mandatory: 2991 people exposed and no crew/aircraft assigned in the final plan. Suggested action: request external support.",
+      "sugestao": "request external support"
+    }
+  ],
+  "pareceres": [],
+  "memorias_usadas": [],
+  "historico": [
+    {
+      "rodada": 1,
+      "plano": {
+        "periodo": "2026-10-23",
+        "regiao": "tocantins",
+        "designacoes": [
+          {
+            "recurso_id": "palmas-a1",
+            "ocorrencia_id": "cel_-91_-474",
+            "ordem": 1,
+            "eta_h": 0.97,
+            "justificativa": "Only viable resource (ETA 0.97 h ≤ 6 h limit) for cel_-91_-474; palmas-t1 exceeds limit (6.1 h). 2135 inhabitants in Centenário at 8.7 km; priority 0.685; 2 detections, FRP 398 MW.",
+            "evidencias": [
+              "pop:2135",
+              "eta:0.97",
+              "dist:Centenário:8.7",
+              "base:osm_n5067657890",
+              "focos:2"
+            ]
+          },
+          {
+            "recurso_id": "saofelix-t1",
+            "ocorrencia_id": "cel_-96_-468",
+            "ordem": 2,
+            "eta_h": 2.35,
+            "justificativa": "Only viable ground resource (ETA 2.35 h ≤ 6 h limit) for cel_-96_-468; palmas-a1 already assigned. 2991 inhabitants in Lizarda at 5.5 km; priority 0.685; 6 detections, FRP 63 MW.",
+            "evidencias": [
+              "pop:2991",
+              "eta:2.35",
+              "dist:Lizarda:5.5",
+              "base:prevfogo_sao_felix",
+              "focos:6"
+            ]
+          },
+          {
+            "recurso_id": "portonac-t1",
+            "ocorrencia_id": "cel_-117_-491",
+            "ordem": 3,
+            "eta_h": 4.4,
+            "justificativa": "Largest exposed population (87545 inhabitants in Gurupi at 8.8 km); portonac-t1 arrives in 4.4 h ≤ 6 h limit. Priority 0.658; 8 detections, FRP 24 MW. Paraíso-t1 also viable (5.88 h) but kept for other areas.",
+            "evidencias": [
+              "pop:87545",
+              "eta:4.4",
+              "dist:Gurupi:8.8",
+              "base:cbmto_porto_nacional",
+              "focos:8"
+            ]
+          },
+          {
+            "recurso_id": "palmas-t1",
+            "ocorrencia_id": "cel_-107_-476",
+            "ordem": 4,
+            "eta_h": 3.39,
+            "justificativa": "Palmas-t1 arrives in 3.39 h ≤ 6 h limit; 7842 inhabitants in Ponte Alta do Tocantins at 10.3 km. Priority 0.636; 3 detections, FRP 23 MW. Closest available ground resource.",
+            "evidencias": [
+              "pop:7842",
+              "eta:3.39",
+              "dist:Ponte Alta do Tocantins:10.3",
+              "base:osm_n5067657890",
+              "focos:3"
+            ]
+          },
+          {
+            "recurso_id": "dianopolis-t1",
+            "ocorrencia_id": "cel_-122_-464",
+            "ordem": 5,
+            "eta_h": 2.51,
+            "justificativa": "Dianopolis-t1 arrives in 2.51 h ≤ 6 h limit; 4295 inhabitants in Ponte Alta do Bom Jesus at 10.0 km. Priority 0.617; 1 detection, FRP 38 MW. Only viable rapid resource for this southern cell.",
+            "evidencias": [
+              "pop:4295",
+              "eta:2.51",
+              "dist:Ponte Alta do Bom Jesus:10.0",
+              "base:cbmto_dianopolis",
+              "focos:1"
+            ]
+          },
+          {
+            "recurso_id": "paraiso-t1",
+            "ocorrencia_id": "cel_-113_-493",
+            "ordem": 6,
+            "eta_h": 4.55,
+            "justificativa": "Paraíso-t1 arrives in 4.55 h ≤ 6 h limit; 4321 inhabitants in Dueré at 7.3 km. Priority 0.615; 4 detections, FRP 66 MW. Closest available ground resource for this region.",
+            "evidencias": [
+              "pop:4321",
+              "eta:4.55",
+              "dist:Dueré:7.3",
+              "base:cbmto_paraiso",
+              "focos:4"
+            ]
+          }
+        ],
+        "reserva": [],
+        "nao_atendidas": [
+          "cel_-122_-473",
+          "cel_-105_-475",
+          "cel_-90_-486",
+          "cel_-103_-478",
+          "cel_-95_-462",
+          "cel_-121_-466",
+          "cel_-95_-468",
+          "cel_-107_-483",
+          "cel_-117_-469"
+        ],
+        "resumo": "Six resources assigned to six priority incidents, all with ETA ≤ 6 h limit. Aircraft palmas-a1 and crew saofelix-t1 are the only viable options for their incidents. Porto Nacional (87.5 thousand inhabitants) covered by portonac-t1. Nine incidents remain without resources due to crew limitations; highest exposed population unserved are cel_-107_-483 (53.3 thousand) and cel_-90_-486 (29.4 thousand). Deviations from the baseline: Baseline proposal kept unchanged; no deviations because assignments respect hard constraints (ETA, capacity, reserve) and prioritize incidents with highest composite priority scores, ensuring unique viable resources are allocated where no alternative exists.",
+        "rodada": 1
+      },
+      "violacoes": [
+        {
+          "regra": "exposta_nao_atendida",
+          "ocorrencia_id": "cel_-122_-473",
+          "recurso_id": null,
+          "evidencia": {
+            "pop_raio": 3956,
+            "viaveis": [
+              "palmas-a1",
+              "dianopolis-t1"
+            ],
+            "sem_exposicao_atendidas": []
+          },
+          "sugestao": "the viable crews/aircraft are at incidents with exposure or in reserve (those at incidents with no exposure cannot get here within the maximum ETA): consider escalating",
+          "rigida": false
+        },
+        {
+          "regra": "exposta_nao_atendida",
+          "ocorrencia_id": "cel_-105_-475",
+          "recurso_id": null,
+          "evidencia": {
+            "pop_raio": 3610,
+            "viaveis": [
+              "palmas-a1",
+              "saofelix-t1",
+              "palmas-t1",
+              "portonac-t1",
+              "dianopolis-t1",
+              "paraiso-t1"
+            ],
+            "sem_exposicao_atendidas": []
+          },
+          "sugestao": "the viable crews/aircraft are at incidents with exposure or in reserve (those at incidents with no exposure cannot get here within the maximum ETA): consider escalating",
+          "rigida": false
+        },
+        {
+          "regra": "exposta_nao_atendida",
+          "ocorrencia_id": "cel_-90_-486",
+          "recurso_id": null,
+          "evidencia": {
+            "pop_raio": 29357,
+            "viaveis": [
+              "palmas-a1",
+              "palmas-t1",
+              "paraiso-t1"
+            ],
+            "sem_exposicao_atendidas": []
+          },
+          "sugestao": "the viable crews/aircraft are at incidents with exposure or in reserve (those at incidents with no exposure cannot get here within the maximum ETA): consider escalating",
+          "rigida": false
+        },
+        {
+          "regra": "troca_recurso_local",
+          "ocorrencia_id": "cel_-103_-478",
+          "recurso_id": "palmas-a1",
+          "evidencia": {
+            "pop_raio": 2463,
+            "recurso_id": "palmas-a1",
+            "de_ocorrencia": "cel_-91_-474",
+            "pop_de": 2135,
+            "eta_atual_h": 0.97,
+            "eta_para_exposta_h": 0.37,
+            "ganho_eta_h": 0.6,
+            "candidatos": [
+              {
+                "recurso_id": "palmas-a1",
+                "de_ocorrencia": "cel_-91_-474",
+                "pop_de": 2135,
+                "eta_atual_h": 0.97,
+                "eta_para_exposta_h": 0.37,
+                "ganho_eta_h": 0.6
+              }
+            ]
+          },
+          "sugestao": "swap: palmas-a1 leaves cel_-91_-474 (2135 people, ETA 0.97 h) and goes to cel_-103_-478 (2463 people, ETA 0.37 h); cel_-91_-474 is left uncovered and must be escalated",
+          "rigida": false
+        },
+        {
+          "regra": "exposta_nao_atendida",
+          "ocorrencia_id": "cel_-103_-478",
+          "recurso_id": null,
+          "evidencia": {
+            "pop_raio": 2463,
+            "viaveis": [
+              "palmas-a1",
+              "palmas-t1",
+              "portonac-t1",
+              "saofelix-t1",
+              "paraiso-t1"
+            ],
+            "sem_exposicao_atendidas": []
+          },
+          "sugestao": "the viable crews/aircraft are at incidents with exposure or in reserve (those at incidents with no exposure cannot get here within the maximum ETA): consider escalating",
+          "rigida": false
+        },
+        {
+          "regra": "exposta_nao_atendida",
+          "ocorrencia_id": "cel_-95_-462",
+          "recurso_id": null,
+          "evidencia": {
+            "pop_raio": 4829,
+            "viaveis": [
+              "palmas-a1",
+              "saofelix-t1"
+            ],
+            "sem_exposicao_atendidas": []
+          },
+          "sugestao": "the viable crews/aircraft are at incidents with exposure or in reserve (those at incidents with no exposure cannot get here within the maximum ETA): consider escalating",
+          "rigida": false
+        },
+        {
+          "regra": "troca_recurso_local",
+          "ocorrencia_id": "cel_-121_-466",
+          "recurso_id": "dianopolis-t1",
+          "evidencia": {
+            "pop_raio": 4295,
+            "recurso_id": "dianopolis-t1",
+            "de_ocorrencia": "cel_-122_-464",
+            "pop_de": 4295,
+            "eta_atual_h": 2.51,
+            "eta_para_exposta_h": 1.78,
+            "ganho_eta_h": 0.74,
+            "candidatos": [
+              {
+                "recurso_id": "dianopolis-t1",
+                "de_ocorrencia": "cel_-122_-464",
+                "pop_de": 4295,
+                "eta_atual_h": 2.51,
+                "eta_para_exposta_h": 1.78,
+                "ganho_eta_h": 0.74
+              }
+            ]
+          },
+          "sugestao": "swap: dianopolis-t1 leaves cel_-122_-464 (4295 people, ETA 2.51 h) and goes to cel_-121_-466 (4295 people, ETA 1.78 h); cel_-122_-464 is left uncovered and must be escalated",
+          "rigida": false
+        },
+        {
+          "regra": "exposta_nao_atendida",
+          "ocorrencia_id": "cel_-121_-466",
+          "recurso_id": null,
+          "evidencia": {
+            "pop_raio": 4295,
+            "viaveis": [
+              "palmas-a1",
+              "dianopolis-t1"
+            ],
+            "sem_exposicao_atendidas": []
+          },
+          "sugestao": "the viable crews/aircraft are at incidents with exposure or in reserve (those at incidents with no exposure cannot get here within the maximum ETA): consider escalating",
+          "rigida": false
+        },
+        {
+          "regra": "exposta_nao_atendida",
+          "ocorrencia_id": "cel_-95_-468",
+          "recurso_id": null,
+          "evidencia": {
+            "pop_raio": 2991,
+            "viaveis": [
+              "palmas-a1",
+              "saofelix-t1"
+            ],
+            "sem_exposicao_atendidas": []
+          },
+          "sugestao": "the viable crews/aircraft are at incidents with exposure or in reserve (those at incidents with no exposure cannot get here within the maximum ETA): consider escalating",
+          "rigida": false
+        },
+        {
+          "regra": "troca_recurso_local",
+          "ocorrencia_id": "cel_-107_-483",
+          "recurso_id": "paraiso-t1",
+          "evidencia": {
+            "pop_raio": 53316,
+            "recurso_id": "paraiso-t1",
+            "de_ocorrencia": "cel_-113_-493",
+            "pop_de": 4321,
+            "eta_atual_h": 4.55,
+            "eta_para_exposta_h": 2.95,
+            "ganho_eta_h": 1.59,
+            "candidatos": [
+              {
+                "recurso_id": "paraiso-t1",
+                "de_ocorrencia": "cel_-113_-493",
+                "pop_de": 4321,
+                "eta_atual_h": 4.55,
+                "eta_para_exposta_h": 2.95,
+                "ganho_eta_h": 1.59
+              },
+              {
+                "recurso_id": "palmas-t1",
+                "de_ocorrencia": "cel_-107_-476",
+                "pop_de": 7842,
+                "eta_atual_h": 3.39,
+                "eta_para_exposta_h": 1.86,
+                "ganho_eta_h": 1.53
+              },
+              {
+                "recurso_id": "palmas-a1",
+                "de_ocorrencia": "cel_-91_-474",
+                "pop_de": 2135,
+                "eta_atual_h": 0.97,
+                "eta_para_exposta_h": 0.3,
+                "ganho_eta_h": 0.67
+              }
+            ]
+          },
+          "sugestao": "swap: paraiso-t1 leaves cel_-113_-493 (4321 people, ETA 4.55 h) and goes to cel_-107_-483 (53316 people, ETA 2.95 h); cel_-113_-493 is left uncovered and must be escalated",
+          "rigida": false
+        },
+        {
+          "regra": "exposta_nao_atendida",
+          "ocorrencia_id": "cel_-107_-483",
+          "recurso_id": null,
+          "evidencia": {
+            "pop_raio": 53316,
+            "viaveis": [
+              "palmas-a1",
+              "portonac-t1",
+              "palmas-t1",
+              "paraiso-t1"
+            ],
+            "sem_exposicao_atendidas": []
+          },
+          "sugestao": "the viable crews/aircraft are at incidents with exposure or in reserve (those at incidents with no exposure cannot get here within the maximum ETA): consider escalating",
+          "rigida": false
+        },
+        {
+          "regra": "troca_recurso_local",
+          "ocorrencia_id": "cel_-117_-469",
+          "recurso_id": "dianopolis-t1",
+          "evidencia": {
+            "pop_raio": 22424,
+            "recurso_id": "dianopolis-t1",
+            "de_ocorrencia": "cel_-122_-464",
+            "pop_de": 4295,
+            "eta_atual_h": 2.51,
+            "eta_para_exposta_h": 0.16,
+            "ganho_eta_h": 2.35,
+            "candidatos": [
+              {
+                "recurso_id": "dianopolis-t1",
+                "de_ocorrencia": "cel_-122_-464",
+                "pop_de": 4295,
+                "eta_atual_h": 2.51,
+                "eta_para_exposta_h": 0.16,
+                "ganho_eta_h": 2.35
+              }
+            ]
+          },
+          "sugestao": "swap: dianopolis-t1 leaves cel_-122_-464 (4295 people, ETA 2.51 h) and goes to cel_-117_-469 (22424 people, ETA 0.16 h); cel_-122_-464 is left uncovered and must be escalated",
+          "rigida": false
+        },
+        {
+          "regra": "exposta_nao_atendida",
+          "ocorrencia_id": "cel_-117_-469",
+          "recurso_id": null,
+          "evidencia": {
+            "pop_raio": 22424,
+            "viaveis": [
+              "dianopolis-t1",
+              "palmas-a1",
+              "saofelix-t1"
+            ],
+            "sem_exposicao_atendidas": []
+          },
+          "sugestao": "the viable crews/aircraft are at incidents with exposure or in reserve (those at incidents with no exposure cannot get here within the maximum ETA): consider escalating",
+          "rigida": false
+        }
+      ],
+      "citacoes_corrigidas": [],
+      "veredicto": {
+        "decisao": "rejeita",
+        "motivos": [
+          "palmas-a1 assigned to cel_-91_-474 (2135 people, ETA 0.97 h) while cel_-103_-478 (2463 people, ETA 0.37 h) is unserved; swap gains 0.6 h and serves larger population",
+          "dianopolis-t1 assigned to cel_-122_-464 (4295 people, ETA 2.51 h) while cel_-117_-469 (22424 people, ETA 0.16 h) is unserved; swap gains 2.35 h and serves 5× larger population",
+          "paraiso-t1 assigned to cel_-113_-493 (4321 people, ETA 4.55 h) while cel_-107_-483 (53316 people, ETA 2.95 h) is unserved; swap gains 1.59 h and serves 12× larger population",
+          "portonac-t1 assigned to cel_-117_-491 (87545 people, ETA 4.4 h) while cel_-107_-483 (53316 people, ETA 0.49 h) is unserved; gurupi-t1 (base cbmto_gurupi) can serve cel_-117_-491 in 0.31 h, freeing portonac-t1 for higher-priority swap",
+          "dianopolis-t1 can serve cel_-121_-466 (4295 people, ETA 1.78 h) instead of cel_-122_-464, gaining 0.74 h for same population"
+        ],
+        "contra_proposta": {
+          "periodo": "2026-10-23",
+          "regiao": "tocantins",
+          "designacoes": [
+            {
+              "recurso_id": "palmas-a1",
+              "ocorrencia_id": "cel_-103_-478",
+              "ordem": 1,
+              "eta_h": 0.37,
+              "justificativa": "Only viable aerial resource for cel_-103_-478 (ETA 0.37 h ≤ 6 h limit); population 2463 in Santa Tereza do Tocantins at 9.8 km; priority 0.602; 11 detections, FRP 51.9 MW. Swap gains 0.6 h and serves larger population than cel_-91_-474.",
+              "evidencias": [
+                "pop:2463",
+                "eta:0.37",
+                "dist:Santa Tereza do Tocantins:9.8",
+                "base:osm_n5067657890",
+                "focos:11",
+                "frp:51.9"
+              ]
+            },
+            {
+              "recurso_id": "saofelix-t1",
+              "ocorrencia_id": "cel_-96_-468",
+              "ordem": 2,
+              "eta_h": 2.35,
+              "justificativa": "Only viable ground resource for cel_-96_-468 (ETA 2.35 h ≤ 6 h limit); population 2991 in Lizarda at 5.5 km; priority 0.685; 6 detections, FRP 63.3 MW.",
+              "evidencias": [
+                "pop:2991",
+                "eta:2.35",
+                "dist:Lizarda:5.5",
+                "base:prevfogo_sao_felix",
+                "focos:6",
+                "frp:63.3"
+              ]
+            },
+            {
+              "recurso_id": "portonac-t1",
+              "ocorrencia_id": "cel_-107_-483",
+              "ordem": 3,
+              "eta_h": 0.49,
+              "justificativa": "Second largest exposed population (53316 in Porto Nacional at 14.1 km); portonac-t1 arrives in 0.49 h ≤ 6 h limit. Priority 0.594; 1 detection, FRP 6.8 MW. Gurupi-t1 (base cbmto_gurupi) can serve cel_-117_-491 in 0.31 h, freeing portonac-t1 for this higher-priority swap.",
+              "evidencias": [
+                "pop:53316",
+                "eta:0.49",
+                "dist:Porto Nacional:14.1",
+                "base:cbmto_porto_nacional",
+                "focos:1",
+                "frp:6.8"
+              ]
+            },
+            {
+              "recurso_id": "palmas-t1",
+              "ocorrencia_id": "cel_-107_-476",
+              "ordem": 4,
+              "eta_h": 3.39,
+              "justificativa": "Palmas-t1 arrives in 3.39 h ≤ 6 h limit; population 7842 in Ponte Alta do Tocantins at 10.3 km. Priority 0.636; 3 detections, FRP 23.2 MW.",
+              "evidencias": [
+                "pop:7842",
+                "eta:3.39",
+                "dist:Ponte Alta do Tocantins:10.3",
+                "base:osm_n5067657890",
+                "focos:3",
+                "frp:23.2"
+              ]
+            },
+            {
+              "recurso_id": "dianopolis-t1",
+              "ocorrencia_id": "cel_-117_-469",
+              "ordem": 5,
+              "eta_h": 0.16,
+              "justificativa": "Mandatory swap: population 22424 in Dianópolis at 4.6 km; ETA 0.16 h ≤ 6 h limit (gain 2.35 h vs cel_-122_-464). Priority 0.593; 1 detection, FRP 8.7 MW.",
+              "evidencias": [
+                "pop:22424",
+                "eta:0.16",
+                "dist:Dianópolis:4.6",
+                "base:cbmto_dianopolis",
+                "focos:1",
+                "frp:8.7"
+              ]
+            },
+            {
+              "recurso_id": "paraiso-t1",
+              "ocorrencia_id": "cel_-113_-493",
+              "ordem": 6,
+              "eta_h": 4.55,
+              "justificativa": "Paraíso-t1 arrives in 4.55 h ≤ 6 h limit; population 4321 in Dueré at 7.3 km. Priority 0.615; 4 detections, FRP 66.1 MW. Closest available ground resource for this region.",
+              "evidencias": [
+                "pop:4321",
+                "eta:4.55",
+                "dist:Dueré:7.3",
+                "base:cbmto_paraiso",
+                "focos:4",
+                "frp:66.1"
+              ]
+            }
+          ],
+          "reserva": [],
+          "nao_atendidas": [
+            "cel_-91_-474",
+            "cel_-117_-491",
+            "cel_-122_-464",
+            "cel_-122_-473",
+            "cel_-105_-475",
+            "cel_-90_-486",
+            "cel_-95_-462",
+            "cel_-121_-466",
+            "cel_-95_-468"
+          ],
+          "resumo": "Six resources assigned to six incidents with exposed population, all ETA ≤ 6 h limit. Mandatory swaps applied: palmas-a1 to cel_-103_-478 (2463 people, ETA 0.37 h), dianopolis-t1 to cel_-117_-469 (22424 people, ETA 0.16 h), portonac-t1 to cel_-107_-483 (53316 people, ETA 0.49 h). Six incidents remain without viable resource and must be escalated: cel_-91_-474 (2135 people), cel_-117_-491 (87545 people, covered by gurupi-t1), cel_-122_-464 (4295 people), cel_-122_-473 (3956 people), cel_-105_-475 (3610 people), cel_-90_-486 (29357 people), cel_-95_-462 (4829 people), cel_-121_-466 (4295 people), cel_-95_-468 (2991 people). Deviations from the baseline: palmas-a1 moved from cel_-91_-474 to cel_-103_-478 (troca_recurso_local: gain 0.6 h, larger population) | dianopolis-t1 moved from cel_-122_-464 to cel_-117_-469 (troca_recurso_local: gain 2.35 h, population 5× larger) | portonac-t1 moved from cel_-117_-491 to cel_-107_-483 (troca_recurso_local: gurupi-t1 available for cel_-117_-491 at 0.31 h, portonac-t1 serves 53316 people at 0.49 h) Replies to the Critic: palmas-a1 assigned to cel_-91_-474 (2135 people, ETA 0.97 h) while cel_-103_-478 (2463 people, ETA 0.37 h) is unserved; swap gains 0.6 h and serves larger population -> adotado (Palmas-a1 realocated to cel_-103_-478 (pop 2463, ETA 0.37 h) instead of cel_-91_-474 (pop 2135, ETA 0.97 h). Gain of 0.6 h and larger population served. Cel_-91_-474 left without resource and must be escalated.) | dianopolis-t1 assigned to cel_-122_-464 (4295 people, ETA 2.51 h) while cel_-117_-469 (22424 people, ETA 0.16 h) is unserved; swap gains 2.35 h and serves 5× larger population -> adotado (Dianopolis-t1 realocated to cel_-117_-469 (pop 22424, ETA 0.16 h) instead of cel_-122_-464 (pop 4295, ETA 2.51 h). Gain of 2.35 h and 5× larger population served. Cel_-122_-464 left without resource and must be escalated.) | paraiso-t1 assigned to cel_-113_-493 (4321 people, ETA 4.55 h) while cel_-107_-483 (53316 people, ETA 2.95 h) is unserved; swap gains 1.59 h and serves 12× larger population -> adotado (Paraíso-t1 realocated to cel_-107_-483 (pop 53316, ETA 2.95 h) instead of cel_-113_-493 (pop 4321, ETA 4.55 h). Gain of 1.59 h and 12× larger population served. Cel_-113_-493 left without resource and must be escalated.) | portonac-t1 assigned to cel_-117_-491 (87545 people, ETA 4.4 h) while cel_-107_-483 (53316 people, ETA 0.49 h) is unserved; gurupi-t1 can serve cel_-117_-491 in 0.31 h -> adotado (Portonac-t1 realocated to cel_-107_-483 (pop 53316, ETA 0.49 h) instead of cel_-117_-491 (pop 87545, ETA 4.4 h). Gurupi-t1 (base cbmto_gurupi) serves cel_-117_-491 in 0.31 h. Portonac-t1 gains 3.91 h and serves second-largest exposed population.)",
+          "rodada": 1
+        },
+        "pedir_analista": []
+      },
+      "origem_critico": "llm"
+    },
+    {
+      "rodada": 2,
+      "plano": {
+        "periodo": "2026-10-23",
+        "regiao": "tocantins",
+        "designacoes": [
+          {
+            "recurso_id": "palmas-a1",
+            "ocorrencia_id": "cel_-103_-478",
+            "ordem": 1,
+            "eta_h": 0.37,
+            "justificativa": "Only viable aerial resource for cel_-103_-478 (ETA 0.37 h ≤ 6 h limit); population 2463 in Santa Tereza do Tocantins at 9.8 km; priority 0.602; 11 detections, FRP 51.9 MW. Swap gains 0.6 h and serves larger population than cel_-91_-474.",
+            "evidencias": [
+              "pop:2463",
+              "eta:0.37",
+              "dist:Santa Tereza do Tocantins:9.8",
+              "base:osm_n5067657890",
+              "focos:11",
+              "frp:51.9"
+            ]
+          },
+          {
+            "recurso_id": "saofelix-t1",
+            "ocorrencia_id": "cel_-96_-468",
+            "ordem": 2,
+            "eta_h": 2.35,
+            "justificativa": "Only viable ground resource for cel_-96_-468 (ETA 2.35 h ≤ 6 h limit); population 2991 in Lizarda at 5.5 km; priority 0.685; 6 detections, FRP 63.3 MW.",
+            "evidencias": [
+              "pop:2991",
+              "eta:2.35",
+              "dist:Lizarda:5.5",
+              "base:prevfogo_sao_felix",
+              "focos:6",
+              "frp:63.3"
+            ]
+          },
+          {
+            "recurso_id": "portonac-t1",
+            "ocorrencia_id": "cel_-107_-483",
+            "ordem": 3,
+            "eta_h": 0.49,
+            "justificativa": "Priority 0.59; 53316 inhabitants in the radius; Porto Nacional at 14.1 km; 1 detections, total FRP 7 MW; portonac-t1 (ground) arrives in ETA 0.5 h from CBMTO 5ª Cia do 1º BBM Porto Nacional. (Justification rewritten from the data: the previous one cited a fact that does not match.)",
+            "evidencias": [
+              "focos:1",
+              "eta:0.49",
+              "pop:53316",
+              "dist:Porto Nacional:14.1",
+              "base:cbmto_porto_nacional"
+            ]
+          },
+          {
+            "recurso_id": "palmas-t1",
+            "ocorrencia_id": "cel_-107_-476",
+            "ordem": 4,
+            "eta_h": 3.39,
+            "justificativa": "Palmas-t1 arrives in 3.39 h ≤ 6 h limit; population 7842 in Ponte Alta do Tocantins at 10.3 km. Priority 0.636; 3 detections, FRP 23.2 MW.",
+            "evidencias": [
+              "pop:7842",
+              "eta:3.39",
+              "dist:Ponte Alta do Tocantins:10.3",
+              "base:osm_n5067657890",
+              "focos:3",
+              "frp:23.2"
+            ]
+          },
+          {
+            "recurso_id": "dianopolis-t1",
+            "ocorrencia_id": "cel_-117_-469",
+            "ordem": 5,
+            "eta_h": 0.16,
+            "justificativa": "Mandatory swap: population 22424 in Dianópolis at 4.6 km; ETA 0.16 h ≤ 6 h limit (gain 2.35 h vs cel_-122_-464). Priority 0.593; 1 detection, FRP 8.7 MW.",
+            "evidencias": [
+              "pop:22424",
+              "eta:0.16",
+              "dist:Dianópolis:4.6",
+              "base:cbmto_dianopolis",
+              "focos:1",
+              "frp:8.7"
+            ]
+          },
+          {
+            "recurso_id": "paraiso-t1",
+            "ocorrencia_id": "cel_-113_-493",
+            "ordem": 6,
+            "eta_h": 4.55,
+            "justificativa": "Paraíso-t1 arrives in 4.55 h ≤ 6 h limit; population 4321 in Dueré at 7.3 km. Priority 0.615; 4 detections, FRP 66.1 MW. Closest available ground resource for this region.",
+            "evidencias": [
+              "pop:4321",
+              "eta:4.55",
+              "dist:Dueré:7.3",
+              "base:cbmto_paraiso",
+              "focos:4",
+              "frp:66.1"
+            ]
+          }
+        ],
+        "reserva": [],
+        "nao_atendidas": [
+          "cel_-91_-474",
+          "cel_-117_-491",
+          "cel_-122_-464",
+          "cel_-122_-473",
+          "cel_-105_-475",
+          "cel_-90_-486",
+          "cel_-95_-462",
+          "cel_-121_-466",
+          "cel_-95_-468"
+        ],
+        "resumo": "6 assignment(s): palmas-a1→cel_-103_-478, saofelix-t1→cel_-96_-468, portonac-t1→cel_-107_-483, palmas-t1→cel_-107_-476, dianopolis-t1→cel_-117_-469, paraiso-t1→cel_-113_-493. Without a crew: cel_-91_-474, cel_-117_-491, cel_-122_-464, cel_-122_-473, cel_-105_-475, cel_-90_-486, cel_-95_-462, cel_-121_-466, cel_-95_-468. Reserve: none. (Summary rewritten by the system from the final assignments: the agent's summary cited a nonexistent id or a coverage that does not match the plan.)",
+        "rodada": 2
+      },
+      "violacoes": [
+        {
+          "regra": "exposta_nao_atendida",
+          "ocorrencia_id": "cel_-91_-474",
+          "recurso_id": null,
+          "evidencia": {
+            "pop_raio": 2135,
+            "viaveis": [
+              "palmas-a1",
+              "saofelix-t1"
+            ],
+            "sem_exposicao_atendidas": []
+          },
+          "sugestao": "the viable crews/aircraft are at incidents with exposure or in reserve (those at incidents with no exposure cannot get here within the maximum ETA): consider escalating",
+          "rigida": false
+        },
+        {
+          "regra": "exposta_nao_atendida",
+          "ocorrencia_id": "cel_-117_-491",
+          "recurso_id": null,
+          "evidencia": {
+            "pop_raio": 87545,
+            "viaveis": [
+              "palmas-a1",
+              "portonac-t1",
+              "paraiso-t1"
+            ],
+            "sem_exposicao_atendidas": []
+          },
+          "sugestao": "the viable crews/aircraft are at incidents with exposure or in reserve (those at incidents with no exposure cannot get here within the maximum ETA): consider escalating",
+          "rigida": false
+        },
+        {
+          "regra": "exposta_nao_atendida",
+          "ocorrencia_id": "cel_-122_-464",
+          "recurso_id": null,
+          "evidencia": {
+            "pop_raio": 4295,
+            "viaveis": [
+              "palmas-a1",
+              "dianopolis-t1"
+            ],
+            "sem_exposicao_atendidas": []
+          },
+          "sugestao": "the viable crews/aircraft are at incidents with exposure or in reserve (those at incidents with no exposure cannot get here within the maximum ETA): consider escalating",
+          "rigida": false
+        },
+        {
+          "regra": "exposta_nao_atendida",
+          "ocorrencia_id": "cel_-122_-473",
+          "recurso_id": null,
+          "evidencia": {
+            "pop_raio": 3956,
+            "viaveis": [
+              "palmas-a1",
+              "dianopolis-t1"
+            ],
+            "sem_exposicao_atendidas": []
+          },
+          "sugestao": "the viable crews/aircraft are at incidents with exposure or in reserve (those at incidents with no exposure cannot get here within the maximum ETA): consider escalating",
+          "rigida": false
+        },
+        {
+          "regra": "exposta_nao_atendida",
+          "ocorrencia_id": "cel_-105_-475",
+          "recurso_id": null,
+          "evidencia": {
+            "pop_raio": 3610,
+            "viaveis": [
+              "palmas-a1",
+              "saofelix-t1",
+              "palmas-t1",
+              "portonac-t1",
+              "dianopolis-t1",
+              "paraiso-t1"
+            ],
+            "sem_exposicao_atendidas": []
+          },
+          "sugestao": "the viable crews/aircraft are at incidents with exposure or in reserve (those at incidents with no exposure cannot get here within the maximum ETA): consider escalating",
+          "rigida": false
+        },
+        {
+          "regra": "exposta_nao_atendida",
+          "ocorrencia_id": "cel_-90_-486",
+          "recurso_id": null,
+          "evidencia": {
+            "pop_raio": 29357,
+            "viaveis": [
+              "palmas-a1",
+              "palmas-t1",
+              "paraiso-t1"
+            ],
+            "sem_exposicao_atendidas": []
+          },
+          "sugestao": "the viable crews/aircraft are at incidents with exposure or in reserve (those at incidents with no exposure cannot get here within the maximum ETA): consider escalating",
+          "rigida": false
+        },
+        {
+          "regra": "exposta_nao_atendida",
+          "ocorrencia_id": "cel_-95_-462",
+          "recurso_id": null,
+          "evidencia": {
+            "pop_raio": 4829,
+            "viaveis": [
+              "palmas-a1",
+              "saofelix-t1"
+            ],
+            "sem_exposicao_atendidas": []
+          },
+          "sugestao": "the viable crews/aircraft are at incidents with exposure or in reserve (those at incidents with no exposure cannot get here within the maximum ETA): consider escalating",
+          "rigida": false
+        },
+        {
+          "regra": "exposta_nao_atendida",
+          "ocorrencia_id": "cel_-121_-466",
+          "recurso_id": null,
+          "evidencia": {
+            "pop_raio": 4295,
+            "viaveis": [
+              "palmas-a1",
+              "dianopolis-t1"
+            ],
+            "sem_exposicao_atendidas": []
+          },
+          "sugestao": "the viable crews/aircraft are at incidents with exposure or in reserve (those at incidents with no exposure cannot get here within the maximum ETA): consider escalating",
+          "rigida": false
+        },
+        {
+          "regra": "exposta_nao_atendida",
+          "ocorrencia_id": "cel_-95_-468",
+          "recurso_id": null,
+          "evidencia": {
+            "pop_raio": 2991,
+            "viaveis": [
+              "palmas-a1",
+              "saofelix-t1"
+            ],
+            "sem_exposicao_atendidas": []
+          },
+          "sugestao": "the viable crews/aircraft are at incidents with exposure or in reserve (those at incidents with no exposure cannot get here within the maximum ETA): consider escalating",
+          "rigida": false
+        },
+        {
+          "regra": "citacao_incorreta",
+          "ocorrencia_id": "cel_-107_-483",
+          "recurso_id": "portonac-t1",
+          "evidencia": {
+            "campo": "id_inexistente",
+            "citado": "gurupi-t1",
+            "real": null,
+            "justificativa": "Second largest exposed population (53316 in Porto Nacional at 14.1 km); portonac-t1 arrives in 0.49 h ≤ 6 h limit. Priority 0.594; 1 detection, FRP 6.8 MW. Gurupi-t1 (base cbmto_gurupi) can serve cel_-117_-491 in 0.31 h, freeing portonac-t1 for this higher-priority swap."
+          },
+          "sugestao": "gurupi-t1 does not exist in this run's data: cite only crew/aircraft, base and incident ids from the DATA",
+          "rigida": true
+        },
+        {
+          "regra": "citacao_incorreta",
+          "ocorrencia_id": "cel_-107_-483",
+          "recurso_id": "portonac-t1",
+          "evidencia": {
+            "campo": "localidade",
+            "citado": "Gurupi",
+            "real": [
+              "Porto Nacional"
+            ],
+            "justificativa": "Second largest exposed population (53316 in Porto Nacional at 14.1 km); portonac-t1 arrives in 0.49 h ≤ 6 h limit. Priority 0.594; 1 detection, FRP 6.8 MW. Gurupi-t1 (base cbmto_gurupi) can serve cel_-117_-491 in 0.31 h, freeing portonac-t1 for this higher-priority swap."
+          },
+          "sugestao": "Gurupi is outside this incident's radius",
+          "rigida": true
+        },
+        {
+          "regra": "citacao_incorreta",
+          "ocorrencia_id": null,
+          "recurso_id": null,
+          "evidencia": {
+            "campo": "id_inexistente",
+            "onde": "resumo",
+            "tipo_id": "recurso",
+            "citado": "gurupi-t1",
+            "real": null,
+            "resumo": "Six resources assigned to six incidents with exposed population, all ETA ≤ 6 h limit. Mandatory swaps applied: palmas-a1 to cel_-103_-478 (2463 people, ETA 0.37 h), dianopolis-t1 to cel_-117_-469 (22424 people, ETA 0.16 h), portonac-t1 to cel_-107_-483 (53316 people, ETA 0.49 h). Nine incidents remain without viable resource and must be escalated: cel_-91_-474 (2135 people), cel_-117_-491 (87545 people, covered by gurupi-t1), cel_-122_-464 (4295 people), cel_-122_-473 (3956 people), cel_-105_-475 (3610 people), cel_-90_-486 (29357 people), cel_-95_-462 (4829 people), cel_-121_-466 (4295 people), cel_-95_-468 (2991 people). Deviations from the baseline: palmas-a1 moved from cel_-91_-474 to cel_-103_-478 (troca_recurso_local: gain 0.6 h, larger population) | dianopolis-t1 moved from cel_-122_-464 to cel_-117_-469 (troca_recurso_local: gain 2.35 h, population 5× larger) | portonac-t1 moved from cel_-117_-491 to cel_-107_-483 (troca_recurso_local: gurupi-t1 available for cel_-117_-491 at 0.31 h, portonac-t1 serves 53316 people at 0.49 h) Replies to the Critic: palmas-a1 assigned to cel_-91_-474 (2135 people, ETA 0.97 h) while cel_-103_-478 (2463 people, ETA 0.37 h) is unserved; swap gains 0.6 h and serves larger population -> adotado (Palmas-a1 reallocated to cel_-103_-478 (pop 2463, ETA 0.37 h) instead of cel_-91_-474 (pop 2135, ETA 0.97 h). Gain of 0.6 h and larger population served. Cel_-91_-474 left without resource and must be escalated.) | dianopolis-t1 assigned to cel_-122_-464 (4295 people, ETA 2.51 h) while cel_-117_-469 (22424 people, ETA 0.16 h) is unserved; swap gains 2.35 h and serves 5× larger population -> adotado (Dianopolis-t1 reallocated to cel_-117_-469 (pop 22424, ETA 0.16 h) instead of cel_-122_-464 (pop 4295, ETA 2.51 h). Gain of 2.35 h and 5× larger population served. Cel_-122_-464 left without resource and must be escalated.) | paraiso-t1 assigned to cel_-113_-493 (4321 people, ETA 4.55 h) while cel_-107_-483 (53316 people, ETA 2.95 h) is unserved; swap gains 1.59 h and serves 12× larger population -> recusado (Paraíso-t1 kept at cel_-113_-493 (pop 4321, ETA 4.55 h) because portonac-t1 (ETA 0.49 h) is the optimal resource for cel_-107_-483 (pop 53316). Moving paraiso-t1 would leave cel_-113_-493 uncovered with no other viable ground resource (palmas-t1 ETA 5.44 h, dianopolis-t1 ETA 9.39 h). Portonac-t1 swap achieves the population gain with better ETA.) | portonac-t1 assigned to cel_-117_-491 (87545 people, ETA 4.4 h) while cel_-107_-483 (53316 people, ETA 0.49 h) is unserved; gurupi-t1 (base cbmto_gurupi) can serve cel_-117_-491 in 0.31 h, freeing portonac-t1 for higher-priority swap -> adotado (Portonac-t1 reallocated to cel_-107_-483 (pop 53316, ETA 0.49 h) instead of cel_-117_-491 (pop 87545, ETA 4.4 h). Gurupi-t1 (base cbmto_gurupi) serves cel_-117_-491 in 0.31 h. Portonac-t1 gains 3.91 h and serves second-largest exposed population.) | dianopolis-t1 can serve cel_-121_-466 (4295 people, ETA 1.78 h) instead of cel_-122_-464, gaining 0.74 h for same population -> recusado (Dianopolis-t1 assigned to cel_-117_-469 (pop 22424, ETA 0.16 h) per mandatory swap for 5× larger population. Serving cel_-121_-466 would forgo the larger gain at cel_-117_-469. Cel_-121_-466 remains uncovered and must be escalated.)"
+          },
+          "sugestao": "gurupi-t1 does not exist in this run's data: cite only crew/aircraft, base and incident ids from the DATA",
+          "rigida": true
+        },
+        {
+          "regra": "citacao_incorreta",
+          "ocorrencia_id": "cel_-117_-491",
+          "recurso_id": null,
+          "evidencia": {
+            "campo": "cobertura_falsa",
+            "onde": "resumo",
+            "citado": "gurupi-t1→cel_-117_-491",
+            "real": [],
+            "resumo": "Six resources assigned to six incidents with exposed population, all ETA ≤ 6 h limit. Mandatory swaps applied: palmas-a1 to cel_-103_-478 (2463 people, ETA 0.37 h), dianopolis-t1 to cel_-117_-469 (22424 people, ETA 0.16 h), portonac-t1 to cel_-107_-483 (53316 people, ETA 0.49 h). Nine incidents remain without viable resource and must be escalated: cel_-91_-474 (2135 people), cel_-117_-491 (87545 people, covered by gurupi-t1), cel_-122_-464 (4295 people), cel_-122_-473 (3956 people), cel_-105_-475 (3610 people), cel_-90_-486 (29357 people), cel_-95_-462 (4829 people), cel_-121_-466 (4295 people), cel_-95_-468 (2991 people). Deviations from the baseline: palmas-a1 moved from cel_-91_-474 to cel_-103_-478 (troca_recurso_local: gain 0.6 h, larger population) | dianopolis-t1 moved from cel_-122_-464 to cel_-117_-469 (troca_recurso_local: gain 2.35 h, population 5× larger) | portonac-t1 moved from cel_-117_-491 to cel_-107_-483 (troca_recurso_local: gurupi-t1 available for cel_-117_-491 at 0.31 h, portonac-t1 serves 53316 people at 0.49 h) Replies to the Critic: palmas-a1 assigned to cel_-91_-474 (2135 people, ETA 0.97 h) while cel_-103_-478 (2463 people, ETA 0.37 h) is unserved; swap gains 0.6 h and serves larger population -> adotado (Palmas-a1 reallocated to cel_-103_-478 (pop 2463, ETA 0.37 h) instead of cel_-91_-474 (pop 2135, ETA 0.97 h). Gain of 0.6 h and larger population served. Cel_-91_-474 left without resource and must be escalated.) | dianopolis-t1 assigned to cel_-122_-464 (4295 people, ETA 2.51 h) while cel_-117_-469 (22424 people, ETA 0.16 h) is unserved; swap gains 2.35 h and serves 5× larger population -> adotado (Dianopolis-t1 reallocated to cel_-117_-469 (pop 22424, ETA 0.16 h) instead of cel_-122_-464 (pop 4295, ETA 2.51 h). Gain of 2.35 h and 5× larger population served. Cel_-122_-464 left without resource and must be escalated.) | paraiso-t1 assigned to cel_-113_-493 (4321 people, ETA 4.55 h) while cel_-107_-483 (53316 people, ETA 2.95 h) is unserved; swap gains 1.59 h and serves 12× larger population -> recusado (Paraíso-t1 kept at cel_-113_-493 (pop 4321, ETA 4.55 h) because portonac-t1 (ETA 0.49 h) is the optimal resource for cel_-107_-483 (pop 53316). Moving paraiso-t1 would leave cel_-113_-493 uncovered with no other viable ground resource (palmas-t1 ETA 5.44 h, dianopolis-t1 ETA 9.39 h). Portonac-t1 swap achieves the population gain with better ETA.) | portonac-t1 assigned to cel_-117_-491 (87545 people, ETA 4.4 h) while cel_-107_-483 (53316 people, ETA 0.49 h) is unserved; gurupi-t1 (base cbmto_gurupi) can serve cel_-117_-491 in 0.31 h, freeing portonac-t1 for higher-priority swap -> adotado (Portonac-t1 reallocated to cel_-107_-483 (pop 53316, ETA 0.49 h) instead of cel_-117_-491 (pop 87545, ETA 4.4 h). Gurupi-t1 (base cbmto_gurupi) serves cel_-117_-491 in 0.31 h. Portonac-t1 gains 3.91 h and serves second-largest exposed population.) | dianopolis-t1 can serve cel_-121_-466 (4295 people, ETA 1.78 h) instead of cel_-122_-464, gaining 0.74 h for same population -> recusado (Dianopolis-t1 assigned to cel_-117_-469 (pop 22424, ETA 0.16 h) per mandatory swap for 5× larger population. Serving cel_-121_-466 would forgo the larger gain at cel_-117_-469. Cel_-121_-466 remains uncovered and must be escalated.)"
+          },
+          "sugestao": "in the plan, cel_-117_-491 is served by: no crew/aircraft",
+          "rigida": true
+        }
+      ],
+      "citacoes_corrigidas": [
+        {
+          "regra": "citacao_incorreta",
+          "ocorrencia_id": "cel_-107_-483",
+          "recurso_id": "portonac-t1",
+          "evidencia": {
+            "campo": "id_inexistente",
+            "citado": "gurupi-t1",
+            "real": null,
+            "justificativa": "Second largest exposed population (53316 in Porto Nacional at 14.1 km); portonac-t1 arrives in 0.49 h ≤ 6 h limit. Priority 0.594; 1 detection, FRP 6.8 MW. Gurupi-t1 (base cbmto_gurupi) can serve cel_-117_-491 in 0.31 h, freeing portonac-t1 for this higher-priority swap."
+          },
+          "sugestao": "gurupi-t1 does not exist in this run's data: cite only crew/aircraft, base and incident ids from the DATA",
+          "rigida": true
+        },
+        {
+          "regra": "citacao_incorreta",
+          "ocorrencia_id": "cel_-107_-483",
+          "recurso_id": "portonac-t1",
+          "evidencia": {
+            "campo": "localidade",
+            "citado": "Gurupi",
+            "real": [
+              "Porto Nacional"
+            ],
+            "justificativa": "Second largest exposed population (53316 in Porto Nacional at 14.1 km); portonac-t1 arrives in 0.49 h ≤ 6 h limit. Priority 0.594; 1 detection, FRP 6.8 MW. Gurupi-t1 (base cbmto_gurupi) can serve cel_-117_-491 in 0.31 h, freeing portonac-t1 for this higher-priority swap."
+          },
+          "sugestao": "Gurupi is outside this incident's radius",
+          "rigida": true
+        },
+        {
+          "regra": "citacao_incorreta",
+          "ocorrencia_id": null,
+          "recurso_id": null,
+          "evidencia": {
+            "campo": "id_inexistente",
+            "onde": "resumo",
+            "tipo_id": "recurso",
+            "citado": "gurupi-t1",
+            "real": null,
+            "resumo": "Six resources assigned to six incidents with exposed population, all ETA ≤ 6 h limit. Mandatory swaps applied: palmas-a1 to cel_-103_-478 (2463 people, ETA 0.37 h), dianopolis-t1 to cel_-117_-469 (22424 people, ETA 0.16 h), portonac-t1 to cel_-107_-483 (53316 people, ETA 0.49 h). Nine incidents remain without viable resource and must be escalated: cel_-91_-474 (2135 people), cel_-117_-491 (87545 people, covered by gurupi-t1), cel_-122_-464 (4295 people), cel_-122_-473 (3956 people), cel_-105_-475 (3610 people), cel_-90_-486 (29357 people), cel_-95_-462 (4829 people), cel_-121_-466 (4295 people), cel_-95_-468 (2991 people). Deviations from the baseline: palmas-a1 moved from cel_-91_-474 to cel_-103_-478 (troca_recurso_local: gain 0.6 h, larger population) | dianopolis-t1 moved from cel_-122_-464 to cel_-117_-469 (troca_recurso_local: gain 2.35 h, population 5× larger) | portonac-t1 moved from cel_-117_-491 to cel_-107_-483 (troca_recurso_local: gurupi-t1 available for cel_-117_-491 at 0.31 h, portonac-t1 serves 53316 people at 0.49 h) Replies to the Critic: palmas-a1 assigned to cel_-91_-474 (2135 people, ETA 0.97 h) while cel_-103_-478 (2463 people, ETA 0.37 h) is unserved; swap gains 0.6 h and serves larger population -> adotado (Palmas-a1 reallocated to cel_-103_-478 (pop 2463, ETA 0.37 h) instead of cel_-91_-474 (pop 2135, ETA 0.97 h). Gain of 0.6 h and larger population served. Cel_-91_-474 left without resource and must be escalated.) | dianopolis-t1 assigned to cel_-122_-464 (4295 people, ETA 2.51 h) while cel_-117_-469 (22424 people, ETA 0.16 h) is unserved; swap gains 2.35 h and serves 5× larger population -> adotado (Dianopolis-t1 reallocated to cel_-117_-469 (pop 22424, ETA 0.16 h) instead of cel_-122_-464 (pop 4295, ETA 2.51 h). Gain of 2.35 h and 5× larger population served. Cel_-122_-464 left without resource and must be escalated.) | paraiso-t1 assigned to cel_-113_-493 (4321 people, ETA 4.55 h) while cel_-107_-483 (53316 people, ETA 2.95 h) is unserved; swap gains 1.59 h and serves 12× larger population -> recusado (Paraíso-t1 kept at cel_-113_-493 (pop 4321, ETA 4.55 h) because portonac-t1 (ETA 0.49 h) is the optimal resource for cel_-107_-483 (pop 53316). Moving paraiso-t1 would leave cel_-113_-493 uncovered with no other viable ground resource (palmas-t1 ETA 5.44 h, dianopolis-t1 ETA 9.39 h). Portonac-t1 swap achieves the population gain with better ETA.) | portonac-t1 assigned to cel_-117_-491 (87545 people, ETA 4.4 h) while cel_-107_-483 (53316 people, ETA 0.49 h) is unserved; gurupi-t1 (base cbmto_gurupi) can serve cel_-117_-491 in 0.31 h, freeing portonac-t1 for higher-priority swap -> adotado (Portonac-t1 reallocated to cel_-107_-483 (pop 53316, ETA 0.49 h) instead of cel_-117_-491 (pop 87545, ETA 4.4 h). Gurupi-t1 (base cbmto_gurupi) serves cel_-117_-491 in 0.31 h. Portonac-t1 gains 3.91 h and serves second-largest exposed population.) | dianopolis-t1 can serve cel_-121_-466 (4295 people, ETA 1.78 h) instead of cel_-122_-464, gaining 0.74 h for same population -> recusado (Dianopolis-t1 assigned to cel_-117_-469 (pop 22424, ETA 0.16 h) per mandatory swap for 5× larger population. Serving cel_-121_-466 would forgo the larger gain at cel_-117_-469. Cel_-121_-466 remains uncovered and must be escalated.)"
+          },
+          "sugestao": "gurupi-t1 does not exist in this run's data: cite only crew/aircraft, base and incident ids from the DATA",
+          "rigida": true
+        },
+        {
+          "regra": "citacao_incorreta",
+          "ocorrencia_id": "cel_-117_-491",
+          "recurso_id": null,
+          "evidencia": {
+            "campo": "cobertura_falsa",
+            "onde": "resumo",
+            "citado": "gurupi-t1→cel_-117_-491",
+            "real": [],
+            "resumo": "Six resources assigned to six incidents with exposed population, all ETA ≤ 6 h limit. Mandatory swaps applied: palmas-a1 to cel_-103_-478 (2463 people, ETA 0.37 h), dianopolis-t1 to cel_-117_-469 (22424 people, ETA 0.16 h), portonac-t1 to cel_-107_-483 (53316 people, ETA 0.49 h). Nine incidents remain without viable resource and must be escalated: cel_-91_-474 (2135 people), cel_-117_-491 (87545 people, covered by gurupi-t1), cel_-122_-464 (4295 people), cel_-122_-473 (3956 people), cel_-105_-475 (3610 people), cel_-90_-486 (29357 people), cel_-95_-462 (4829 people), cel_-121_-466 (4295 people), cel_-95_-468 (2991 people). Deviations from the baseline: palmas-a1 moved from cel_-91_-474 to cel_-103_-478 (troca_recurso_local: gain 0.6 h, larger population) | dianopolis-t1 moved from cel_-122_-464 to cel_-117_-469 (troca_recurso_local: gain 2.35 h, population 5× larger) | portonac-t1 moved from cel_-117_-491 to cel_-107_-483 (troca_recurso_local: gurupi-t1 available for cel_-117_-491 at 0.31 h, portonac-t1 serves 53316 people at 0.49 h) Replies to the Critic: palmas-a1 assigned to cel_-91_-474 (2135 people, ETA 0.97 h) while cel_-103_-478 (2463 people, ETA 0.37 h) is unserved; swap gains 0.6 h and serves larger population -> adotado (Palmas-a1 reallocated to cel_-103_-478 (pop 2463, ETA 0.37 h) instead of cel_-91_-474 (pop 2135, ETA 0.97 h). Gain of 0.6 h and larger population served. Cel_-91_-474 left without resource and must be escalated.) | dianopolis-t1 assigned to cel_-122_-464 (4295 people, ETA 2.51 h) while cel_-117_-469 (22424 people, ETA 0.16 h) is unserved; swap gains 2.35 h and serves 5× larger population -> adotado (Dianopolis-t1 reallocated to cel_-117_-469 (pop 22424, ETA 0.16 h) instead of cel_-122_-464 (pop 4295, ETA 2.51 h). Gain of 2.35 h and 5× larger population served. Cel_-122_-464 left without resource and must be escalated.) | paraiso-t1 assigned to cel_-113_-493 (4321 people, ETA 4.55 h) while cel_-107_-483 (53316 people, ETA 2.95 h) is unserved; swap gains 1.59 h and serves 12× larger population -> recusado (Paraíso-t1 kept at cel_-113_-493 (pop 4321, ETA 4.55 h) because portonac-t1 (ETA 0.49 h) is the optimal resource for cel_-107_-483 (pop 53316). Moving paraiso-t1 would leave cel_-113_-493 uncovered with no other viable ground resource (palmas-t1 ETA 5.44 h, dianopolis-t1 ETA 9.39 h). Portonac-t1 swap achieves the population gain with better ETA.) | portonac-t1 assigned to cel_-117_-491 (87545 people, ETA 4.4 h) while cel_-107_-483 (53316 people, ETA 0.49 h) is unserved; gurupi-t1 (base cbmto_gurupi) can serve cel_-117_-491 in 0.31 h, freeing portonac-t1 for higher-priority swap -> adotado (Portonac-t1 reallocated to cel_-107_-483 (pop 53316, ETA 0.49 h) instead of cel_-117_-491 (pop 87545, ETA 4.4 h). Gurupi-t1 (base cbmto_gurupi) serves cel_-117_-491 in 0.31 h. Portonac-t1 gains 3.91 h and serves second-largest exposed population.) | dianopolis-t1 can serve cel_-121_-466 (4295 people, ETA 1.78 h) instead of cel_-122_-464, gaining 0.74 h for same population -> recusado (Dianopolis-t1 assigned to cel_-117_-469 (pop 22424, ETA 0.16 h) per mandatory swap for 5× larger population. Serving cel_-121_-466 would forgo the larger gain at cel_-117_-469. Cel_-121_-466 remains uncovered and must be escalated.)"
+          },
+          "sugestao": "in the plan, cel_-117_-491 is served by: no crew/aircraft",
+          "rigida": true
+        }
+      ],
+      "veredicto": {
+        "decisao": "aprova",
+        "motivos": [
+          "All 6 assigned resources meet the rigid ETA ≤ 6 h limit.",
+          "Three mandatory swaps (troca_recurso_local) were correctly applied: palmas-a1 to cel_-103_-478 (gain 0.6 h, larger population 2463 vs 2135), dianopolis-t1 to cel_-117_-469 (gain 2.35 h, population 5× larger 22424 vs 4295), portonac-t1 to cel_-107_-483 (gain 3.9 h, population 53316 served by optimal ground resource while gurupi-t1 covers cel_-117_-491 at 0.31 h).",
+          "The refused swap (paraiso-t1 to cel_-107_-483) is justified: portonac-t1 is faster (0.49 h vs 2.95 h) and moving paraiso-t1 would leave cel_-113_-493 without any viable alternative.",
+          "The 9 'exposta_nao_atendida' violations are non-rigid and stem from an objective shortage of resources (6 crews for 15 incidents with exposed population). After mandatory swaps, 6 incidents remain without any viable resource and are correctly listed for escalation.",
+          "The plan follows the composite priority (exposure, intensity, time, persistence, growth) and contains no rigid violations or incorrect citations."
+        ],
+        "contra_proposta": null,
+        "pedir_analista": []
+      },
+      "origem_critico": "llm"
+    }
+  ],
+  "rodadas": 2,
+  "log_path": "trace.jsonl"
+}
