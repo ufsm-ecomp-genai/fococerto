@@ -138,3 +138,25 @@ def test_prazo_total_aborta_resposta_que_pinga_bytes():
         assert time.monotonic() - t < 4
     finally:
         srv.shutdown()
+
+
+def test_escopo_isolado_por_execucao(nightshift, monkeypatch, tmp_path):
+    """Padrão: cada execução manda um meterless-scope próprio (o Nightshift não junta contexto de outras)."""
+    vistos = []
+    monkeypatch.delenv("METERLESS_SCOPE", raising=False)
+    monkeypatch.setattr(client, "_post", lambda url, headers, corpo, timeout_s: vistos.append(headers) or _resp())
+    log1, log2 = LogExecucao("t", "p", pasta=tmp_path), LogExecucao("t", "p", pasta=tmp_path)
+    client.chat([{"role": "user", "content": "oi"}], "planejador", log=log1)
+    client.chat([{"role": "user", "content": "oi"}], "critico", log=log1)
+    client.chat([{"role": "user", "content": "oi"}], "planejador", log=log2)
+    escopos = [h["meterless-scope"] for h in vistos]
+    assert escopos[0] == escopos[1] == f"fococerto-{log1.execucao}"
+    assert escopos[2] == f"fococerto-{log2.execucao}" != escopos[0]
+
+
+def test_escopo_explicito_e_respeitado(nightshift, monkeypatch):
+    vistos = []
+    monkeypatch.setenv("METERLESS_SCOPE", "user")
+    monkeypatch.setattr(client, "_post", lambda url, headers, corpo, timeout_s: vistos.append(headers) or _resp())
+    client.chat([{"role": "user", "content": "oi"}], "planejador")
+    assert vistos[0]["meterless-scope"] == "user"

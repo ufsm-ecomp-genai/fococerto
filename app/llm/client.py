@@ -17,6 +17,7 @@ from __future__ import annotations
 import json
 import re
 import time
+import uuid
 from dataclasses import dataclass
 from typing import Any
 
@@ -48,13 +49,28 @@ def provider() -> str:
     return (env("LLM_PROVIDER", "offline") or "offline").strip().lower()
 
 
+ESCOPO_POR_EXECUCAO = "execucao"
+_ESCOPO_PROCESSO = uuid.uuid4().hex[:12]  # sem log: um escopo por processo
+
+
+def escopo_efetivo(cfg_scope: str, app: str, log: LogExecucao | None) -> str:
+    """Valor do cabeçalho ``meterless-scope``: em "execucao", ``<app>-<id da execução>`` (isolado por execução)."""
+    if cfg_scope != ESCOPO_POR_EXECUCAO:
+        return cfg_scope
+    return f"{app}-{log.execucao if log is not None else _ESCOPO_PROCESSO}"
+
+
 def _cfg() -> dict[str, Any]:
     return {
         "base_url": (env("METERLESS_BASE_URL") or "").rstrip("/"),
         "token": env("METERLESS_RUNTIME_TOKEN") or "",
         "modelo": env("METERLESS_MODEL", "meterless/auto") or "meterless/auto",
         "app": env("METERLESS_APP", "fococerto") or "fococerto",
-        "scope": env("METERLESS_SCOPE", "user") or "user",
+        # "execucao" (padrão): um escopo novo por execução. Com "user", o Nightshift junta ao prompt contexto
+        # lembrado de chamadas anteriores (medido em 26/10: o mesmo prompt chegou com 15.595 tokens em "user" e
+        # 10.682 num escopo novo, e só no primeiro a resposta citou memórias que o prompt não tinha). A única
+        # memória do sistema deve ser a do H-MEM, auditável; qualquer outro valor é enviado como está.
+        "scope": env("METERLESS_SCOPE", ESCOPO_POR_EXECUCAO) or ESCOPO_POR_EXECUCAO,
         "timeout_s": float(env("LLM_TIMEOUT_S", "180") or 180),
         "retries": int(env("LLM_RETRIES", "3") or 3),
         "backoff_s": float(env("LLM_BACKOFF_S", "2") or 2),
@@ -215,7 +231,7 @@ def chat(messages: list[dict], papel: str, json_schema: dict | None = None,
     if cfg["no_think"]:
         corpo["chat_template_kwargs"] = {"enable_thinking": False}
     headers = {"Authorization": f"Bearer {cfg['token']}", "meterless-app": cfg["app"],
-               "meterless-scope": cfg["scope"], "Content-Type": "application/json"}
+               "meterless-scope": escopo_efetivo(cfg["scope"], cfg["app"], log), "Content-Type": "application/json"}
     url = cfg["base_url"] + "/chat/completions"
 
     t0 = time.monotonic()
