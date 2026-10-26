@@ -1,0 +1,55 @@
+/* tema: manual — escrito à mão para os dois temas; o plugin tema/postcss-tema.js não altera este arquivo. */
+/* Especificidade com :root:root: este arquivo é importado pelo AppNovo.jsx, antes do style.css e do refinement.css. */
+:root{color-scheme:light;--tema-destaque:#b8501a;--tema-destaque-hover:#9c430f;--tema-texto-destaque:#fff;--tema-esc:#c62828}
+:root[data-theme="dark"]{color-scheme:dark;--tema-destaque:#ef8441;--tema-destaque-hover:#f59a5f;--tema-texto-destaque:#111111}
+
+/* Escalações em vermelho: no tema laranja o pêssego da v1 some, e status "escala" precisa ser impossível de não ver */
+:root:root .escalation-banner{background:#fdeceb;border-color:#f2c4c0;color:#8e2a20;box-shadow:inset 4px 0 var(--tema-esc)}
+:root:root .escalation-banner strong{color:#7a1f17}
+:root:root .escalation-banner button{background:#fff;border-color:#f2c4c0;color:#8e2a20}
+:root:root .escalations-inline{border-color:#f2c4c0;box-shadow:inset 4px 0 var(--tema-esc)}
+:root:root .escalations-inline h2{color:#8e2a20}
+:root:root .escalation-item.general{background:#fdf3f2}
+:root:root[data-theme="dark"] .escalation-banner{background:#2d1715;border-color:#5c2a25;color:#f3b7ae}
+:root:root[data-theme="dark"] .escalation-banner strong{color:#ffd2cb}
+:root:root[data-theme="dark"] .escalation-banner button{background:#3a1d1a;border-color:#6b322c;color:#ffd2cb}
+:root:root[data-theme="dark"] .escalations-inline{border-color:#5c2a25}
+:root:root[data-theme="dark"] .escalations-inline h2{color:#ffb4a8}
+:root:root[data-theme="dark"] .escalation-item.general{background:#2a1816}
+
+/* aviso de recursos simulados */
+:root:root[data-theme="dark"] .sim-banner{background:#2e2610;border-color:#5a4a1c;color:#f3dc95}
+
+/* mapa (Leaflet): popups, controles e atribuição no escuro; os tiles da Esri ficam como estão */
+:root:root[data-theme="dark"] .leaflet-popup-content-wrapper,:root:root[data-theme="dark"] .leaflet-popup-tip{background:#1c1c1c;color:#e8e8e8}
+:root:root[data-theme="dark"] .leaflet-popup-content a{color:#ef8441}
+:root:root[data-theme="dark"] .leaflet-bar a{background:#1c1c1c;color:#e8e8e8;border-bottom-color:#2e2e2e}
+:root:root[data-theme="dark"] .leaflet-bar a:hover{background:#262626}
+:root:root[data-theme="dark"] .leaflet-control-attribution{background:#0f0f0fcc;color:#b0b0b0}
+:root:root[data-theme="dark"] .leaflet-control-attribution a{color:#ef8441}
+:root:root[data-theme="dark"] .leaflet-container{background:#111111}
+:root:root[data-theme="dark"] .popup-esc{background:#000;color:#fff}
+
+/* seletor de tema no topo */
+:root:root .theme-toggle{padding:6px 9px;border-radius:8px;background:transparent;border:1px solid transparent;color:inherit}
+:root:root .theme-toggle:hover:not(:disabled){border-color:var(--border)}
+
+/* laranja nos pontos de ação e de identidade (o plugin só troca o tom; aqui o laranja ganha presença) */
+:root:root .page-overview>.page-heading .primary{background:var(--tema-destaque);border-color:var(--tema-destaque);color:var(--tema-texto-destaque)}
+:root:root .page-overview>.page-heading .primary:hover:not(:disabled){background:var(--tema-destaque-hover);color:var(--tema-texto-destaque)}
+:root:root .brand-icon{background:var(--tema-destaque);color:#fff;box-shadow:0 0 22px #e2702b33}
+:root:root .sidebar nav button.active{background:#e2702b1f;color:#ffd9c0;box-shadow:inset 3px 0 var(--tema-destaque)}
+:root:root .coverage-track>span{background:linear-gradient(90deg,#c95f1f,#f0a066)}
+:root:root .live-dot{background:var(--tema-destaque)}
+:root:root .api-status.down .live-dot{background:var(--tema-esc)}
+
+/* contraste (WCAG 4,5:1): no escuro, texto escuro sobre o laranja vivo; selo de procedência com texto claro */
+:root:root[data-theme="dark"] .primary,:root:root[data-theme="dark"] .primary:hover:not(:disabled){color:var(--tema-texto-destaque)}
+:root:root[data-theme="dark"] .journey-steps .current .step-number{color:var(--tema-texto-destaque)}
+:root:root[data-theme="dark"] .badge.provenance{background:#1c1c1c;color:#e8e8e8;border-color:var(--prov,#7a7a7a)}
+:root:root .badge.sand{color:#755a20}
+:root:root[data-theme="dark"] .badge.sand{color:#f0d79c}
+:root:root .text-button{color:var(--tema-destaque)}
+:root:root .escalation-banner p,:root:root .escalation-banner b{color:#8e2a20}
+:root:root[data-theme="dark"] .escalation-banner p,:root:root[data-theme="dark"] .escalation-banner b{color:#f3b7ae}
+:root:root[data-theme="dark"] .brand-icon{background:var(--tema-destaque);color:var(--tema-texto-destaque)}
