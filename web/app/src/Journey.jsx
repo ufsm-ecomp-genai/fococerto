@@ -1,3 +1,4 @@
+import { rotuloCenario } from './lib.js';
 import { ArrowRight, Check, Layers, MapPin, Plus, ShieldCheck, Truck, ArrowLeft, LoaderCircle } from 'lucide-react';
 
 export function Steps({ step, onStep, busy, t }) {
@@ -58,7 +59,7 @@ export function ScenarioStart({ scenarios, region, onLoad, onBlank, busy, t }) {
                 {t(s.simulado ? 'Simulado' : 'Disponibilidade real')}
               </span>
             </div>
-            <h3>{s.nome.replaceAll('-', ' ')}</h3>
+            <h3>{t(rotuloCenario(s.nome))}</h3>
             <div className="scenario-facts">
               <span>
                 <Truck size={14} />

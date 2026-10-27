@@ -172,6 +172,21 @@ const ROTULOS_EXEMPLO = {
   'tocantins-parana-analista': 'Amostra · caso do Analista (Paranã)',
 };
 export const rotuloExemplo = (nome) => ROTULOS_EXEMPLO[nome] || nome;
+const ROTULOS_CENARIO = {
+  'tocantins-escasso': 'Tocantins · equipes escassas',
+  'tocantins-medio': 'Tocantins · equipes médias',
+  'tocantins-folgado': 'Tocantins · equipes folgadas',
+  'tocantins-parana-analista': 'Tocantins · caso do Analista (Paranã)',
+};
+export const rotuloCenario = (nome) => ROTULOS_CENARIO[nome] || String(nome).replaceAll('-', ' ');
+// tempo de chegada legível: "22 min", "2 h 21 min" (o plano guarda horas decimais)
+export const fmtDuracao = (h) => {
+  if (h == null || Number.isNaN(Number(h))) return '—';
+  const min = Math.round(Number(h) * 60);
+  if (min < 60) return `${min} min`;
+  const resto = min % 60;
+  return `${Math.floor(min / 60)} h${resto ? ` ${String(resto).padStart(2, '0')} min` : ''}`;
+};
 // "precisam de você": escalações gerais primeiro, depois por população exposta (e prioridade no empate)
 export function ordenarEscalacoes(escalacoes = [], ocorrencias = []) {
   const occ = Object.fromEntries(ocorrencias.map((o) => [o.id, o]));

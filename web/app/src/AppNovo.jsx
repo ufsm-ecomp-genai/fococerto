@@ -45,6 +45,7 @@ import {
   localeNumeros,
   fmtPrio,
   rotuloExemplo,
+  fmtDuracao,
 } from './lib';
 
 // tema claro/escuro: começa pela preferência do sistema; a escolha fica neste navegador (localStorage pode falhar)
@@ -146,6 +147,14 @@ export default function App() {
   const regionCfg = regions.find((r) => r.nome === region),
     plan = data?.plano;
   const allBases = [...scenario.bases, ...bases.filter((b) => !scenario.bases.some((x) => x.id === b.id))];
+  // o exemplo de referência: a execução real no idioma da interface (ou o primeiro exemplo da região)
+  function openReference() {
+    const nome = locale.startsWith('en') ? 'tocantins-escasso-real-en' : 'tocantins-escasso-real';
+    const x = examples.find((e) => e.nome === nome) || examples.find((e) => e.regiao === region) || examples[0];
+    if (!x) return;
+    setPeriod(x.periodo);
+    loadPlan(`/api/exemplos/${enc(x.nome)}`, x.nome);
+  }
   async function loadPlan(path, exampleName = '') {
     const version = ++planVersion.current;
     setLoading(true);
@@ -698,7 +707,13 @@ export default function App() {
                 <Flame size={34} />
                 <h2>{t('Nenhum plano selecionado')}</h2>
                 <p>{t('Selecione um exemplo ou configure os recursos do dia para começar.')}</p>
-                {!regions.length && <button onClick={initialize}>{t('Tentar novamente')}</button>}
+                {!regions.length ? (
+                  <button onClick={initialize}>{t('Tentar novamente')}</button>
+                ) : (
+                  <button className="primary" onClick={openReference}>
+                    {t('Abrir a execução real de exemplo')}
+                  </button>
+                )}
               </div>
             ) : (
               <>
@@ -758,6 +773,7 @@ export default function App() {
                       </div>
                     )}
                     <NeedsYou data={data} selectedId={openNeed} onPick={pickOccurrence} locale={locale} t={t} />
+                    <PlanSummary data={data} locale={locale} t={t} />
                     <div className="side-actions">
                       <div className="side-buttons">
                         <button
@@ -774,7 +790,13 @@ export default function App() {
                           {t('Nota')}
                         </button>
                       </div>
-                      <p className="fine-print">{t('A aprovação não resolve as escalações e não despacha equipes.')}</p>
+                      <p className="fine-print">
+                        {t(
+                          example
+                            ? 'Este é um exemplo salvo, só para leitura. Gere um plano para poder aprová-lo.'
+                            : 'A aprovação não resolve as escalações e não despacha equipes.',
+                        )}
+                      </p>
                       {example && (
                         <button
                           className="text-button example-cta"
@@ -866,8 +888,8 @@ export default function App() {
                               <div>
                                 <strong>{place(o)}</strong>
                                 <small>
-                                  {o.n_focos} {t('focos')} · {t('até')} {num(o.pop_raio, locale)}{' '}
-                                  {t('habitantes no raio')}
+                                  {o.n_focos} {t(o.n_focos === 1 ? 'foco' : 'focos')} · {t('até')}{' '}
+                                  {num(o.pop_raio, locale)} {t('habitantes no raio')}
                                 </small>
                               </div>
                             </div>
@@ -898,7 +920,7 @@ export default function App() {
                             <div className="eta">
                               {a ? (
                                 <>
-                                  <Clock size={14} />~{num(a.eta_h, locale)} h
+                                  <Clock size={14} />~{fmtDuracao(a.eta_h)}
                                 </>
                               ) : (
                                 '—'
@@ -1243,7 +1265,14 @@ export default function App() {
           )}
           {view === 'reasoning' &&
             (!data ? (
-              <div className="empty">{t('Selecione um exemplo ou configure os recursos do dia para começar.')}</div>
+              <div className="empty">
+                <p>{t('Selecione um exemplo ou configure os recursos do dia para começar.')}</p>
+                {!!examples.length && (
+                  <button className="primary" onClick={openReference}>
+                    {t('Abrir a execução real de exemplo')}
+                  </button>
+                )}
+              </div>
             ) : (
               <>
                 <div className="agent-flow">
@@ -1439,6 +1468,36 @@ export default function App() {
           {t('Executando o ciclo de decisão')}
         </button>
       )}
+    </div>
+  );
+}
+
+// resumo do plano no painel lateral: quem foi atendido, quem espera decisão, chegada média
+function PlanSummary({ data, locale, t }) {
+  const occ = Object.fromEntries((data.ocorrencias || []).map((o) => [o.id, o]));
+  const designadas = data.plano?.designacoes || [];
+  const atendidas = new Set(designadas.map((d) => d.ocorrencia_id));
+  const escaladas = new Set((data.escalacoes || []).map((e) => e.ocorrencia_id).filter(Boolean));
+  const pop = (ids) => [...ids].reduce((s, id) => s + (occ[id]?.pop_raio || 0), 0);
+  const etas = designadas.map((d) => d.eta_h).filter((x) => x != null);
+  const media = etas.length ? etas.reduce((a, b) => a + b, 0) / etas.length : null;
+  return (
+    <div className="plan-summary-card">
+      <div>
+        <span>{t('Pessoas atendidas')}</span>
+        <b>{fmt(pop(atendidas), locale, 0)}</b>
+      </div>
+      <div className="warn">
+        <span>{t('Pessoas sem equipe')}</span>
+        <b>{fmt(pop(escaladas), locale, 0)}</b>
+      </div>
+      <div>
+        <span>{t('Chegada média')}</span>
+        <b>{fmtDuracao(media)}</b>
+      </div>
+      <small>
+        {t('Pessoas = população das localidades a até 15 km.')} {data.rodadas ? `${data.rodadas} ${t('rodadas')}` : ''}
+      </small>
     </div>
   );
 }

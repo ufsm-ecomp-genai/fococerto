@@ -11,6 +11,7 @@ import {
   fmt,
   ordenarEscalacoes,
   fmtPrio,
+  fmtDuracao,
 } from './lib.js';
 
 const place = (o) => o?.localidades?.[0]?.nome || o?.id;
@@ -73,7 +74,7 @@ export function NeedsYou({ data, selectedId, onPick, locale, t, limite = 6 }) {
                         <ul className="reach">
                           {e.alcance.map((a) => (
                             <li key={a.recurso_id}>
-                              <code>{a.recurso_id}</code> ~{fmt(a.eta_h, locale, 1)} h · {t(`alcance_${a.situacao}`)}
+                              <code>{a.recurso_id}</code> ~{fmtDuracao(a.eta_h)} · {t(`alcance_${a.situacao}`)}
                               {a.destinos?.length > 0 &&
                                 `: ${a.destinos
                                   .map((d) => `${d.localidade || d.ocorrencia_id} (${fmt(d.pop_raio, locale, 0)})`)
