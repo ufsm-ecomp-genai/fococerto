@@ -195,3 +195,15 @@
   height: 16px;
   border-radius: 4px;
 }
+/* logo do menu lateral um pouco maior no desktop (as telas menores mantêm os tamanhos próprios) */
+@media (min-width: 1101px) {
+  .sidebar .brand > .brand-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    margin-right: 12px;
+  }
+  .sidebar .brand {
+    font-size: 25px;
+  }
+}
