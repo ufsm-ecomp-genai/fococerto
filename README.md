@@ -9,7 +9,7 @@ FocoCerto crosses NASA FIRMS heat detections with weather, nearby communities, r
 **Status, stated plainly**
 - **Everything runs for real.** Data through **Zetaris 2.4** (4 SQL views; `fococerto.ocorrencias_prioridade` returns 698 rows, the same as our Python reference), decisions by **NVIDIA Nemotron 3 Ultra through Meterless Nightshift** (every call logged with a signed receipt), memory in the **Meterless H-MEM** service. A full real run, in English: [`output_examples/tocantins-escasso-real-en/`](output_examples/tocantins-escasso-real-en/) (Portuguese: [`tocantins-escasso-real/`](output_examples/tocantins-escasso-real/)).
 - **Runs without any service, too.** `--sample` runs the whole pipeline on cached real FIRMS data with deterministic agents, in about 2 seconds.
-- **Measured, not claimed.** Ablation with answer keys committed before any run: the full system passes 82.8% of the checks against 22.2% for a simple allocator (Nemotron, second run, 48 runs); 600+ real Nemotron calls so far. See [Evaluation](#evaluation).
+- **Measured, not claimed.** Ablation with answer keys committed before any run: with Nemotron (clean run, isolated Nightshift scope, 48 runs) the full system passes 82.8% of the checks against 22.2% for a simple allocator, and exposed people wait 2.8 h for a crew instead of 4.4 h; 700+ real Nemotron calls so far. See [Evaluation](#evaluation).
 - **Model text is checked.** Wrong facts and invented ids written by the model are rewritten before the Critic sees the plan ([a real case](#when-the-model-is-wrong-a-real-case)).
 - **English or Portuguese** per run (`--idioma en`), Nemotron's own text included.
 - **What is simulated:** the number of crews per station (the stations are real, with sources). No operator has validated it yet. See [Limitations](#limitations).
@@ -385,6 +385,36 @@ per-scenario results and the before/after of the bug fixes: `eval/RELATORIO.md`.
 
 ### LLM mode: NVIDIA Nemotron 3 Ultra through Meterless Nightshift
 
+#### Headline: clean run with an isolated Nightshift scope (26 Oct, night)
+
+12 scenarios × 4 variants × 1 repetition = 48 runs, **122 Nemotron calls, 0 errors, 0 offline fallbacks**, mean latency
+21 s, every call in its own Nightshift scope (no remembered context from other calls, see "Cause found" below). Code of
+26 Oct: citations corrected before the Critic, mandatory escalation, local-crew swap, invented-id and coverage checks.
+Results: `eval/resultados/20261026T234558Z_llm/`.
+
+| Variant | Checks passed | Decision | Detection | False alarms | Exposure-weighted ETA | Impasses |
+|---|---|---|---|---|---|---|
+| **A** simple allocator | 6/27 (22.2%) | 5/17 | 0/9 | 0/1 | 4.40 h | – |
+| **B** Planner + rule checker | 17/27 (63.0%) | 11/17 | 5/9 | 0/1 | 3.87 h | 1 |
+| **C** full (Planner ⇄ Critic ⇄ Analyst + H-MEM) | **24/29 (82.8%)** | 15/17 | 7/10 | 0/2 | **2.76 h** | 0 |
+| **D** C without H-MEM | 23/29 (79.3%) | 15/17 | 6/10 | 0/2 | 3.06 h | 2 |
+
+- **The Critic and the Analyst are where the gain is (B → C: +7 checks):** the invented trend no tool checks
+  (`fato_errado_tendencia`, +2), the night trade-off in Gurupi (`tradeoff_noite_gurupi`, +3), the native-vegetation
+  control (+1) and the Mateiros exception (+1).
+- **Memory (C − D: +1 check):** in Mateiros, C keeps the crew whose road the coordinator reported flooded; D sends it.
+  It is the same single decision the isolated re-run of the memory scenarios showed. Small, but now clean.
+- **Model errors, measured:** Nemotron wrote **44 wrong facts** in 48 runs (17 localities, 15 distances, 6 populations,
+  1 ETA, 3 summary claims, 2 invented ids); the system rewrote every one before the Critic saw the plan, and
+  re-running `checar_citacoes` on all 36 final plans of B, C and D finds **0 false citations**.
+- **Exposed people wait less:** exposure-weighted ETA 4.40 h (A) → 2.76 h (C).
+- **Not covered:** the plan language (the evaluation runs in Portuguese). One repetition: one check is ~3.5 points.
+- **Why B is lower than in the second run (77.8%):** the two earlier LLM runs used the `user` scope, in which Nightshift
+  adds context remembered from earlier calls; that context helped the variants. The numbers in this table are the
+  ones we stand by. The earlier runs are kept below as history.
+
+#### History: first LLM run (25 Oct, Nightshift `user` scope)
+
 Same 12 scenarios × 4 variants × 3 repetitions, with every agent decision made by `nvidia/nemotron-3-ultra-550b-a55b`
 through a real Meterless Nightshift (25 Oct 2026): **144 runs, 450 LLM calls, 449 valid on the first try, 1 invalid JSON
 recovered by the retry, 0 fallbacks to offline**, mean latency 29 s per call. Results: `eval/resultados/20261025T015525Z_llm/`.
@@ -423,7 +453,7 @@ What this shows, and what it does not:
   "solicitar apoio externo" guard rail above and Critic changes); the second LLM run below was measured after them
   (impasses went from 30 to 6). Details: `eval/RELATORIO.md` ("Sobre-escalação").
 
-#### Second LLM run, after the fixes (25 Oct, evening)
+#### History: second LLM run, after the fixes (25 Oct, evening, Nightshift `user` scope)
 
 1 repetition × 12 scenarios × 4 variants = 48 runs, 137 Nemotron calls, all valid, 0 offline fallbacks, mean latency
 25 s. Results: `eval/resultados/20261025T220912Z_llm/`. Changes since the first run: citations corrected before the
@@ -522,7 +552,7 @@ Full write-up: [`docs/PATROCINADORES.md`](docs/PATROCINADORES.md).
 ## Limitations
 
 - **Two full real runs (Zetaris + Nightshift + H-MEM together):** `output_examples/tocantins-escasso-real-en/` (English, 26 Oct) and `tocantins-escasso-real/` (Portuguese, 25 Oct), the same period of Tocantins; they differ, because the model's choices vary between runs. The ablation reads the local cache of the same real data (`RepositorioCache`, real Nemotron), not Zetaris. The REST weather table depends on `CACHE TABLE`, which is lost when Zetaris restarts (`setup_zetaris.py --so-cache` re-creates it).
-- **The evaluation does not cover the latest changes:** the first LLM ablation predates the "solicitar apoio externo" guard rail and the `troca_recurso_local` rule (the second LLM run, 1 repetition, includes them); neither covers the plan language or the invented-id and coverage checks (26 Oct). In the first LLM run all escalations came from deadlocks; the memory gain (C − D) is within run-to-run noise (zero in the second run). Small sample: 27–29 checks per run, written by the team.
+- **Evaluation size:** the clean LLM run has 1 repetition (27–29 checks per variant, written by the team); the memory gain in LLM mode is one decision (C − D = +1); the evaluation runs in Portuguese, so the plan-language option is not measured. The two earlier LLM runs used the Nightshift `user` scope and are kept only as history.
 - **The summary coverage check is a heuristic:** it recognises two sentence forms ("X covered by R", "R → X", in Portuguese and English); a claim phrased another way is not checked. The text of escalation reasons is not checked at all.
 - **Offline agents are simple:** in sample mode the Planner is essentially the greedy baseline; differences between ablation variants depend on LLM mode.
 - **Data-derived memories are learned between periods**: before each `run`, the system compares the previous period's plan with the new FIRMS data and stores, for example, "cell X was left without a resource and grew from 2 to 8 detections" (`app/agents/aprendizado.py`). Each ablation scenario has a single period, so the ablation seeds these memories; the multi-period effect is shown by `scripts/demo_3_periodos.sh`.

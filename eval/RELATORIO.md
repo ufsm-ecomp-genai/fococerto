@@ -342,3 +342,28 @@ afirmar ganho líquido da memória no modo LLM; o efeito medido de forma limpa c
 rodadas LLM completas (`20261025T015525Z_llm`, `20261025T220912Z_llm`) foram feitas com o escopo `user` e, portanto,
 com contexto injetado pelo Nightshift em B, C e D.
 
+## Modo LLM, 3ª rodada, limpa: escopo do Nightshift isolado (26/10, noite) — números oficiais
+
+`eval/resultados/20261026T234558Z_llm/` · 12 cenários × 4 variantes × 1 repetição = 48 execuções · 122 chamadas ao
+Nemotron, 0 erros, 0 fallbacks · latência média 21 s · cada execução no próprio escopo do Nightshift (commit `73aed60`).
+
+| Variante | Acerto | Decisão | Detecção | Alarmes falsos | ETA ponderado | Impasses |
+|---|---|---|---|---|---|---|
+| A | 6/27 (22,2%) | 5/17 | 0/9 | 0/1 | 4,40 h | – |
+| B | 17/27 (63,0%) | 11/17 | 5/9 | 0/1 | 3,87 h | 1 |
+| C | 24/29 (82,8%) | 15/17 | 7/10 | 0/2 | 2,76 h | 0 |
+| D | 23/29 (79,3%) | 15/17 | 6/10 | 0/2 | 3,06 h | 2 |
+
+Por cenário (checagens que passaram, A/B/C/D): `fato_errado_tendencia` 0/0/2/2, `tradeoff_noite_gurupi` 0/0/3/3,
+`controle_vegetacao_parana` 1/1/2/2, `excecao_mateiros_alagada` 2/3/4/3 (a única diferença entre C e D: c1, a equipe
+da estrada alagada), `escalar_expostas` 0/2/2/2, `reignicao_morros` 0/2/2/2, os dois `fato_errado` de localidade e
+população 0/3/3/3, `excecao_dianopolis_ponte` 1/1/1/1, `controle_taguatinga` 2/2/2/2, `agricola_recorrente_parana` e
+`reignicao_conceicao` 0 em todas.
+
+- Fatos errados escritos pelo Nemotron e reescritos antes do Crítico: **44** (17 localidades, 15 distâncias,
+  6 populações, 1 ETA, 3 afirmações do resumo, 2 ids inexistentes). `checar_citacoes` rodado de novo sobre os 36 planos
+  finais de B, C e D: **0** citações falsas (descontado o fato injetado de propósito nos cenários `fato_errado`).
+- B caiu de 77,8% (2ª rodada) para 63,0%: as rodadas anteriores usavam o escopo `user`, em que o Nightshift junta
+  contexto de chamadas anteriores, e isso ajudava as variantes. Estes são os números que valem; as rodadas de 25/10
+  ficam como histórico.
+
