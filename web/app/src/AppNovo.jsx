@@ -24,10 +24,12 @@ import {
   ChevronRight,
   Sun,
   Moon,
+  LifeBuoy,
 } from 'lucide-react';
 import { api, enc, resourceErrors } from './api';
 import { translator } from './i18nNovo';
 import OperationMap from './MapaPlano';
+import Ajuda from './Ajuda';
 import './novo.css';
 import './tema.css';
 import logo from './assets/logo.png';
@@ -41,6 +43,8 @@ import {
   payloadCenario as scenarioPayload,
   fmt,
   localeNumeros,
+  fmtPrio,
+  rotuloExemplo,
 } from './lib';
 
 // tema claro/escuro: começa pela preferência do sistema; a escolha fica neste navegador (localStorage pode falhar)
@@ -449,6 +453,7 @@ export default function App() {
     ['overview', LayoutDashboard, 'Visão geral'],
     ['resources', Truck, 'Recursos do dia'],
     ['reasoning', GitBranch, 'Raciocínio e memória'],
+    ['help', LifeBuoy, 'Central de ajuda'],
   ];
   return (
     <div className="shell">
@@ -526,131 +531,147 @@ export default function App() {
                   {t('COORDENAÇÃO REGIONAL')} <span>/ {region || '—'}</span>
                 </div>
                 <h1>
-                  {t(view === 'resources' ? 'Recursos do dia' : view === 'reasoning' ? 'Como chegamos aqui' : '')}
+                  {t(
+                    view === 'resources'
+                      ? 'Recursos do dia'
+                      : view === 'reasoning'
+                        ? 'Como chegamos aqui'
+                        : view === 'help'
+                          ? 'Central de ajuda'
+                          : '',
+                  )}
                 </h1>
                 <p>
                   {t(
                     view === 'resources'
                       ? 'Informe a disponibilidade do dia ou carregue um cenário existente.'
-                      : 'O que o Planejador, o Crítico e o Analista decidiram, e por quê.',
+                      : view === 'help'
+                        ? 'O que o sistema faz, como ler cada tela e o que ele não faz.'
+                        : 'O que o Planejador, o Crítico e o Analista decidiram, e por quê.',
                   )}
                 </p>
               </div>
             </div>
           )}
-          <div className="context-bar">
-            <div className="context-fields">
-              <label>
-                <MapPin size={16} />
-                <span>{t('Região')}</span>
-                <select
-                  aria-label={t('Região')}
-                  disabled={busy}
-                  value={region}
-                  onChange={(e) => changeRegion(e.target.value)}
-                >
-                  {regions.map((r) => (
-                    // região sem cache e sem plano salvo: aparece (mostra que a região é configuração), mas não abre
-                    <option key={r.nome} value={r.nome} disabled={r.tem_cache === false && !r.planos_salvos}>
-                      {r.nome}
-                      {r.tem_cache === false && !r.planos_salvos ? ` (${t('sem dados')})` : ''}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <div className="divider" />
-              <label>
-                <Clock size={16} />
-                <span>{t('Período UTC')}</span>
-                <select
-                  aria-label={t('Período UTC')}
-                  disabled={busy}
-                  value={period}
-                  onChange={(e) => {
-                    planVersion.current++;
-                    setPeriod(e.target.value);
-                    setData(null);
-                    setExample('');
-                    setSelected(null);
-                    setLoading(false);
-                  }}
-                >
-                  {!periods.length && <option value="">—</option>}
-                  {[...new Set([...periods, ...saved])].sort().map((p) => (
-                    <option key={p}>{p}</option>
-                  ))}
-                </select>
-              </label>
-              {view !== 'resources' && (
-                <>
-                  <div className="divider" />
-                  <label>
-                    <Layers size={16} />
-                    <select
-                      aria-label={t('Escolha um exemplo')}
-                      value={example}
-                      disabled={busy}
-                      onChange={(e) => {
-                        const x = examples.find((x) => x.nome === e.target.value);
-                        if (x) {
-                          setPeriod(x.periodo);
-                          loadPlan(`/api/exemplos/${enc(x.nome)}`, x.nome);
-                        }
-                      }}
-                    >
-                      <option value="">{t(saved.includes(period) ? 'Plano do período' : 'Escolha um exemplo')}</option>
-                      {examples
-                        .filter((x) => x.regiao === region)
-                        .map((x) => (
-                          <option key={x.nome} value={x.nome}>
-                            {x.nome}
-                          </option>
-                        ))}
-                    </select>
-                  </label>
-                  <button
-                    className="text-button"
-                    disabled={!saved.includes(period) || busy}
-                    onClick={() => loadPlan(`/api/plano/${enc(region)}/${enc(period)}`)}
+          {view === 'help' && <Ajuda locale={locale} />}
+          {view !== 'help' && (
+            <div className="context-bar">
+              <div className="context-fields">
+                <label>
+                  <MapPin size={16} />
+                  <span>{t('Região')}</span>
+                  <select
+                    aria-label={t('Região')}
+                    disabled={busy}
+                    value={region}
+                    onChange={(e) => changeRegion(e.target.value)}
                   >
-                    {t('Abrir plano salvo')}
-                    <ArrowUpRight size={15} />
-                  </button>
-                </>
-              )}
-            </div>
-            <div className="context-right">
-              <Badge
-                tone="sand"
-                title={
-                  (view === 'resources' ? scenario.simulado : (data?.meta.simulado ?? scenario.simulado))
-                    ? `${t('as equipes e aeronaves deste plano vêm de um cenário de demonstração, não de um inventário real.')}${
-                        data?.meta.arquivo_cenario && view !== 'resources' ? ` (${data.meta.arquivo_cenario})` : ''
-                      }`
-                    : ''
-                }
-              >
-                <span className="tiny-dot" />
-                {t(
-                  (view === 'resources' ? scenario.simulado : (data?.meta.simulado ?? scenario.simulado))
-                    ? 'Recursos simulados'
-                    : 'Disponibilidade real',
+                    {regions.map((r) => (
+                      // região sem cache e sem plano salvo: aparece (mostra que a região é configuração), mas não abre
+                      <option key={r.nome} value={r.nome} disabled={r.tem_cache === false && !r.planos_salvos}>
+                        {r.nome}
+                        {r.tem_cache === false && !r.planos_salvos ? ` (${t('sem dados')})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <div className="divider" />
+                <label>
+                  <Clock size={16} />
+                  <span>{t('Período UTC')}</span>
+                  <select
+                    aria-label={t('Período UTC')}
+                    disabled={busy}
+                    value={period}
+                    onChange={(e) => {
+                      planVersion.current++;
+                      setPeriod(e.target.value);
+                      setData(null);
+                      setExample('');
+                      setSelected(null);
+                      setLoading(false);
+                    }}
+                  >
+                    {!periods.length && <option value="">—</option>}
+                    {[...new Set([...periods, ...saved])].sort().map((p) => (
+                      <option key={p}>{p}</option>
+                    ))}
+                  </select>
+                </label>
+                {view !== 'resources' && (
+                  <>
+                    <div className="divider" />
+                    <label>
+                      <Layers size={16} />
+                      <select
+                        className="example-select"
+                        aria-label={t('Escolha um exemplo')}
+                        value={example}
+                        disabled={busy}
+                        onChange={(e) => {
+                          const x = examples.find((x) => x.nome === e.target.value);
+                          if (x) {
+                            setPeriod(x.periodo);
+                            loadPlan(`/api/exemplos/${enc(x.nome)}`, x.nome);
+                          }
+                        }}
+                      >
+                        <option value="">
+                          {t(saved.includes(period) ? 'Plano do período' : 'Escolha um exemplo')}
+                        </option>
+                        {examples
+                          .filter((x) => x.regiao === region)
+                          .map((x) => (
+                            <option key={x.nome} value={x.nome}>
+                              {t(rotuloExemplo(x.nome))}
+                            </option>
+                          ))}
+                      </select>
+                    </label>
+                    <button
+                      className="text-button"
+                      disabled={!saved.includes(period) || busy}
+                      onClick={() => loadPlan(`/api/plano/${enc(region)}/${enc(period)}`)}
+                    >
+                      {t('Abrir plano salvo')}
+                      <ArrowUpRight size={15} />
+                    </button>
+                  </>
                 )}
-              </Badge>
-              {view === 'overview' && (
-                <button
-                  className="primary"
-                  onClick={() => {
-                    setView('resources');
-                    goStep(0);
-                  }}
+              </div>
+              <div className="context-right">
+                <Badge
+                  tone="sand"
+                  title={
+                    (view === 'resources' ? scenario.simulado : (data?.meta.simulado ?? scenario.simulado))
+                      ? `${t('as equipes e aeronaves deste plano vêm de um cenário de demonstração, não de um inventário real.')}${
+                          data?.meta.arquivo_cenario && view !== 'resources' ? ` (${data.meta.arquivo_cenario})` : ''
+                        }`
+                      : ''
+                  }
                 >
-                  <Plus size={17} />
-                  {t('Gerar novo plano')}
-                </button>
-              )}
+                  <span className="tiny-dot" />
+                  {t(
+                    (view === 'resources' ? scenario.simulado : (data?.meta.simulado ?? scenario.simulado))
+                      ? 'Recursos simulados'
+                      : 'Disponibilidade real',
+                  )}
+                </Badge>
+                {view === 'overview' && (
+                  <button
+                    className="primary"
+                    onClick={() => {
+                      setView('resources');
+                      goStep(0);
+                    }}
+                  >
+                    <Plus size={17} />
+                    {t('Gerar novo plano')}
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
+          )}
           {error && (
             <div className="error" role="alert">
               <AlertTriangle size={20} />
@@ -851,7 +872,7 @@ export default function App() {
                               </div>
                             </div>
                             <div className="priority">
-                              <b>{num(o.prioridade, locale)}</b>
+                              <b>{fmtPrio(o.prioridade, locale)}</b>
                               <span>
                                 <i style={{ width: `${o.prioridade * 100}%` }} />
                               </span>
@@ -1434,7 +1455,7 @@ function Occurrence({ o, t, locale }) {
         <span>FRP: {num(o.frp_soma, locale)} MW</span>
       </div>
       <h4>
-        {t('Índice de prioridade')} · {num(o.prioridade, locale)}
+        {t('Índice de prioridade')} · {fmtPrio(o.prioridade, locale)}
       </h4>
       <div className="components">
         {Object.entries(o.componentes || {}).map(([k, v]) => (

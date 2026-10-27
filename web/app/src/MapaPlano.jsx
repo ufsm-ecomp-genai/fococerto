@@ -2,7 +2,7 @@ import { useEffect, Fragment } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Marker, Polyline, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { LocateFixed } from 'lucide-react';
-import { CORES, ESTILO_BASE, faixas, procedencia, escalados, fmt } from './lib.js';
+import { CORES, ESTILO_BASE, faixas, procedencia, escalados, fmt, fmtPrio } from './lib.js';
 function Controls({ bbox, onClick, selected }) {
   const map = useMap();
   useEffect(() => {
@@ -128,7 +128,7 @@ export default function OperationMap({
               <Popup>
                 <strong>{o.localidades?.[0]?.nome || o.id}</strong>
                 <p>
-                  {t('Prioridade')}: {fmt(o.prioridade, locale)} ({t('faixa')} {t(faixa[o.id])}) · {o.n_focos}{' '}
+                  {t('Prioridade')}: {fmtPrio(o.prioridade, locale)} ({t('faixa')} {t(faixa[o.id])}) · {o.n_focos}{' '}
                   {t('focos')}
                 </p>
                 <p>

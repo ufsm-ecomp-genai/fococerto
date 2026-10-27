@@ -10,6 +10,7 @@ import {
   partesResposta,
   fmt,
   ordenarEscalacoes,
+  fmtPrio,
 } from './lib.js';
 
 const place = (o) => o?.localidades?.[0]?.nome || o?.id;
@@ -56,7 +57,7 @@ export function NeedsYou({ data, selectedId, onPick, locale, t, limite = 6 }) {
                     {fmt(o.pop_raio, locale, 0)}
                   </span>
                 )}
-                {o && <span className="need-prio">{fmt(o.prioridade, locale)}</span>}
+                {o && <span className="need-prio">{fmtPrio(o.prioridade, locale)}</span>}
               </button>
               {aberta && (
                 <div className="need-detail">

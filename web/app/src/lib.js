@@ -150,10 +150,28 @@ export function partesResposta(resposta) {
 
 // números no formato do idioma da interface ("87,545" em EN, "87.545" em PT): todo toLocaleString passa por aqui
 export const localeNumeros = (locale) => (String(locale || '').startsWith('en') ? 'en-US' : 'pt-BR');
-export const fmt = (v, locale, digitos = 2) =>
+export const fmt = (v, locale, digitos = 2, minimo = 0) =>
   v == null || Number.isNaN(Number(v))
     ? '—'
-    : Number(v).toLocaleString(localeNumeros(locale), { maximumFractionDigits: digitos });
+    : Number(v).toLocaleString(localeNumeros(locale), {
+        maximumFractionDigits: digitos,
+        minimumFractionDigits: Math.min(minimo, digitos),
+      });
+// prioridade sempre com duas casas ("0.60", não "0.6"), para as colunas alinharem
+export const fmtPrio = (v, locale) => fmt(v, locale, 2, 2);
+// nome legível dos exemplos de output_examples/ (em português; o i18nNovo traduz). Desconhecido: o nome do arquivo.
+const ROTULOS_EXEMPLO = {
+  'tocantins-escasso-real-en': 'Execução real · equipes escassas (EN)',
+  'tocantins-escasso-real': 'Execução real · equipes escassas (PT)',
+  'nemotron-invented-id-en': 'Execução real · modelo inventou uma equipe (EN)',
+  'tocantins-escasso-en': 'Amostra · equipes escassas (EN)',
+  'tocantins-escasso': 'Amostra · equipes escassas',
+  'tocantins-escasso-com-nota': 'Amostra · equipes escassas + nota de estrada alagada',
+  'tocantins-medio': 'Amostra · equipes médias',
+  'tocantins-folgado': 'Amostra · equipes folgadas',
+  'tocantins-parana-analista': 'Amostra · caso do Analista (Paranã)',
+};
+export const rotuloExemplo = (nome) => ROTULOS_EXEMPLO[nome] || nome;
 // "precisam de você": escalações gerais primeiro, depois por população exposta (e prioridade no empate)
 export function ordenarEscalacoes(escalacoes = [], ocorrencias = []) {
   const occ = Object.fromEntries(ocorrencias.map((o) => [o.id, o]));

@@ -482,3 +482,175 @@ li.open > .need-row .chev {
     margin-left: 0;
   }
 }
+
+/* ---- Central de ajuda ---- */
+.help {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 1180px;
+}
+.help .panel {
+  padding: 20px 22px;
+}
+.help p {
+  margin: 0;
+  line-height: 1.55;
+}
+.help-intro {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.help-intro > svg {
+  color: var(--green);
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.help-intro h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+.help-intro p {
+  font-size: 15px;
+}
+.help-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 0;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+}
+.help-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.help-card h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+  font-size: 15px;
+  color: var(--green);
+}
+.help-card p + p {
+  margin-top: 8px;
+}
+.help-card p,
+.help-steps p,
+.help-glossary dd,
+.help-limits li,
+.help-faq p {
+  color: #4b5a54;
+  font-size: 13.5px;
+}
+.help-steps {
+  list-style: none;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px 22px;
+}
+.help-steps li {
+  display: flex;
+  gap: 12px;
+}
+.help-step-n {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 13px;
+  color: #fff;
+  background: var(--green);
+}
+.help-steps b {
+  display: block;
+  margin-bottom: 3px;
+}
+.help-two {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+.help-side {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.help-glossary dl {
+  margin: 12px 0 0;
+}
+.help-glossary dl > div {
+  padding: 9px 0;
+  border-top: 1px solid var(--border);
+}
+.help-glossary dt {
+  font-weight: 700;
+  font-size: 13.5px;
+}
+.help-glossary dd {
+  margin: 2px 0 0;
+  line-height: 1.5;
+}
+.help-limits ul {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  line-height: 1.55;
+}
+.help-faq-item {
+  border-top: 1px solid var(--border);
+}
+.help-faq-item:first-of-type {
+  margin-top: 10px;
+}
+.help-faq-item button {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 0;
+  background: none;
+  border: 0;
+  text-align: left;
+  font: inherit;
+  font-weight: 600;
+  color: inherit;
+  cursor: pointer;
+}
+.help-faq-item button svg {
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+.help-faq-item.open button svg {
+  transform: rotate(180deg);
+}
+.help-faq-item p {
+  padding: 0 0 12px;
+}
+.help-repo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--green);
+}
+@media (max-width: 1000px) {
+  .help-cards,
+  .help-steps,
+  .help-two {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* rótulos dos exemplos já vêm escritos; sem capitalizar cada palavra */
+.context-fields select.example-select {
+  text-transform: none;
+}
