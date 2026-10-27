@@ -4,6 +4,32 @@ Short texts ready to paste. Check every `[[...]]` before submitting. Keep the st
 
 ---
 
+## Final texts for the HackOS form (27 Oct)
+
+### Description (1874 of 2,000 characters)
+When there are more wildfires than crews, a regional fire coordinator has to decide which fires to answer first and with which crew. Dashboards show where the fire is; they do not propose a priority or record why. FocoCerto does.
+
+It turns NASA FIRMS satellite detections, towns and population, weather and real fire stations (each with its public source) into a priority list and a resource order with travel times. A Planner (NVIDIA Nemotron through Meterless Nightshift) proposes who goes where. Deterministic tools check hard rules and every fact the model cites: town, distance, population, time and ids; wrong facts and invented crews are rewritten before review. A Critic judges the grey zone (trade-offs between towns, exceptions from the coordinator's field notes, when to escalate) and can call an Analyst for open questions such as "agricultural burn or wildfire?", answered with stated confidence. Any fire with exposed people left without a crew is escalated, naming which crews could have reached it and where each one went. Coordinator notes and lessons learned live in Meterless H-MEM, and data comes through Zetaris SQL views. Nothing is dispatched without human approval.
+
+The coordinator works in a web app: one screen with the map, the fires that need a decision and a plan summary; a reasoning view with every round and the Critic's reasons; and a trace with each model call and its signed receipt. English or Portuguese.
+
+Evidence: 12 scenarios on real data with answer keys committed before any run. With Nemotron, the full system passes 82.8% of the checks against 22.2% for a greedy allocator, and exposed people wait 2.8 h for a crew instead of 4.4 h. It runs end to end for real (Zetaris, Nemotron, H-MEM) and also offline in sample mode, without keys. Limits are stated: crew counts are simulated and it has not been validated with operators yet.
+
+### Sponsor technology explanation (3698 of 4,000 characters)
+ZETARIS (data layer). Zetaris 2.4 federates three source types: Postgres (NASA FIRMS detections), file-store CSVs (GeoNames towns and population, OpenStreetMap stations, an official Tocantins station list with one source URL per row) and an Open-Meteo REST table kept with CACHE TABLE. Four SQL views do the analysis in Zetaris itself: grouping detections into occurrences, nearby towns and exposure, weather context, and a transparent priority (exposure 35%, intensity 25%, weather 20%, persistence 10%, growth 10%). scripts/setup_zetaris.py registers everything with 0 failures; the priority view returns 698 occurrences, identical to our Python reference. The agents read only through these views, and every run logs the exact SQL it sent to Zetaris in its trace.
+
+METERLESS H-MEM (engine). We run the official H-MEM reference engine as a TypeScript service and pass its official conformance suite (13/13, npm test in services/hmem). It powers a real feature: coordinator notes and lessons learned between periods change the next plan. "Road to São Félix flooded" keeps that station's crew off the road; a later "road reopened" supersedes the old note (nothing is deleted, the ledger keeps both) and the crew comes back. Between periods the system also writes derived memories, such as a fire left unattended that grew, which raise its priority the next day.
+
+METERLESS NIGHTSHIFT (AI provider). Every agent call (Planner, Critic, Analyst) goes through one OpenAI-compatible client to Nightshift; nothing calls a model provider directly, and a test enforces it. Each call logs the requested model, the routed model and the signed receipt (meterless.compute_receipt.v1); the web app shows them in the trace. A finding: in its default "user" scope, Nightshift added about 4,900 tokens of context remembered from earlier calls to our prompts (the same prompt reached the model with 15,595 input tokens versus 10,682 in a fresh scope, and only then quoted memories it was never sent). That had contaminated our first evaluation runs. FocoCerto now sends its own scope per run, so the only memory in the system is H-MEM, which is audited, and we re-ran the evaluation clean.
+
+NVIDIA (reasoning model). nvidia/nemotron-3-ultra-550b-a55b, through Nightshift, makes every agent decision: the Planner's resource order, the Critic's judgement of trade-offs and memory exceptions, and the Analyst's verdicts. Numbers always come from tools; Nemotron decides and explains. Everything it writes is checked: across 48 evaluation runs it wrote 44 wrong facts (towns, distances, populations and 2 invented crew ids) and the system rewrote every one before the Critic saw the plan, so no final plan carries a false citation. In one real run it claimed a fire near 87,545 people was "covered by gurupi-t1", a crew that does not exist; the system caught the invented id and the false coverage and escalated the fire. With Nemotron, the full system passes 82.8% of our answer-key checks against 22.2% for a greedy allocator. Reasoning is turned off (enable_thinking=false) so the model returns JSON within the token budget. More than 700 real Nemotron calls so far.
+
+WHAT WAS UNIQUE. The sponsor technologies are not pass-throughs: the analysis lives in Zetaris views, H-MEM memory changes decisions and is superseded instead of deleted, every Nemotron decision carries a Nightshift receipt a judge can verify, and every fact the model writes is checked against the data. We measured it with answer keys committed before any run, and we found and fixed a hidden-context issue in the provider instead of publishing inflated numbers.
+
+Full write-up: docs/PATROCINADORES.md in the repository. We did not use SpaceX AI.
+
+---
+
 ## Project name
 FocoCerto
 
