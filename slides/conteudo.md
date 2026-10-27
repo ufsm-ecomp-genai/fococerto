@@ -20,10 +20,10 @@ Estrutura do `pitch-deck-template.md` (12 slides + apêndice), adaptada ao que o
 ## Slide 1: Título
 - **FocoCerto**
 - *Mais incêndios do que equipes: qual atender primeiro, com quem, e por quê.*
-- Open Agent Hackathon 2026 · Track 3: Reasoning Architecture · Time UFSM (Universidade Federal de Santa Maria)
+- Open Agent Hackathon 2026 · Track 3: Reasoning Architecture · Time ECOMP - UFSM (Universidade Federal de Santa Maria)
 - **Visual:** à esquerda, nome e frase; à direita, captura do `mapa.html` do Tocantins (23/10) com as designações.
 
-**Notas:** "Somos o time UFSM. O FocoCerto ajuda o coordenador regional a decidir quais incêndios atender primeiro quando há mais incêndios do que equipes."
+**Notas:** "Somos o time ECOMP - UFSM. O FocoCerto ajuda o coordenador regional a decidir quais incêndios atender primeiro quando há mais incêndios do que equipes."
 
 ## Slide 2: Resumo em 30 segundos
 - **Problema:** incêndios simultâneos e equipes escassas; os painéis mostram *onde* está o fogo, não *qual atender primeiro*.

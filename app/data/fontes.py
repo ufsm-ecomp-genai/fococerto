@@ -17,7 +17,7 @@ from typing import Iterable
 
 from app.data.geo import dentro_bbox, grade, haversine_km
 
-USER_AGENT = "FocoCerto/0.1 (Open Agent Hackathon 2026, time UFSM)"
+USER_AGENT = "FocoCerto/0.1 (Open Agent Hackathon 2026, time ECOMP - UFSM)"
 
 FIRMS_URL = ("https://firms.modaps.eosdis.nasa.gov/data/active_fire/suomi-npp-viirs-c2/csv/"
              "SUOMI_VIIRS_C2_Global_{janela}.csv")

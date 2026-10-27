@@ -14,7 +14,7 @@ When there are more wildfires than crews, FocoCerto proposes which fire to atten
 **Track 3: Reasoning Architecture**
 
 ## Team
-Team UFSM (Universidade Federal de Santa Maria, Brazil). Members: [[names, as registered on HackOS]]
+Team ECOMP - UFSM (Universidade Federal de Santa Maria, Brazil). Members: [[names, as registered on HackOS]]
 
 ## Short description (~100 words)
 FocoCerto is a multi-agent decision aid for regional wildfire coordinators. It turns NASA FIRMS heat detections, localities, real fire stations (each with its source) and weather into a priority list of occurrences and a resource order. A Planner proposes assignments, deterministic tools check hard rules and every cited fact, and a Critic judges the grey zone (trade-offs between communities, exceptions from the coordinator's field notes, when to escalate). The Critic can call an Analyst that answers "agricultural burning or native-vegetation fire?" with stated confidence. Memory across periods uses the Meterless H-MEM engine. Every assignment carries its evidence, the model's text is checked against the plan, plans come in English or Portuguese, and nothing is dispatched without human approval.
