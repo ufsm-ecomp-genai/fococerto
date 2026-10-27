@@ -205,6 +205,7 @@ const enBase = {
   'Tentar novamente': 'Retry',
   'Nenhum resultado para a busca.': 'No results for this search.',
   'Sem dados para esta região.': 'No data for this region.',
+  'sem dados': 'no data',
   'Atualizado em': 'Updated at',
   'Exportar JSON': 'Export JSON',
   'Revisão humana obrigatória': 'Human review required',

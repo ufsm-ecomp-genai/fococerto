@@ -21,7 +21,7 @@ import {
   ordenarEscalacoes,
 } from '../src/lib.js';
 
-const mock = (nome) => JSON.parse(readFileSync(new URL(`../../mocks/${nome}`, import.meta.url), 'utf8'));
+const mock = (nome) => JSON.parse(readFileSync(new URL(`./fixtures/${nome}`, import.meta.url), 'utf8'));
 
 test('priority bands are terciles of the period ranking, like app/output/comum.faixas_prioridade', () => {
   const oc = [0.9, 0.8, 0.7, 0.6, 0.5, 0.4].map((p, i) => ({ id: `o${i}`, prioridade: p }));

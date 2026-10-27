@@ -255,7 +255,7 @@ table.trace td {
   }
 }
 
-/* ---- Visão geral em uma tela (web/MUDANCAS-FRONT.md, item 1): status, mapa + "precisam de você", abas abaixo ---- */
+/* ---- Visão geral em uma tela: status, mapa + "precisam de você", abas abaixo ---- */
 .context-bar .context-fields {
   flex-wrap: wrap;
 }

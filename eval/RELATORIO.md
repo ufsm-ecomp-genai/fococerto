@@ -249,7 +249,7 @@ automático atual não a produz. Pedido ao `agentes-llm` (relatado ao líder): u
 e ainda queima), não só a comparação com o plano de P-1.
 
 Observação: neste modo B, C e D escalam (12 ocorrências cada), e na ablação offline de 24/10 B não escalava. O
-código dos agentes mudou depois da ablação (fila de correções do ESTADO, item 1: escalação obrigatória de exposta
+código dos agentes mudou depois da ablação (correção de 25/10: escalação obrigatória de exposta
 sem recurso). As tabelas acima, de 24 e 25/10, são do código daquela data.
 
 

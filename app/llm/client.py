@@ -3,9 +3,9 @@
 Providers (variável LLM_PROVIDER):
 - ``nightshift``: Meterless Nightshift, compatível com OpenAI (POST {METERLESS_BASE_URL}/chat/completions),
   com o token METERLESS_RUNTIME_TOKEN e o modelo METERLESS_MODEL (padrão ``meterless/auto``).
-  **NÃO TESTADO contra um Nightshift real** (não havia Nightshift nesta máquina no desenvolvimento).
-  O formato exato do *receipt* não está documentado; ``_extrair_meta`` procura ``routed_model`` e o
-  receipt de forma tolerante no corpo e nos cabeçalhos da resposta.
+  Usado contra um Nightshift real desde 25/10/2026 (mais de 700 chamadas ao Nemotron 3 Ultra, cada uma com
+  ``routed_model`` e um receipt ``meterless.compute_receipt.v1``). Como o formato do receipt não está documentado,
+  ``_extrair_meta`` o procura de forma tolerante no corpo e nos cabeçalhos da resposta.
 - ``offline``: não chama LLM nenhum. ``chat`` levanta ``LLMIndisponivel`` e os agentes usam o próprio
   ``decidir_offline()``.
 

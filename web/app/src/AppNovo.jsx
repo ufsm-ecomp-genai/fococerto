@@ -550,8 +550,10 @@ export default function App() {
                   onChange={(e) => changeRegion(e.target.value)}
                 >
                   {regions.map((r) => (
-                    <option key={r.nome} value={r.nome}>
+                    // região sem cache e sem plano salvo: aparece (mostra que a região é configuração), mas não abre
+                    <option key={r.nome} value={r.nome} disabled={r.tem_cache === false && !r.planos_salvos}>
                       {r.nome}
+                      {r.tem_cache === false && !r.planos_salvos ? ` (${t('sem dados')})` : ''}
                     </option>
                   ))}
                 </select>

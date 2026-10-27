@@ -23,7 +23,7 @@ Projeto do time ECOMP - UFSM para o Open Agent Hackathon 2026, Track 3 (Reasonin
 | `eval/` | `avaliacao` |
 | `app/cli.py`, `app/output/`, `web/`, `cenarios/` | `interface-ux` |
 | `tests/`, `Dockerfile`, `.env.example`, `scripts/check_*` | `qa-integracao` |
-| `README.md`, `docs/` (exceto CONTRATOS), `slides/` | `docs-submissao` |
+| `README.md`, `docs/` (exceto CONTRATOS) | `docs-submissao` |
 
 ## Regras do hackathon que não podem ser quebradas
 - **Zetaris** é a camada de dados: os agentes consultam dados **pelo Zetaris**, não direto nas fontes. A exceção é a escrita (decisões e notas), que vai direto ao Postgres, porque o Zetaris é só leitura sobre as fontes.

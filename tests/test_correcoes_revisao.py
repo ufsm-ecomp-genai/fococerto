@@ -1,4 +1,4 @@
-"""Regressão das correções da revisão do juiz (docs/ESTADO.md, fila itens 1, 2, 6 e 12). Dados SIMULADOS de teste."""
+"""Regressão das correções da revisão do juiz (25/10: escalação obrigatória, troca de recurso local, `app.cli avaliar` e SAMPLE_MODE). Dados SIMULADOS de teste."""
 import json
 import os
 
