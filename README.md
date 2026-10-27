@@ -53,7 +53,8 @@ start out\tocantins\2026-10-23\mapa.html
 uvicorn app.api:app --port 8000          # then open http://localhost:8000
 ```
 It opens on the real English run (`tocantins-escasso-real-en`) and follows your browser language (English or
-Portuguese). "Create a plan" runs a new period from the screen; leave "sample" on to run without keys. With Docker
+Portuguese). New to the system? The **Help center** tab explains each screen, how a plan is made, a glossary and
+what the system does not do. "Create a plan" runs a new period from the screen; leave "sample" on to run without keys. With Docker
 instead: `docker compose -f web/compose.yaml up -d --build` (builds the app and the API together, same address).
 
 What the CLI run gives you: `out/tocantins/2026-10-23/plano.md` (the plan), `plano.json`, `mapa.html` (the map) and a
