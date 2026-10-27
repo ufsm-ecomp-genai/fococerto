@@ -177,3 +177,21 @@
   background: var(--tema-destaque);
   color: var(--tema-texto-destaque);
 }
+/* logo: imagem com fundo escuro próprio, igual nos dois temas */
+:root:root .brand-icon,
+:root:root[data-theme='dark'] .brand-icon {
+  background: #15110e;
+  padding: 0;
+  overflow: hidden;
+}
+.brand-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.footer-brand img {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+}

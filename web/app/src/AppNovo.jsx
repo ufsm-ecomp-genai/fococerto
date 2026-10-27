@@ -30,6 +30,7 @@ import { translator } from './i18nNovo';
 import OperationMap from './MapaPlano';
 import './novo.css';
 import './tema.css';
+import logo from './assets/logo.png';
 import { Steps, ScenarioStart, ReviewSummary, JourneyActions, Coverage } from './Journey';
 import { NeedsYou, ReserveList, ReasoningPanels, MapLegend, TraceTable, ResourceIcon, ProvenanceBadge } from './Plan';
 import {
@@ -461,7 +462,7 @@ export default function App() {
           }}
         >
           <span className="brand-icon">
-            <Flame size={25} />
+            <img src={logo} alt="" />
           </span>
           Foco<span>Certo</span>
         </a>
@@ -1241,7 +1242,7 @@ export default function App() {
             ))}
           <footer>
             <span className="footer-brand">
-              <Flame size={14} />
+              <img src={logo} alt="" />
               FocoCerto
             </span>
             <span>NASA FIRMS · Open-Meteo · GeoNames</span>
