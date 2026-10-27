@@ -34,7 +34,7 @@ npm run build
 npm test
 ```
 
-O build vai para `web/dist`, conforme o contrato da API. Traduções ficam em `web/app/src/i18n.js`. Os textos narrativos do backend são preservados no idioma do plano; o seletor de idioma controla o próximo plano e os rótulos da interface.
+O build vai para `web/dist`, conforme o contrato da API. Traduções ficam em `web/app/src/i18nNovo.js`. Os textos narrativos do backend são preservados no idioma do plano; o seletor de idioma controla o próximo plano e os rótulos da interface.
 
 ## Conferir os fluxos
 
@@ -46,4 +46,4 @@ O build vai para `web/dist`, conforme o contrato da API. Traduções ficam em `w
 
 O mapa usa Esri World Street Map e precisa de internet para os tiles. Os dados da demonstração são históricos; o último período de cache pode estar incompleto. A população é a soma das localidades no raio, não uma contagem de pessoas diretamente em risco. ETAs são estimativas, não rotas de navegação.
 
-Limitação do backend atual: `POST /api/aprovar` registra a decisão, mas não atualiza `meta.aprovacao_humana` no arquivo do plano. A interface confirma a aprovação após uma resposta bem-sucedida e mantém esse estado durante a sessão, vinculado à data de geração do plano. Após recarregar a página, prevalece o estado retornado pela API.
+Aprovação: depois de `POST /api/aprovar`, a interface recarrega o plano e mostra `meta.aprovacao_humana`, `meta.aprovado_por` e `meta.aprovado_em` gravados pela API. Aprovar não despacha equipes nem resolve escalações.
