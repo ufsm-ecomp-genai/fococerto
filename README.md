@@ -45,8 +45,16 @@ python -m app.cli run --sample --regiao tocantins --recursos cenarios/tocantins-
 start out\tocantins\2026-10-23\mapa.html
 ```
 
-What you get: `out/tocantins/2026-10-23/plano.md` (the plan), `plano.json`, `mapa.html` (the map) and a trace in
-`logs/`. With the environment active, every other command in this README works as written (`python -m app.cli …`,
+**The web app** (built and committed in `web/dist/`, so only Python is needed), with the environment active:
+```bash
+uvicorn app.api:app --port 8000          # then open http://localhost:8000
+```
+It opens on the real English run (`tocantins-escasso-real-en`) and follows your browser language (English or
+Portuguese). "Create a plan" runs a new period from the screen; leave "sample" on to run without keys. With Docker
+instead: `docker compose -f web/compose.yaml up -d --build` (builds the app and the API together, same address).
+
+What the CLI run gives you: `out/tocantins/2026-10-23/plano.md` (the plan), `plano.json`, `mapa.html` (the map) and a
+trace in `logs/`. With the environment active, every other command in this README works as written (`python -m app.cli …`,
 `python -m pytest -q`, `uvicorn app.api:app --port 8000`). Prefer Docker? `docker build -t fococerto .` then
 `docker run --rm fococerto`. The real runs with Zetaris, Nemotron and H-MEM are saved in
 [`output_examples/tocantins-escasso-real-en/`](output_examples/tocantins-escasso-real-en/).

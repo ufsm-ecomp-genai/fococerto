@@ -1,5 +1,4 @@
 app/node_modules/
-dist/
 .runtime/
 .venv/
 *.log
