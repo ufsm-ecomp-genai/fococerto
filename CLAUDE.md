@@ -1,9 +1,9 @@
 # FocoCerto: regras do projeto (vale para todos os agentes)
 
 Projeto do time ECOMP - UFSM para o Open Agent Hackathon 2026, Track 3 (Reasoning Architecture).
-- Especificação completa: `../PROJETO-queimadas.md`. Leia as seções relevantes ao seu papel antes de começar.
+- Especificação de design: documento interno do time, fora do repositório. O que está implementado está descrito em `docs/CONTRATOS.md` e no README.
 - Interfaces entre módulos: `docs/CONTRATOS.md`. **Elas valem mais do que a sua preferência.**
-- Regras oficiais do hackathon: `~/Downloads/genai-docs/rules/`.
+- Regras oficiais do hackathon: página do evento no HackOS (o time usou uma cópia local, fora do repositório).
 
 **Prazo: terça, 27/10/2026, 23:45 UTC (20:45 em Brasília).** Priorize o que está como "Precisa ter" na seção 12 da especificação.
 
@@ -36,7 +36,7 @@ Projeto do time ECOMP - UFSM para o Open Agent Hackathon 2026, Track 3 (Reasonin
 
 ## Stack
 - App: **Python 3.12**, LangGraph, httpx, pydantic, pytest. Rodar com `python -m app.cli`.
-- H-MEM: **TypeScript** (referência oficial em `../02-meterless-engines/Meterless`), exposto como serviço HTTP em `services/hmem/`.
+- H-MEM: **TypeScript** (adaptada da implementação de referência da Meterless; ver `services/hmem/NOTICE`), exposto como serviço HTTP em `services/hmem/`.
 - Dados: Postgres + Zetaris (Docker). Credenciais no `.env` (veja `.env.example`).
 
 ## Relatório final de cada agente (obrigatório)

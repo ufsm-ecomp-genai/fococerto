@@ -16,7 +16,7 @@
   e offline `20261026T225811Z_offline/` (22,2 · 70,4 · 82,8 · 62,1). Detalhes e histórico em `eval/RELATORIO.md`.
 - Achado: o escopo `user` do Nightshift injeta ~4.900 tokens de contexto lembrado; corrigido (commit `73aed60`).
 - 331 testes passam (1 pulado: precisa de um Postgres descartável); `check_submissao.py` 17 OK.
-- Deck (Artifact Slides, privado) atualizado até a rodada limpa; banner do time em `~/Downloads/banner-fococerto/`.
+- Deck (Artifact Slides, privado) atualizado até a rodada limpa; banner do time feito (fora do repositório).
 
 ## Em andamento (time)
 - **Front-end** na branch `front-end`: tarefas em `web/MUDANCAS-FRONT.md` (Visão geral em uma tela, abrir em EN,
