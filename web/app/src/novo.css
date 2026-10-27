@@ -708,3 +708,23 @@ li.open > .need-row .chev {
     font-size: 15px;
   }
 }
+/* janelas baixas (notebook com barras do navegador): resumo numa faixa compacta, para a lista de escalações caber */
+@media (max-height: 760px) {
+  .plan-summary-card {
+    margin: 2px 12px 6px;
+    padding: 7px 10px;
+    gap: 6px;
+  }
+  .plan-summary-card small {
+    display: none;
+  }
+  .plan-summary-card span {
+    font-size: 9.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .plan-summary-card b {
+    font-size: 14px;
+  }
+}
