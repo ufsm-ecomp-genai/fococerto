@@ -15,7 +15,7 @@ def carregar_env(caminho: Path = RAIZ / ".env") -> None:
     """Carrega KEY=VALUE do .env sem sobrescrever o ambiente já definido."""
     if not caminho.exists():
         return
-    for linha in caminho.read_text().splitlines():
+    for linha in caminho.read_text(encoding="utf-8").splitlines():
         linha = linha.strip()
         if not linha or linha.startswith("#") or "=" not in linha:
             continue
@@ -28,9 +28,9 @@ def env(chave: str, padrao: str | None = None) -> str | None:
 
 
 def regiao(nome: str) -> RegiaoCfg:
-    dados = yaml.safe_load((RAIZ / "config" / "regioes" / f"{nome}.yaml").read_text())
+    dados = yaml.safe_load((RAIZ / "config" / "regioes" / f"{nome}.yaml").read_text(encoding="utf-8"))
     return RegiaoCfg(nome=nome, **dados)
 
 
 def cenario(caminho: str | Path) -> Cenario:
-    return Cenario(**yaml.safe_load(Path(caminho).read_text()))
+    return Cenario(**yaml.safe_load(Path(caminho).read_text(encoding="utf-8")))

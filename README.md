@@ -17,7 +17,44 @@ FocoCerto crosses NASA FIRMS heat detections with weather, nearby communities, r
 
 ---
 
+## Quick start (about 3 minutes, no keys or services needed)
+
+You need **Python 3.12** and **git**. Sample mode runs the whole pipeline on cached real data with deterministic
+agents; the real mode (Zetaris + Nightshift + H-MEM) is in [Setup](#setup).
+
+**Linux / macOS**
+```bash
+git clone https://github.com/ufsm-ecomp-genai/fococerto.git
+cd fococerto
+python3.12 -m venv .venv                 # create the virtual environment (once)
+source .venv/bin/activate                # activate it (in every new terminal)
+pip install -r requirements.txt          # install the dependencies (once)
+python -m app.cli run --sample --regiao tocantins --recursos cenarios/tocantins-escasso.yaml --idioma en
+xdg-open out/tocantins/2026-10-23/mapa.html    # macOS: open out/tocantins/2026-10-23/mapa.html
+```
+
+**Windows (PowerShell)**
+```powershell
+git clone https://github.com/ufsm-ecomp-genai/fococerto.git
+cd fococerto
+py -3.12 -m venv .venv                   # create the virtual environment (once)
+Set-ExecutionPolicy -Scope Process Bypass   # only if activation is blocked
+.venv\Scripts\Activate.ps1               # activate it (in every new terminal)
+pip install -r requirements.txt          # install the dependencies (once)
+python -m app.cli run --sample --regiao tocantins --recursos cenarios/tocantins-escasso.yaml --idioma en
+start out\tocantins\2026-10-23\mapa.html
+```
+
+What you get: `out/tocantins/2026-10-23/plano.md` (the plan), `plano.json`, `mapa.html` (the map) and a trace in
+`logs/`. With the environment active, every other command in this README works as written (`python -m app.cli …`,
+`python -m pytest -q`, `uvicorn app.api:app --port 8000`). Prefer Docker? `docker build -t fococerto .` then
+`docker run --rm fococerto`. The real runs with Zetaris, Nemotron and H-MEM are saved in
+[`output_examples/tocantins-escasso-real-en/`](output_examples/tocantins-escasso-real-en/).
+
+---
+
 ## Contents
+0. [Quick start](#quick-start-about-3-minutes-no-keys-or-services-needed)
 1. [Problem and user](#problem-and-user)
 2. [Architecture](#architecture)
 3. [Agent roles and the reasoning loop](#agent-roles-and-the-reasoning-loop)
@@ -182,11 +219,14 @@ The real run is in [`output_examples/nemotron-invented-id-en/`](output_examples/
 ## Setup
 
 ### 1. Python (sample mode works right after this)
+Same steps as the [Quick start](#quick-start-about-3-minutes-no-keys-or-services-needed) (on Windows, use
+`py -3.12 -m venv .venv` and `.venv\Scripts\Activate.ps1`):
 ```bash
-git clone <this repo> fococerto && cd fococerto
+git clone https://github.com/ufsm-ecomp-genai/fococerto.git && cd fococerto
 python3.12 -m venv .venv
-.venv/bin/pip install -r requirements.txt
-.venv/bin/python -m app.cli run --sample --regiao tocantins --recursos cenarios/tocantins-escasso.yaml --idioma en   # or --idioma pt-BR
+source .venv/bin/activate        # every command below assumes the environment is active
+pip install -r requirements.txt
+python -m app.cli run --sample --regiao tocantins --recursos cenarios/tocantins-escasso.yaml --idioma en   # or --idioma pt-BR
 ```
 
 ### 2. Docker (alternative)
