@@ -7,7 +7,7 @@
     "modo": "offline",
     "simulado": true,
     "arquivo_cenario": "input_examples/tocantins-folgado.yaml",
-    "gerado_em": "2026-10-26T18:13:57.936056+00:00",
+    "gerado_em": "2026-10-26T23:36:33.783095+00:00",
     "aprovacao_humana": "pendente"
   },
   "plano": {
@@ -946,12 +946,112 @@
     {
       "ocorrencia_id": "cel_-121_-466",
       "motivo": "Escalação: cel_-121_-466 tem 4295 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
-      "sugestao": "solicitar apoio externo"
+      "sugestao": "solicitar apoio externo",
+      "alcance": [
+        {
+          "recurso_id": "palmas-a1",
+          "eta_h": 1.55,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-91_-474",
+              "localidade": "Centenário",
+              "pop_raio": 2135
+            }
+          ]
+        },
+        {
+          "recurso_id": "palmas-a2",
+          "eta_h": 1.55,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-96_-468",
+              "localidade": "Lizarda",
+              "pop_raio": 2991
+            }
+          ]
+        },
+        {
+          "recurso_id": "dianopolis-t1",
+          "eta_h": 1.78,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-117_-469",
+              "localidade": "Dianópolis",
+              "pop_raio": 22424
+            }
+          ]
+        },
+        {
+          "recurso_id": "arraias-t1",
+          "eta_h": 3.77,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-122_-473",
+              "localidade": "Conceição do Tocantins",
+              "pop_raio": 3956
+            }
+          ]
+        }
+      ]
     },
     {
       "ocorrencia_id": "cel_-122_-464",
       "motivo": "Escalação: cel_-122_-464 tem 4295 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
-      "sugestao": "solicitar apoio externo"
+      "sugestao": "solicitar apoio externo",
+      "alcance": [
+        {
+          "recurso_id": "palmas-a1",
+          "eta_h": 1.67,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-91_-474",
+              "localidade": "Centenário",
+              "pop_raio": 2135
+            }
+          ]
+        },
+        {
+          "recurso_id": "palmas-a2",
+          "eta_h": 1.67,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-96_-468",
+              "localidade": "Lizarda",
+              "pop_raio": 2991
+            }
+          ]
+        },
+        {
+          "recurso_id": "dianopolis-t1",
+          "eta_h": 2.51,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-117_-469",
+              "localidade": "Dianópolis",
+              "pop_raio": 22424
+            }
+          ]
+        },
+        {
+          "recurso_id": "arraias-t1",
+          "eta_h": 3.79,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-122_-473",
+              "localidade": "Conceição do Tocantins",
+              "pop_raio": 3956
+            }
+          ]
+        }
+      ]
     }
   ],
   "pareceres": [],

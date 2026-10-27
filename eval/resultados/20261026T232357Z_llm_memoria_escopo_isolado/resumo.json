@@ -1,0 +1,349 @@
+{
+ "modo": "llm",
+ "timestamp_utc": "20261026T232357Z",
+ "repeticoes": 1,
+ "cenarios": [
+  "controle_taguatinga_liberada_21out",
+  "excecao_dianopolis_ponte_18out",
+  "excecao_mateiros_alagada_23out",
+  "reignicao_conceicao_20out",
+  "reignicao_morros_24out"
+ ],
+ "variantes": {
+  "A": "alocador_simples sozinho",
+  "B": "Planejador + checador (usar_critico_llm=False)",
+  "C": "completo (Crítico + Analista + H-MEM)",
+  "D": "C sem H-MEM (usar_memoria=False)"
+ },
+ "agregado": {
+  "variantes": {
+   "C": {
+    "descricao": "completo (Crítico + Analista + H-MEM)",
+    "execucoes": 5,
+    "erros": 0,
+    "acerto": "9/12",
+    "acerto_pct": 75.0,
+    "decisao": "6/7",
+    "deteccao": "2/4",
+    "alarmes_falsos_gabarito": 0,
+    "alarme_falso_aplicaveis": 1,
+    "citacoes_falsas": 17,
+    "eta_pond_medio_h": 3.509,
+    "eta_pond_log_medio_h": 5.658,
+    "rodadas_media": 2.6,
+    "status_escala": 4,
+    "escalacoes_media": 4.4,
+    "desvio_acerto_entre_repeticoes": 0.0,
+    "acerto_por_repeticao": {
+     "r1": "9/12"
+    },
+    "acerto_por_execucao_media": 9.0,
+    "acerto_por_execucao_aplicaveis": [
+     12
+    ],
+    "acerto_por_execucao_desvio": 0.0,
+    "acerto_por_execucao_min_max": [
+     9,
+     9
+    ],
+    "escaladas": 22,
+    "sobre_escaladas": 0,
+    "escaladas_sem_exposicao": 0,
+    "escaladas_com_recurso_livre": 0,
+    "escaladas_com_troca": 0,
+    "escaladas_so_com_reserva": 0,
+    "escaladas_e_atendidas": 0,
+    "escalacoes_sem_alvo": 0,
+    "escalacoes_impasse": 0,
+    "credito_escalacao": 1,
+    "execucoes_com_sobre_escalacao": 0,
+    "cenarios_com_planos_diferentes_entre_repeticoes": 0,
+    "agentes": {
+     "llm_calls": 33,
+     "planejador": 13,
+     "critico": 14,
+     "analista": 3
+    },
+    "duracao_total_s": 604.14
+   },
+   "D": {
+    "descricao": "C sem H-MEM (usar_memoria=False)",
+    "execucoes": 5,
+    "erros": 0,
+    "acerto": "9/12",
+    "acerto_pct": 75.0,
+    "decisao": "7/7",
+    "deteccao": "1/4",
+    "alarmes_falsos_gabarito": 0,
+    "alarme_falso_aplicaveis": 1,
+    "citacoes_falsas": 6,
+    "eta_pond_medio_h": 3.134,
+    "eta_pond_log_medio_h": 5.031,
+    "rodadas_media": 2.4,
+    "status_escala": 4,
+    "escalacoes_media": 4.2,
+    "desvio_acerto_entre_repeticoes": 0.0,
+    "acerto_por_repeticao": {
+     "r1": "9/12"
+    },
+    "acerto_por_execucao_media": 9.0,
+    "acerto_por_execucao_aplicaveis": [
+     12
+    ],
+    "acerto_por_execucao_desvio": 0.0,
+    "acerto_por_execucao_min_max": [
+     9,
+     9
+    ],
+    "escaladas": 19,
+    "sobre_escaladas": 0,
+    "escaladas_sem_exposicao": 0,
+    "escaladas_com_recurso_livre": 0,
+    "escaladas_com_troca": 0,
+    "escaladas_so_com_reserva": 0,
+    "escaladas_e_atendidas": 6,
+    "escalacoes_sem_alvo": 0,
+    "escalacoes_impasse": 2,
+    "credito_escalacao": 1,
+    "execucoes_com_sobre_escalacao": 0,
+    "cenarios_com_planos_diferentes_entre_repeticoes": 0,
+    "agentes": {
+     "llm_calls": 24,
+     "planejador": 12,
+     "critico": 12
+    },
+    "duracao_total_s": 405.05
+   }
+  },
+  "por_cenario": {
+   "controle_taguatinga_liberada_21out|C": {
+    "cenario": "controle_taguatinga_liberada_21out",
+    "variante": "C",
+    "n": 1,
+    "erros": 0,
+    "acerto_medio": 1.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 5.001,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "passou"
+     ],
+     "c2": [
+      "passou"
+     ]
+    }
+   },
+   "controle_taguatinga_liberada_21out|D": {
+    "cenario": "controle_taguatinga_liberada_21out",
+    "variante": "D",
+    "n": 1,
+    "erros": 0,
+    "acerto_medio": 1.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 5.001,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "passou"
+     ],
+     "c2": [
+      "passou"
+     ]
+    }
+   },
+   "excecao_dianopolis_ponte_18out|C": {
+    "cenario": "excecao_dianopolis_ponte_18out",
+    "variante": "C",
+    "n": 1,
+    "erros": 0,
+    "acerto_medio": 0.5,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 3.261,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "falhou"
+     ],
+     "c2": [
+      "passou"
+     ]
+    }
+   },
+   "excecao_dianopolis_ponte_18out|D": {
+    "cenario": "excecao_dianopolis_ponte_18out",
+    "variante": "D",
+    "n": 1,
+    "erros": 0,
+    "acerto_medio": 0.5,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 2.544,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "falhou"
+     ],
+     "c2": [
+      "passou"
+     ]
+    }
+   },
+   "excecao_mateiros_alagada_23out|C": {
+    "cenario": "excecao_mateiros_alagada_23out",
+    "variante": "C",
+    "n": 1,
+    "erros": 0,
+    "acerto_medio": 1.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 5.635,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "passou"
+     ],
+     "c2": [
+      "passou"
+     ],
+     "c3": [
+      "passou"
+     ],
+     "c4": [
+      "passou"
+     ]
+    }
+   },
+   "excecao_mateiros_alagada_23out|D": {
+    "cenario": "excecao_mateiros_alagada_23out",
+    "variante": "D",
+    "n": 1,
+    "erros": 0,
+    "acerto_medio": 0.75,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 4.9,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "falhou"
+     ],
+     "c2": [
+      "passou"
+     ],
+     "c3": [
+      "passou"
+     ],
+     "c4": [
+      "passou"
+     ]
+    }
+   },
+   "reignicao_conceicao_20out|C": {
+    "cenario": "reignicao_conceicao_20out",
+    "variante": "C",
+    "n": 1,
+    "erros": 0,
+    "acerto_medio": 0.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 3.067,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "falhou"
+     ],
+     "c2": [
+      "falhou"
+     ]
+    }
+   },
+   "reignicao_conceicao_20out|D": {
+    "cenario": "reignicao_conceicao_20out",
+    "variante": "D",
+    "n": 1,
+    "erros": 0,
+    "acerto_medio": 0.5,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 2.646,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "falhou"
+     ],
+     "c2": [
+      "passou"
+     ]
+    }
+   },
+   "reignicao_morros_24out|C": {
+    "cenario": "reignicao_morros_24out",
+    "variante": "C",
+    "n": 1,
+    "erros": 0,
+    "acerto_medio": 1.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 0.58,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "passou"
+     ],
+     "c2": [
+      "passou"
+     ]
+    }
+   },
+   "reignicao_morros_24out|D": {
+    "cenario": "reignicao_morros_24out",
+    "variante": "D",
+    "n": 1,
+    "erros": 0,
+    "acerto_medio": 1.0,
+    "acerto_desvio": 0.0,
+    "eta_pond_medio": 0.58,
+    "eta_pond_desvio": 0.0,
+    "planos_identicos": true,
+    "checagens": {
+     "c1": [
+      "passou"
+     ],
+     "c2": [
+      "passou"
+     ]
+    }
+   }
+  }
+ },
+ "estimativa_llm": {
+  "latencia_s_suposta": 30.0,
+  "repeticoes": 1,
+  "por_variante": {
+   "C": {
+    "chamadas_por_execucao_min": 6.0,
+    "chamadas_por_execucao_max": 13.2,
+    "planejador": 2.6,
+    "critico": 2.8,
+    "analista": 0.6
+   },
+   "D": {
+    "chamadas_por_execucao_min": 4.8,
+    "chamadas_por_execucao_max": 9.6,
+    "planejador": 2.4,
+    "critico": 2.4,
+    "analista": 0.0
+   }
+  },
+  "chamadas_total_min": 54,
+  "chamadas_total_max": 114,
+  "horas_min": 0.45,
+  "horas_max": 0.95,
+  "teto_teorico_por_execucao": "3 rodadas × (1 Planejador + 2 Crítico + 3 Analistas × 2) × 2 retries = 54",
+  "obs": "Estimativa a partir da trajetória OFFLINE: no modo LLM o número de rodadas e de pareceres pode ser outro. A variante A não chama LLM; a B só chama o Planejador."
+ }
+}

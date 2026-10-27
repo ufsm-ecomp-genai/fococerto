@@ -34,7 +34,7 @@ from collections import Counter
 
 from app.core.mensagens import msg
 from app.core.models import Base, Memoria, Ocorrencia, Plano, Recurso, RegiaoCfg, Violacao
-from app.tools.geo import eta_recurso, exposta
+from app.tools.geo import eta_recurso, etas_disponiveis, exposta, viaveis
 from app.tools.memorias import interpretar_memorias
 
 INSOLUVEIS = {"exposicao_sem_recurso_viavel"}
@@ -132,20 +132,19 @@ def checar_regras(plano: Plano, ocorrencias: list[Ocorrencia], recursos: list[Re
     for d in plano.designacoes:
         if d.ocorrencia_id in occ and not exposta(occ[d.ocorrencia_id]) and d.recurso_id in rec:
             em_sem_exposicao.setdefault(d.recurso_id, []).append(d.ocorrencia_id)
-    disp = [r for r in recursos if r.disponivel]
     for o in ocorrencias:
         if not exposta(o) or o.id in designadas:
             continue
-        etas = {r.id: eta_recurso(r, por_base.get(r.base_id), o, regiao_cfg) for r in disp}
-        viaveis = sorted((e, rid) for rid, e in etas.items() if e <= regiao_cfg.eta_max_h)
-        if not viaveis:
+        etas = etas_disponiveis(o, recursos, por_base, regiao_cfg)
+        alcance = viaveis(etas, regiao_cfg)
+        if not alcance:
             vs.append(Violacao(regra="exposicao_sem_recurso_viavel", ocorrencia_id=o.id,
                                evidencia={"pop_raio": o.pop_raio,
                                           "eta_min_h": round(min(etas.values()), 2) if etas else None,
                                           "eta_max_h": regiao_cfg.eta_max_h},
                                sugestao=msg("sug_sem_viavel", idioma)))
             continue
-        viaveis_ids = [rid for _, rid in viaveis]
+        viaveis_ids = [rid for _, rid in alcance]
         liberaveis = [rid for rid in viaveis_ids if rid in em_sem_exposicao]
         if liberaveis:
             vs.append(Violacao(regra="exposta_sem_recurso", ocorrencia_id=o.id,

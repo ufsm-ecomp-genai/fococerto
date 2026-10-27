@@ -7,7 +7,7 @@
     "modo": "offline",
     "simulado": true,
     "arquivo_cenario": "input_examples/tocantins-escasso.yaml",
-    "gerado_em": "2026-10-26T18:13:53.445646+00:00",
+    "gerado_em": "2026-10-26T23:36:29.163757+00:00",
     "aprovacao_humana": "pendente"
   },
   "plano": {
@@ -781,47 +781,365 @@
     {
       "ocorrencia_id": "cel_-105_-475",
       "motivo": "Escalação: cel_-105_-475 tem 3610 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
-      "sugestao": "solicitar apoio externo"
+      "sugestao": "solicitar apoio externo",
+      "alcance": [
+        {
+          "recurso_id": "palmas-a1",
+          "eta_h": 0.56,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-103_-478",
+              "localidade": "Santa Tereza do Tocantins",
+              "pop_raio": 2463
+            }
+          ]
+        },
+        {
+          "recurso_id": "saofelix-t1",
+          "eta_h": 3.26,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-96_-468",
+              "localidade": "Lizarda",
+              "pop_raio": 2991
+            }
+          ]
+        },
+        {
+          "recurso_id": "palmas-t1",
+          "eta_h": 3.53,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-107_-476",
+              "localidade": "Ponte Alta do Tocantins",
+              "pop_raio": 7842
+            }
+          ]
+        },
+        {
+          "recurso_id": "portonac-t1",
+          "eta_h": 3.79,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-117_-491",
+              "localidade": "Gurupi",
+              "pop_raio": 87545
+            }
+          ]
+        },
+        {
+          "recurso_id": "dianopolis-t1",
+          "eta_h": 5.16,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-117_-469",
+              "localidade": "Dianópolis",
+              "pop_raio": 22424
+            }
+          ]
+        },
+        {
+          "recurso_id": "paraiso-t1",
+          "eta_h": 5.51,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-107_-483",
+              "localidade": "Porto Nacional",
+              "pop_raio": 53316
+            }
+          ]
+        }
+      ]
     },
     {
       "ocorrencia_id": "cel_-113_-493",
       "motivo": "Escalação: cel_-113_-493 tem 4321 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
-      "sugestao": "solicitar apoio externo"
+      "sugestao": "solicitar apoio externo",
+      "alcance": [
+        {
+          "recurso_id": "palmas-a1",
+          "eta_h": 0.86,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-103_-478",
+              "localidade": "Santa Tereza do Tocantins",
+              "pop_raio": 2463
+            }
+          ]
+        },
+        {
+          "recurso_id": "portonac-t1",
+          "eta_h": 3.9,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-117_-491",
+              "localidade": "Gurupi",
+              "pop_raio": 87545
+            }
+          ]
+        },
+        {
+          "recurso_id": "paraiso-t1",
+          "eta_h": 4.55,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-107_-483",
+              "localidade": "Porto Nacional",
+              "pop_raio": 53316
+            }
+          ]
+        },
+        {
+          "recurso_id": "palmas-t1",
+          "eta_h": 5.44,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-107_-476",
+              "localidade": "Ponte Alta do Tocantins",
+              "pop_raio": 7842
+            }
+          ]
+        }
+      ]
     },
     {
       "ocorrencia_id": "cel_-121_-466",
       "motivo": "Escalação: cel_-121_-466 tem 4295 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
-      "sugestao": "solicitar apoio externo"
+      "sugestao": "solicitar apoio externo",
+      "alcance": [
+        {
+          "recurso_id": "palmas-a1",
+          "eta_h": 1.55,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-103_-478",
+              "localidade": "Santa Tereza do Tocantins",
+              "pop_raio": 2463
+            }
+          ]
+        },
+        {
+          "recurso_id": "dianopolis-t1",
+          "eta_h": 1.78,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-117_-469",
+              "localidade": "Dianópolis",
+              "pop_raio": 22424
+            }
+          ]
+        }
+      ]
     },
     {
       "ocorrencia_id": "cel_-122_-464",
       "motivo": "Escalação: cel_-122_-464 tem 4295 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
-      "sugestao": "solicitar apoio externo"
+      "sugestao": "solicitar apoio externo",
+      "alcance": [
+        {
+          "recurso_id": "palmas-a1",
+          "eta_h": 1.67,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-103_-478",
+              "localidade": "Santa Tereza do Tocantins",
+              "pop_raio": 2463
+            }
+          ]
+        },
+        {
+          "recurso_id": "dianopolis-t1",
+          "eta_h": 2.51,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-117_-469",
+              "localidade": "Dianópolis",
+              "pop_raio": 22424
+            }
+          ]
+        }
+      ]
     },
     {
       "ocorrencia_id": "cel_-122_-473",
       "motivo": "Escalação: cel_-122_-473 tem 3956 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
-      "sugestao": "solicitar apoio externo"
+      "sugestao": "solicitar apoio externo",
+      "alcance": [
+        {
+          "recurso_id": "palmas-a1",
+          "eta_h": 1.36,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-103_-478",
+              "localidade": "Santa Tereza do Tocantins",
+              "pop_raio": 2463
+            }
+          ]
+        },
+        {
+          "recurso_id": "dianopolis-t1",
+          "eta_h": 2.6,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-117_-469",
+              "localidade": "Dianópolis",
+              "pop_raio": 22424
+            }
+          ]
+        }
+      ]
     },
     {
       "ocorrencia_id": "cel_-90_-486",
       "motivo": "Escalação: cel_-90_-486 tem 29357 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
-      "sugestao": "solicitar apoio externo"
+      "sugestao": "solicitar apoio externo",
+      "alcance": [
+        {
+          "recurso_id": "palmas-a1",
+          "eta_h": 0.78,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-103_-478",
+              "localidade": "Santa Tereza do Tocantins",
+              "pop_raio": 2463
+            }
+          ]
+        },
+        {
+          "recurso_id": "palmas-t1",
+          "eta_h": 4.89,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-107_-476",
+              "localidade": "Ponte Alta do Tocantins",
+              "pop_raio": 7842
+            }
+          ]
+        },
+        {
+          "recurso_id": "paraiso-t1",
+          "eta_h": 4.9,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-107_-483",
+              "localidade": "Porto Nacional",
+              "pop_raio": 53316
+            }
+          ]
+        }
+      ]
     },
     {
       "ocorrencia_id": "cel_-91_-474",
       "motivo": "Escalação: cel_-91_-474 tem 2135 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
-      "sugestao": "solicitar apoio externo"
+      "sugestao": "solicitar apoio externo",
+      "alcance": [
+        {
+          "recurso_id": "palmas-a1",
+          "eta_h": 0.97,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-103_-478",
+              "localidade": "Santa Tereza do Tocantins",
+              "pop_raio": 2463
+            }
+          ]
+        },
+        {
+          "recurso_id": "saofelix-t1",
+          "eta_h": 5.1,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-96_-468",
+              "localidade": "Lizarda",
+              "pop_raio": 2991
+            }
+          ]
+        }
+      ]
     },
     {
       "ocorrencia_id": "cel_-95_-462",
       "motivo": "Escalação: cel_-95_-462 tem 4829 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
-      "sugestao": "solicitar apoio externo"
+      "sugestao": "solicitar apoio externo",
+      "alcance": [
+        {
+          "recurso_id": "palmas-a1",
+          "eta_h": 1.38,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-103_-478",
+              "localidade": "Santa Tereza do Tocantins",
+              "pop_raio": 2463
+            }
+          ]
+        },
+        {
+          "recurso_id": "saofelix-t1",
+          "eta_h": 3.25,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-96_-468",
+              "localidade": "Lizarda",
+              "pop_raio": 2991
+            }
+          ]
+        }
+      ]
     },
     {
       "ocorrencia_id": "cel_-95_-468",
       "motivo": "Escalação: cel_-95_-468 tem 2991 hab. expostos e os recursos viáveis estão em outras ocorrências com população ou na reserva.",
-      "sugestao": "solicitar apoio externo"
+      "sugestao": "solicitar apoio externo",
+      "alcance": [
+        {
+          "recurso_id": "palmas-a1",
+          "eta_h": 1.09,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-103_-478",
+              "localidade": "Santa Tereza do Tocantins",
+              "pop_raio": 2463
+            }
+          ]
+        },
+        {
+          "recurso_id": "saofelix-t1",
+          "eta_h": 2.74,
+          "situacao": "designado",
+          "destinos": [
+            {
+              "ocorrencia_id": "cel_-96_-468",
+              "localidade": "Lizarda",
+              "pop_raio": 2991
+            }
+          ]
+        }
+      ]
     }
   ],
   "pareceres": [],

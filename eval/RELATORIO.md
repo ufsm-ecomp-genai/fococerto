@@ -166,7 +166,8 @@ Leitura honesta:
   chegou ao coordenador com citação falsa (conferido rodando `checar_citacoes` sobre os 108 planos finais).
 - O Crítico com LLM pega o que o código não pega: em `fato_errado_tendencia`, B falha e C e D passam nas 3 repetições.
 - A memória acrescenta pouco no modo LLM (C − D = +2 checagens, contra +18 no offline). `reignicao_conceicao` falha em
-  todas as variantes.
+  todas as variantes. **Atenção (26/10):** a variante D estava contaminada; veja "Memória no modo LLM: o braço sem
+  memória vazou" no fim deste relatório.
 - Variação entre repetições: desvio do acerto ≤ 0,018; planos diferentes entre repetições em 2 de 12 cenários.
 - ETA ponderado por exposição: 4,40 h (A) → 3,77 h (C).
 
@@ -271,4 +272,98 @@ troca de equipe local, bases reais com fonte, fim dos impasses de zona cinzenta.
 - Impasses: de 30 para 6. Os 6 restantes têm regra rígida aberta (`capacidade_excedida`, `eta_acima_limite`) depois de
   3 rodadas, em `controle_vegetacao_parana_19out` e `excecao_dianopolis_ponte_18out`; escalar para o humano é o
   comportamento esperado. 8 divergências de zona cinzenta fecharam como `divergencia_zona_cinzenta`.
-- A memória não fez diferença nesta rodada (C e D idênticos).
+- C e D idênticos, mas isso **não** mostra que a memória não ajuda: o braço D estava contaminado (seção seguinte).
+
+
+## Offline com o código de 26/10
+
+`eval/resultados/20261026T225811Z_offline/` · `python -m eval.run_ablacao --modo offline` (3 repetições, idênticas) ·
+código depois das correções de 25/10 e da explicação das escalações (motivo cita quem chegaria e para onde foi; as
+decisões não mudam: a ablação deu o mesmo resultado antes e depois dessa mudança).
+
+| Variante | Acerto | Decisão | Detecção | Alarmes falsos | Sinalizações de citação (qualquer rodada) |
+|---|---|---|---|---|---|
+| A | 18/81 (22,2%) | 15/51 | 0/27 | 0/3 | 0 |
+| B | 57/81 (70,4%) | 36/51 | 18/27 | 0/3 | 0 |
+| C | 72/87 (82,8%) | 39/51 | 27/30 | 0/6 | 0 |
+| D | 54/87 (62,1%) | 33/51 | 15/30 | 0/6 | 3 |
+
+C − D = +18 checagens, todas nos 4 cenários em que a memória deve mudar a decisão (Dianópolis e Mateiros: base
+bloqueada; Conceição e Morros: reignição). As 3 sinalizações em D são a checagem de cobertura pegando o resumo do
+próprio Planejador offline (`excecao_dianopolis_ponte_18out`, "incluído taguatinga-t1→cel_-117_-470", designação que o
+plano não tem); o resumo é reescrito antes do Crítico, e nenhum plano final a carrega. A coluna "Citações falsas" das
+tabelas acima conta violações `citacao_incorreta` em qualquer rodada, não só no plano final.
+
+## Memória no modo LLM: o braço sem memória vazou
+
+Nas duas rodadas LLM (`20261025T015525Z_llm` e `20261025T220912Z_llm`), a variante D (`usar_memoria=False`) não recebe
+memória pelo código: nenhum evento `memoria_lida`, `memorias_usadas` vazio, prompt do Planejador ~200 tokens menor que
+o de C (ex.: Morros, 16.731 contra 16.934). Mesmo assim, o texto do Nemotron em D cita as memórias dos cenários, às
+vezes palavra por palavra:
+
+- `reignicao_morros_24out` D: "482 MW em 22/10" (números exatos da memória derivada), já na 1ª proposta do Planejador;
+- `excecao_dianopolis_ponte_18out` D: "restrição de memória (ponte caída) confirmada pelo coordenador"; o resumo da
+  rodada 1 é idêntico ao de C;
+- `excecao_mateiros_alagada_23out` D e `controle_taguatinga_liberada_21out` D também citam as notas.
+
+O caminho no código está limpo (`dados_comuns` só envia `ctx.memorias`, vazio em D; `notas` é vazio em todos os
+cenários; prompts e YAMLs não têm esses textos; o cliente não tem cache). D rodou segundos depois de C, com os mesmos
+`meterless-app: fococerto` e `meterless-scope: user`. Hipótese: contexto ou respostas guardados do lado do Nightshift.
+Os logs não guardam o prompt, então não dá para provar. Conclusão: **o modo LLM não mede o efeito da memória**; a
+comparação limpa é a offline. Para medir de verdade: rodar C e D com `METERLESS_SCOPE` diferente por execução.
+
+Duas falhas reais de C, independentes do vazamento: em Mateiros o Planejador devolveu a equipe da base bloqueada na
+rodada 2 e o Crítico aprovou (`restricao_memoria` é regra não rígida, `app/tools/regras.py`); em Conceição a célula
+reforçada pela memória não foi atendida.
+
+### Causa encontrada e medição limpa (26/10, noite)
+
+A causa não era a ordem C→D: era o escopo do Nightshift. O mesmo prompt do Planejador da variante D (Morros), que
+não tem "482 MW" nem "13 focos", enviado com `meterless-scope: user` chegou ao modelo com **15.595** tokens de
+entrada e a resposta citou a memória; com um escopo novo chegou com **10.682** e não citou. O Nightshift junta
+~4.900 tokens de contexto lembrado de chamadas anteriores ao prompt no escopo `user`. Correção: o cliente manda um
+escopo próprio por execução (`fococerto-<id da execução>`, commit `73aed60`).
+
+Medição limpa, só os 5 cenários com memória, 1 repetição, Nemotron, escopos isolados:
+`eval/resultados/20261026T232357Z_llm_memoria_escopo_isolado/`.
+
+| Cenário | C | D | Diferença |
+|---|---|---|---|
+| `excecao_mateiros_alagada_23out` | 4/4 | 3/4 | c1: C respeita a base bloqueada pela nota; D manda a equipe |
+| `excecao_dianopolis_ponte_18out` | 1/2 | 1/2 | — |
+| `controle_taguatinga_liberada_21out` | 2/2 | 2/2 | — (controle) |
+| `reignicao_conceicao_20out` | 0/2 | 1/2 | c2: D passa, C falha |
+| `reignicao_morros_24out` | 2/2 | 2/2 | D chega à célula só pelos dados |
+| **Total** | **9/12** | **9/12** | |
+
+Nenhum texto da D cita memória. Leitura: com o Nemotron, a memória mudou uma decisão de forma atribuível
+(Mateiros) e, no total, C = D nesta amostra (uma repetição, 12 checagens; uma checagem vale ~8 pontos). Não dá para
+afirmar ganho líquido da memória no modo LLM; o efeito medido de forma limpa continua sendo o offline (+18). As
+rodadas LLM completas (`20261025T015525Z_llm`, `20261025T220912Z_llm`) foram feitas com o escopo `user` e, portanto,
+com contexto injetado pelo Nightshift em B, C e D.
+
+## Modo LLM, 3ª rodada, limpa: escopo do Nightshift isolado (26/10, noite) — números oficiais
+
+`eval/resultados/20261026T234558Z_llm/` · 12 cenários × 4 variantes × 1 repetição = 48 execuções · 122 chamadas ao
+Nemotron, 0 erros, 0 fallbacks · latência média 21 s · cada execução no próprio escopo do Nightshift (commit `73aed60`).
+
+| Variante | Acerto | Decisão | Detecção | Alarmes falsos | ETA ponderado | Impasses |
+|---|---|---|---|---|---|---|
+| A | 6/27 (22,2%) | 5/17 | 0/9 | 0/1 | 4,40 h | – |
+| B | 17/27 (63,0%) | 11/17 | 5/9 | 0/1 | 3,87 h | 1 |
+| C | 24/29 (82,8%) | 15/17 | 7/10 | 0/2 | 2,76 h | 0 |
+| D | 23/29 (79,3%) | 15/17 | 6/10 | 0/2 | 3,06 h | 2 |
+
+Por cenário (checagens que passaram, A/B/C/D): `fato_errado_tendencia` 0/0/2/2, `tradeoff_noite_gurupi` 0/0/3/3,
+`controle_vegetacao_parana` 1/1/2/2, `excecao_mateiros_alagada` 2/3/4/3 (a única diferença entre C e D: c1, a equipe
+da estrada alagada), `escalar_expostas` 0/2/2/2, `reignicao_morros` 0/2/2/2, os dois `fato_errado` de localidade e
+população 0/3/3/3, `excecao_dianopolis_ponte` 1/1/1/1, `controle_taguatinga` 2/2/2/2, `agricola_recorrente_parana` e
+`reignicao_conceicao` 0 em todas.
+
+- Fatos errados escritos pelo Nemotron e reescritos antes do Crítico: **44** (17 localidades, 15 distâncias,
+  6 populações, 1 ETA, 3 afirmações do resumo, 2 ids inexistentes). `checar_citacoes` rodado de novo sobre os 36 planos
+  finais de B, C e D: **0** citações falsas (descontado o fato injetado de propósito nos cenários `fato_errado`).
+- B caiu de 77,8% (2ª rodada) para 63,0%: as rodadas anteriores usavam o escopo `user`, em que o Nightshift junta
+  contexto de chamadas anteriores, e isso ajudava as variantes. Estes são os números que valem; as rodadas de 25/10
+  ficam como histórico.
+

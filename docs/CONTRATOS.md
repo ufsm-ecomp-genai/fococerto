@@ -255,3 +255,15 @@ exemplos reais em `web/README.md`):
   (`origem: "salvo"`, `caminho: null`, `salvo_em`); cada item ganhou `bases_declaradas`. `GET /api/cenarios/{nome}`
   → `{nome, origem, caminho, cenario}` (repositório primeiro, depois salvos; 404 se não existe).
 - A quantidade de equipes continua vindo do coordenador (§16): a API não completa nem sugere recursos.
+
+## 22. Alcance nas escalações e aprovação gravada no plano (26/10, noite)
+
+- `ResultadoPeriodo.escalacoes[]` ganhou o campo opcional `alcance`: lista de `{recurso_id, eta_h, situacao,
+  destinos[]}` (`situacao` em `designado | reserva | livre`; `destinos[]` = `{ocorrencia_id, localidade,
+  pop_raio}`), calculada por `app.agents.grafo.alcance_estruturado` com o mesmo critério de viabilidade da regra de
+  exposição (`app.tools.geo.viaveis`). O guarda-corpo põe o campo em toda escalação de ocorrência exposta sem
+  recurso, nova ou já existente; o `motivo` não muda (o avaliador só lê `ocorrencia_id` e `motivo`).
+- `python -m app.cli aprovar` (e `POST /api/aprovar`) grava no `plano.json`: `meta.aprovacao_humana = "aprovado"`,
+  `meta.aprovado_por`, `meta.aprovado_em` (UTC, ISO 8601). Escrita atômica (temporário + rename). Um `run` novo do
+  período reescreve o plano com `"pendente"`.
+

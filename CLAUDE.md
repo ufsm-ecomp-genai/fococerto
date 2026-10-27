@@ -1,6 +1,6 @@
 # FocoCerto: regras do projeto (vale para todos os agentes)
 
-Projeto do time UFSM para o Open Agent Hackathon 2026, Track 3 (Reasoning Architecture).
+Projeto do time ECOMP - UFSM para o Open Agent Hackathon 2026, Track 3 (Reasoning Architecture).
 - Especificação completa: `../PROJETO-queimadas.md`. Leia as seções relevantes ao seu papel antes de começar.
 - Interfaces entre módulos: `docs/CONTRATOS.md`. **Elas valem mais do que a sua preferência.**
 - Regras oficiais do hackathon: `~/Downloads/genai-docs/rules/`.
