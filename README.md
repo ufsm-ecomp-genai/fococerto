@@ -117,21 +117,6 @@ flowchart LR
   COORD -->|notes| HMEM
 ```
 
-Text version:
-
-```
-FIRMS -> Postgres ─┐
-GeoNames, OSM, official stations CSV -> Zetaris file store ─┼─> Zetaris views (occurrences + context + priority) ─> Repository
-Open-Meteo -> Zetaris REST table + CACHE ┘                                                       │
-                                     (sample mode: data/cache/ instead of Zetaris) ──────────────┤
-                                                                                                  ▼
-            Nightshift (-> Nemotron) <─ app/llm/client.py ─ Planner ⇄ Critic ⇄ Analyst ─ H-MEM (:7070)
-                                                                  │
-                                plano.md / plano.json / mapa.html / logs/<run>.jsonl
-                                                                  │
-                                              Coordinator: aprovar (Postgres) / nota (Postgres + H-MEM)
-```
-
 - **Zetaris is the read path.** Agents read data through Zetaris views. Writes (approved decisions, coordinator notes) go straight to Postgres, because Zetaris is read-only over its sources.
 - **All LLM calls go through `app/llm/client.py`** (`LLM_PROVIDER=nightshift|offline`). Nothing calls NVIDIA or any other provider directly; a test (`tests/test_integracao.py::test_sem_chamada_direta_a_nvidia_ou_outro_provedor`) enforces this.
 - **Priority formula** (transparent, declared starting weights; `app/data/ocorrencias.py` and the same logic in `sql/zetaris_views.sql`):
