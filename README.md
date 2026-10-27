@@ -4,6 +4,9 @@
 
 Open Agent Hackathon 2026 · **Track 3: Reasoning Architecture** · Team ECOMP - UFSM (Universidade Federal de Santa Maria, Brazil)
 
+![FocoCerto web app on a real run: the operations map with incidents by priority and crews on their way, and on the right the incidents that need the coordinator's decision, sorted by people exposed](docs/img/overview.jpg)
+<sub>The web app on a real run (Zetaris + NVIDIA Nemotron through Meterless Nightshift + H-MEM), Tocantins, 23 Oct 2026. Open it yourself in 3 minutes: see the [Quick start](#quick-start-about-3-minutes-no-keys-or-services-needed).</sub>
+
 FocoCerto crosses NASA FIRMS heat detections with weather, nearby communities, real fire stations (each with its source) and the resources the coordinator declares. A **Planner** proposes a resource order, a **Critic** challenges it (trade-offs, exceptions from memory, when to escalate) and can call an **Analyst** to answer an open question with stated uncertainty. The output is a **priority list plus a resource order**, where every assignment carries its evidence. Nothing is dispatched without human approval.
 
 **Status, stated plainly**
