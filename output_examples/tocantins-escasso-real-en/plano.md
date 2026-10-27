@@ -143,6 +143,6 @@ No memories were used in this period.
 - The weather index is a surface-level simplification.
 - Doctrine is simplified, and there was no validation with operators.
 
-[Full execution log](../../../logs/20261026T230136-266ca8.jsonl)
+[Full execution log](trace.jsonl)
 
 _Generated at 2026-10-26 23:03 UTC_

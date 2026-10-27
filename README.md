@@ -254,7 +254,7 @@ Real mode from Docker: `docker run --rm --env-file .env fococerto run --regiao t
 ```bash
 cp .env.example .env   # placeholders only; never commit .env
 ```
-Without `ZETARIS_API_KEY` the CLI falls back to the cache; without `HMEM_URL` it uses `MemoriaLocal`; with `LLM_PROVIDER=offline` the agents run deterministically.
+As copied, `.env` keeps **`SAMPLE_MODE=true`**, so every command (including `aprovar`) stays on cached data with offline agents and nothing tries to reach a service. For the real mode, fill in the Nightshift, Zetaris, Postgres and H-MEM values and set `SAMPLE_MODE=false`. Even then, each service is optional: without `ZETARIS_API_KEY` the CLI falls back to the cache; without `HMEM_URL` it uses `MemoriaLocal`; with `LLM_PROVIDER=offline` the agents run deterministically.
 
 ### 4. Meterless H-MEM service
 ```bash
@@ -317,8 +317,8 @@ python -m app.cli run --regiao tocantins --recursos cenarios/tocantins-escasso.y
 # Coordinator note: Postgres (or local state in sample mode) + H-MEM
 python -m app.cli nota --regiao tocantins [--periodo P] [--autor A] "estrada para São Félix alagada"
 
-# Approve the last saved plan of a period (writes the decisions)
-python -m app.cli aprovar --regiao tocantins --periodo 2026-10-23
+# Approve the last saved plan of a period (writes the decisions; add --sample if the plan came from a sample run)
+python -m app.cli aprovar --regiao tocantins --periodo 2026-10-23 [--sample]
 
 # Run the ablation: 12 scenarios x 4 variants x 3 repetitions (writes eval/resultados/<timestamp>_<mode>/)
 python -m app.cli avaliar [--modo offline|llm] [--repeticoes N] [--variantes ABCD] [--cenarios ID ...] [--sample]

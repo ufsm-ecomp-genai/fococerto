@@ -320,7 +320,9 @@ def rodar_cenario(args, cenario: Cenario | None = None, origem: str | None = Non
     for nome, c in caminhos.items():
         print(f"  {nome}: {c}")
     print(f"  log: {log.caminho}")
-    print(tr("Para aprovar", "To approve") + f": python -m app.cli aprovar --regiao {regiao.nome} --periodo {periodo}")
+    flag_sample = " --sample" if modo_sample(args) else ""   # sem --sample, aprovar grava no Postgres do .env
+    print(tr("Para aprovar", "To approve")
+          + f": python -m app.cli aprovar{flag_sample} --regiao {regiao.nome} --periodo {periodo}")
     return 0
 
 

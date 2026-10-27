@@ -449,8 +449,11 @@ def criar_app(saida: str | Path | None = None, exemplos: str | Path | None = Non
     def cenarios() -> list[dict]:
         """Cenários do repositório (as duas primeiras pastas de web/api.yaml; aceitos por caminho no POST /api/run)
         e os salvos pela tela (POST /api/cenarios; carregue com GET /api/cenarios/{nome})."""
-        out = []
+        out, vistos = [], set()
         for caminho, arq in cenarios_repositorio():
+            if arq.stem in vistos:   # mesmo nome em cenarios/ e input_examples/: vale o primeiro, como no GET por nome
+                continue
+            vistos.add(arq.stem)
             try:
                 d = yaml.safe_load(arq.read_text(encoding="utf-8")) or {}
             except (OSError, yaml.YAMLError) as e:
