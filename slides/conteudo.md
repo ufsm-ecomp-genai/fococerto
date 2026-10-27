@@ -29,7 +29,7 @@ Estrutura do `pitch-deck-template.md` (12 slides + apêndice), adaptada ao que o
 - **Problema:** incêndios simultâneos e equipes escassas; os painéis mostram *onde* está o fogo, não *qual atender primeiro*.
 - **Usuário:** o nível de coordenação multiagência (salas de situação estaduais, PrevFogo/ICMBio; nos EUA, os MAC groups).
 - **Solução:** um Planejador propõe a ordem de recursos, um Crítico contesta, um Analista responde perguntas em aberto com incerteza; cada designação traz a sua evidência; o humano aprova.
-- **Prova:** dados reais do NASA FIRMS, bases reais com fonte, conformidade do H-MEM 13/13, ablação A/B/C/D com gabaritos commitados antes de rodar: no modo LLM, 75,9% (completo) contra 22,2% (alocador simples), 82,8% na 2ª rodada depois das correções, 0 citações falsas no plano final.
+- **Prova:** dados reais do NASA FIRMS, bases reais com fonte, conformidade do H-MEM 13/13, ablação A/B/C/D com gabaritos commitados antes de rodar: no modo LLM (rodada limpa, escopo do Nightshift isolado), 82,8% (completo) contra 22,2% (alocador simples), espera da população exposta de 4,4 h para 2,8 h, 0 citações falsas no plano final.
 - **Visual:** 4 ícones em linha (dados → planejar → criticar → aprovar).
 
 ## Slide 3: O problema
@@ -72,7 +72,7 @@ Estrutura do `pitch-deck-template.md` (12 slides + apêndice), adaptada ao que o
 | Engine Meterless | **H-MEM**, referência oficial (serviço TypeScript, porta 7070) + versão em Python para o modo offline |
 | Agentes | Python 3.12, LangGraph, pydantic, httpx; código escrito e revisado com Claude Code (Anthropic), sob responsabilidade do time |
 | Interface | CLI (`run`, `nota`, `aprovar`, `avaliar`), API HTTP (FastAPI, `uvicorn app.api:app`), plano em Markdown/JSON, mapa Leaflet; tela web **[[se existir na hora de exportar]]** |
-| Qualidade | pytest 312 passaram / 1 pulado (26/10), `npm test` 13/13, `check_submissao.py`, script de clone limpo, Docker, sample mode (`--sample` ou `SAMPLE_MODE=true`) |
+| Qualidade | pytest 331 passaram / 1 pulado (26/10), `npm test` 13/13, `check_submissao.py`, script de clone limpo, Docker, sample mode (`--sample` ou `SAMPLE_MODE=true`) |
 
 - **Status:** **Nightshift real funcionando** desde 25/10/2026 (Nightshift Windows numa máquina do time com GPU NVIDIA, via Tailscale; `nvidia/nemotron-3-ultra-550b-a55b`; cada chamada traz recibo assinado `meterless.compute_receipt.v1` e o log grava `routed_model` e o `receipt_id`; um período real no modo LLM levou de 1,5 a 3 min com 4 chamadas). **Zetaris real funcionando** desde 25/10/2026 à noite (Zetaris 2.4 em Docker no servidor do time, via túnel SSH/Tailscale): setup com 0 falhas, 1.875 focos reais federados, a view `ocorrencias_prioridade` devolve 698 linhas, igual ao cálculo de referência em Python. **Execução real de ponta a ponta** (Zetaris + Nemotron pelo Nightshift + serviço H-MEM): `output_examples/tocantins-escasso-real/`, 2 rodadas, 4 chamadas, ~2,5 min, 6 designações e 9 escalações.
 - **Visual:** a tabela acima com os logos dos patrocinadores.
@@ -94,7 +94,7 @@ Estrutura do `pitch-deck-template.md` (12 slides + apêndice), adaptada ao que o
 
 ## Slide 9: Impacto e valor
 - Decisões mais claras sob escassez: quem espera, e por quê, fica escrito (as escalações aparecem, não somem).
-- **ETA ponderado por exposição** (quanto tempo a população exposta espera por um recurso), modo LLM: **4,40 h** no alocador simples → **3,77 h** no sistema completo (`eval/RELATORIO.md`).
+- **ETA ponderado por exposição** (quanto tempo a população exposta espera por um recurso), modo LLM (rodada limpa): **4,40 h** no alocador simples → **2,76 h** no sistema completo (`eval/RELATORIO.md`).
 - Auditável depois: cada designação aponta para ids de evidência (`focos:`, `pop:`, `eta:`, `dist:`) e para a memória que a mudou.
 - **Escala por configuração:** uma região nova é um YAML (bbox + velocidade e tortuosidade declaradas); a mesma arquitetura serve para enchentes (ex.: RS 2024).
 
@@ -106,7 +106,7 @@ Estrutura do `pitch-deck-template.md` (12 slides + apêndice), adaptada ao que o
 
 ## Slide 11: Riscos, limitações e mitigações
 - **Uma só execução real de ponta a ponta** (Zetaris + Nightshift + H-MEM, um período do Tocantins) → o Zetaris real devolve as mesmas 698 ocorrências do Python; a ablação lê um cache local dos mesmos dados reais, não o Zetaris. O teste real exigiu ajustes (formato `{headers, data}` da API, descrições do `DESCRIBE BY`, porta do Postgres dentro da rede do Zetaris), todos documentados.
-- **Ablação no modo LLM concluída** (25/10): A 22,2%, B 65,4%, C 75,9%, D 73,6%; na 2ª rodada (depois das correções): A 22,2%, B 77,8%, C 82,8%, D 82,8%; 24 fatos errados do Nemotron corrigidos antes do Crítico; 0 citações falsas no plano final; 0 sobre-escalação. Limites: ganho da memória dentro da variação (C − D = 0,67 checagem por execução; 0 na 2ª rodada); na 1ª rodada as escalações do modo LLM vieram de impasse, e na 2ª os impasses caíram de 30 para 6 (os 6 com regra rígida aberta); a 2ª rodada teve 1 repetição só; idioma e checagem de ids/coberturas (26/10) vieram depois das duas rodadas.
+- **Ablação no modo LLM, rodada limpa** (26/10, cada execução no próprio escopo do Nightshift, 48 execuções, 122 chamadas): A 22,2%, B 63,0%, C 82,8%, D 79,3%; 44 fatos errados do Nemotron reescritos antes do Crítico (incl. 2 ids inventados); 0 citações falsas no plano final; espera da população exposta 4,40 h → 2,76 h. Limites: 1 repetição; a memória vale uma decisão no modo LLM (Mateiros, C − D = +1) e +18 no offline; as rodadas de 25/10 usavam o escopo `user`, em que o Nightshift junta ~4.900 tokens de contexto lembrado, e ficam só como histórico.
 - **Checagem de cobertura heurística** (duas formas de frase) e motivos de escalação não conferidos.
 - **Agentes offline são simples** (Planejador ≈ alocador guloso) → o ganho das variantes da ablação depende do modo LLM.
 - **Exposição superestimada** (população municipal do GeoNames) · **detecção ≠ incêndio** · queima agrícola inferida com incerteza · distância em linha reta × fator · Hot-Dry-Windy simplificado de superfície · TI/UC não ingeridos · quantidade de equipes simulada (bases reais, coordenada = sede do município) · sem validação com operadores.
@@ -132,8 +132,8 @@ Estrutura do `pitch-deck-template.md` (12 slides + apêndice), adaptada ao que o
 - Uma linha `critico`/`escala` e uma `analista`/`consulta` de `output_examples/*/trace.jsonl` ou da execução do cenário agrícola; no modo LLM, uma linha `llm_call` com `routed_model` e `receipt` (de `logs/` da execução real pelo Nightshift).
 
 ### C. Avaliação
-- Variantes A (alocador guloso), B (Planejador + checador), C (completo), D (C sem H-MEM); 12 cenários com dados reais; gabaritos commitados antes de qualquer execução (commit `1d722b5`); 3 execuções por cenário e variante.
-- **Tabela (modo LLM, Nemotron pelo Nightshift, 144 execuções, 450 chamadas):** A 18/81 (22,2%) · B 53/81 (65,4%) · C 66/87 (75,9%) · D 64/87 (73,6%). Por execução: A 6,0/27, B 17,7/27, C 22,0/29, D 21,3/29. Sinalizações de citação: B 56, C 54, D 47 (superestimam os erros do modelo: parte era falso positivo do checador, corrigido); citações falsas no plano final: 0. Sobre-escalação: 0 em todas as variantes; escalações do modo LLM vieram de impasse. **2ª rodada (depois das correções, 48 execuções, 137 chamadas):** A 6/27 (22,2%) · B 21/27 (77,8%) · C 24/29 (82,8%) · D 24/29 (82,8%); 24 fatos errados do Nemotron corrigidos antes do Crítico (12 distâncias, 6 localidades, 6 populações); impasses de 30 para 6. Offline (validação do pipeline): A 22,2%, B 59,3%, C 79,3%, D 58,6%.
+- Variantes A (alocador guloso), B (Planejador + checador), C (completo), D (C sem H-MEM); 12 cenários com dados reais; gabaritos commitados antes de qualquer execução (commit `1d722b5`); 3 execuções por cenário e variante no offline e na 1ª rodada LLM; 1 na rodada limpa.
+- **Tabela oficial (modo LLM limpo, Nemotron pelo Nightshift, escopo isolado, 48 execuções, 122 chamadas, 0 fallbacks):** A 6/27 (22,2%) · B 17/27 (63,0%) · C 24/29 (82,8%) · D 23/29 (79,3%). ETA ponderado: 4,40 / 3,87 / 2,76 / 3,06 h. Impasses: B 1, C 0, D 2. 44 fatos errados reescritos antes do Crítico (17 localidades, 15 distâncias, 6 populações, 1 ETA, 3 do resumo, 2 ids inventados); 0 citações falsas nos 36 planos finais. Offline (código de 26/10): A 22,2%, B 70,4%, C 82,8%, D 62,1%. Histórico (escopo `user`): 1ª rodada 22,2/65,4/75,9/73,6; 2ª rodada 22,2/77,8/82,8/82,8.
 
 ### D. Fontes de dados
 - NASA FIRMS VIIRS (focos), GeoNames cities1000 (localidades e população), OpenStreetMap (bases: só 2 dentro do Tocantins, as duas em Palmas), lista oficial de 12 bases do Tocantins com fonte por linha (CBMTO; Prevfogo/Ibama, Portaria nº 114/2024; ICMBio Esec Serra Geral), Open-Meteo (VPD, vento). Simulado: a quantidade de equipes por base.
